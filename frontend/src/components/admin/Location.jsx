@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const LocationManager = () => {
   const [locations, setLocations] = useState([]);
@@ -14,6 +15,7 @@ const LocationManager = () => {
   const [debugInfo, setDebugInfo] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("latest");
+  const navigate = useNavigate();
 
   const baseURL = "http://localhost:6969/locations";
 
@@ -152,10 +154,41 @@ const LocationManager = () => {
   const sortedActiveLocations = sortLocations(filteredActiveLocations);
   const sortedInactiveLocations = sortLocations(filteredInactiveLocations);
 
+  
+  const handleLogout = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      // Optionally: Call a backend logout endpoint to invalidate the token
+      // await axios.post("http://localhost:6969/user/logout", {}, {
+      //   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      // });
+
+      // Clear the token from localStorage
+      localStorage.removeItem("token");
+      console.log("handleLogout - Token cleared from localStorage");
+
+      // Redirect to login page
+      navigate("/");
+    } catch (err) {
+      console.error("handleLogout - Error:", err);
+      setError(err.response?.data?.message || "Failed to log out.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-4 text-center">Location  </h2>
-
+      <button
+          onClick={handleLogout}
+          className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:bg-red-300"
+          disabled={loading}
+          aria-label="Logout"
+        >
+          {loading ? "Logging out..." : "Logout"}
+        </button>
       {/* Search and Sort Controls */}
       <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
         <input
