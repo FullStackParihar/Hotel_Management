@@ -20,10 +20,10 @@ const userController = require('../controller/userController');
 
 router.post('/signup',auth, userController.signup);
 router.post('/verifyOtp',auth, userController.verifyOtp);
-router.post('/login',auth, userController.login);
+router.post('/login', userController.login);
 router.get('/getUsers', userController.getUsers);
 router.patch('/update/:id',auth, userController.patch);
-router.post('/forgot',auth, userController.forgot);
-router.post('/resetPassword',auth, userController.resetPassword);
+router.post('/forgot', userController.forgot);
+router.post('/resetPassword', userController.resetPassword);
 
 module.exports = router;
