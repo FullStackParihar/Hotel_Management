@@ -1037,7 +1037,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const userRoutes = require('./routes/StateRoute')
+const StateRoute = require('./routes/StateRoute')
+const CityRoute = require('./routes/CityRoute')
 
 const app = express();
 app.use(cors());
@@ -1055,11 +1056,11 @@ mongoose.connect("mongodb://localhost:27017/location-manager", {
 //   code: { type: String, required: true, unique: true },
 //   isActive: { type: Boolean, default: true },
 // });
-const citySchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  state: { type: mongoose.Schema.Types.ObjectId, ref: "State", required: true },
-  isActive: { type: Boolean, default: true },
-});
+// const citySchema = new mongoose.Schema({
+//   name: { type: String, required: true },
+//   state: { type: mongoose.Schema.Types.ObjectId, ref: "State", required: true },
+//   isActive: { type: Boolean, default: true },
+// });
 const hotelSchema = new mongoose.Schema({
   name: { type: String, required: true },
   city: { type: mongoose.Schema.Types.ObjectId, ref: "City", required: true },
@@ -1070,17 +1071,12 @@ const hotelSchema = new mongoose.Schema({
   contact: { phone: String, email: String },
   isActive: { type: Boolean, default: true },
 });
-const locationSchema = new mongoose.Schema({
-  state: { type: String, required: true }, // Note: String, not ObjectId
-  city: { type: String, required: true },  // Note: String, not ObjectId
-  isActive: { type: Boolean, default: true },
-  createdAt: { type: Date, default: Date.now },
-});
+ 
 
 // const State = mongoose.model("State", stateSchema);
-const City = mongoose.model("City", citySchema);
+// const City = mongoose.model("City", citySchema);
 const Hotel = mongoose.model("Hotel", hotelSchema);
-const Location = mongoose.model("Location", locationSchema);
+ 
 
 // State Routes
 // app.get("/api/states", async (req, res) => {
@@ -1144,200 +1140,201 @@ const Location = mongoose.model("Location", locationSchema);
 // });
 
 // City Routes
-app.use("/api", userRoutes);
+app.use("/api", StateRoute);
+app.use("/api", CityRoute);
 
-app.get("/api/states/:stateId/cities", async (req, res) => {
-  try {
-    const cities = await City.find({ state: req.params.stateId }).populate("state");
-    res.json(cities);
-  } catch (err) {
-    console.error("GET /api/states/:stateId/cities - Error:", err);
-    res.status(500).json({ message: "Failed to fetch cities" });
-  }
-});
-app.post("/api/cities/add", async (req, res) => {
-  try {
-    const city = new City(req.body);
-    await city.save();
-    const populatedCity = await City.findById(city._id).populate("state");
-    res.json(populatedCity);
-  } catch (err) {
-    console.error("POST /api/cities/add - Error:", err);
-    res.status(400).json({ message: err.message || "Failed to add city" });
-  }
-});
-app.put("/api/cities/:id", async (req, res) => {
-  try {
-    const city = await City.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate("state");
-    if (!city) return res.status(404).json({ message: "City not found" });
-    res.json(city);
-  } catch (err) {
-    console.error("PUT /api/cities/:id - Error:", err);
-    res.status(400).json({ message: err.message || "Failed to update city" });
-  }
-});
-app.delete("/api/cities/:id", async (req, res) => {
-  try {
-    const city = await City.findByIdAndDelete(req.params.id);
-    if (!city) return res.status(404).json({ message: "City not found" });
-    res.json({ message: "City deleted" });
-  } catch (err) {
-    console.error("DELETE /api/cities/:id - Error:", err);
-    res.status(500).json({ message: "Failed to delete city" });
-  }
-});
-app.patch("/api/cities/:id/softdelete", async (req, res) => {
-  try {
-    const city = await City.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
-    if (!city) return res.status(404).json({ message: "City not found" });
-    res.json({ message: "City deactivated" });
-  } catch (err) {
-    console.error("PATCH /api/cities/:id/softdelete - Error:", err);
-    res.status(500).json({ message: "Failed to deactivate city" });
-  }
-});
-app.patch("/api/cities/:id/activate", async (req, res) => {
-  try {
-    const city = await City.findByIdAndUpdate(req.params.id, { isActive: true }, { new: true });
-    if (!city) return res.status(404).json({ message: "City not found" });
-    res.json({ message: "City activated" });
-  } catch (err) {
-    console.error("PATCH /api/cities/:id/activate - Error:", err);
-    res.status(500).json({ message: "Failed to activate city" });
-  }
-});
+// app.get("/api/states/:stateId/cities", async (req, res) => {
+//   try {
+//     const cities = await City.find({ state: req.params.stateId }).populate("state");
+//     res.json(cities);
+//   } catch (err) {
+//     console.error("GET /api/states/:stateId/cities - Error:", err);
+//     res.status(500).json({ message: "Failed to fetch cities" });
+//   }
+// });
+// app.post("/api/cities/add", async (req, res) => {
+//   try {
+//     const city = new City(req.body);
+//     await city.save();
+//     const populatedCity = await City.findById(city._id).populate("state");
+//     res.json(populatedCity);
+//   } catch (err) {
+//     console.error("POST /api/cities/add - Error:", err);
+//     res.status(400).json({ message: err.message || "Failed to add city" });
+//   }
+// });
+// app.put("/api/cities/:id", async (req, res) => {
+//   try {
+//     const city = await City.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate("state");
+//     if (!city) return res.status(404).json({ message: "City not found" });
+//     res.json(city);
+//   } catch (err) {
+//     console.error("PUT /api/cities/:id - Error:", err);
+//     res.status(400).json({ message: err.message || "Failed to update city" });
+//   }
+// });
+// app.delete("/api/cities/:id", async (req, res) => {
+//   try {
+//     const city = await City.findByIdAndDelete(req.params.id);
+//     if (!city) return res.status(404).json({ message: "City not found" });
+//     res.json({ message: "City deleted" });
+//   } catch (err) {
+//     console.error("DELETE /api/cities/:id - Error:", err);
+//     res.status(500).json({ message: "Failed to delete city" });
+//   }
+// });
+// app.patch("/api/cities/:id/softdelete", async (req, res) => {
+//   try {
+//     const city = await City.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+//     if (!city) return res.status(404).json({ message: "City not found" });
+//     res.json({ message: "City deactivated" });
+//   } catch (err) {
+//     console.error("PATCH /api/cities/:id/softdelete - Error:", err);
+//     res.status(500).json({ message: "Failed to deactivate city" });
+//   }
+// });
+// app.patch("/api/cities/:id/activate", async (req, res) => {
+//   try {
+//     const city = await City.findByIdAndUpdate(req.params.id, { isActive: true }, { new: true });
+//     if (!city) return res.status(404).json({ message: "City not found" });
+//     res.json({ message: "City activated" });
+//   } catch (err) {
+//     console.error("PATCH /api/cities/:id/activate - Error:", err);
+//     res.status(500).json({ message: "Failed to activate city" });
+//   }
+// });
 
-// Hotel Routes
-app.get("/api/cities/:cityId/hotels", async (req, res) => {
-  try {
-    const hotels = await Hotel.find({ city: req.params.cityId }).populate({
-      path: "city",
-      populate: { path: "state" },
-    });
-    res.json(hotels);
-  } catch (err) {
-    console.error("GET /api/cities/:cityId/hotels - Error:", err);
-    res.status(500).json({ message: "Failed to fetch hotels" });
-  }
-});
-app.post("/api/hotels/add", async (req, res) => {
-  try {
-    const hotel = new Hotel(req.body);
-    await hotel.save();
-    const populatedHotel = await Hotel.findById(hotel._id).populate({
-      path: "city",
-      populate: { path: "state" },
-    });
-    res.json(populatedHotel);
-  } catch (err) {
-    console.error("POST /api/hotels/add - Error:", err);
-    res.status(400).json({ message: err.message || "Failed to add hotel" });
-  }
-});
-app.put("/api/hotels/:id", async (req, res) => {
-  try {
-    const hotel = await Hotel.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate({
-      path: "city",
-      populate: { path: "state" },
-    });
-    if (!hotel) return res.status(404).json({ message: "Hotel not found" });
-    res.json(hotel);
-  } catch (err) {
-    console.error("PUT /api/hotels/:id - Error:", err);
-    res.status(400).json({ message: err.message || "Failed to update hotel" });
-  }
-});
-app.delete("/api/hotels/:id", async (req, res) => {
-  try {
-    const hotel = await Hotel.findByIdAndDelete(req.params.id);
-    if (!hotel) return res.status(404).json({ message: "Hotel not found" });
-    res.json({ message: "Hotel deleted" });
-  } catch (err) {
-    console.error("DELETE /api/hotels/:id - Error:", err);
-    res.status(500).json({ message: "Failed to delete hotel" });
-  }
-});
-app.patch("/api/hotels/:id/softdelete", async (req, res) => {
-  try {
-    const hotel = await Hotel.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
-    if (!hotel) return res.status(404).json({ message: "Hotel not found" });
-    res.json({ message: "Hotel deactivated" });
-  } catch (err) {
-    console.error("PATCH /api/hotels/:id/softdelete - Error:", err);
-    res.status(500).json({ message: "Failed to deactivate hotel" });
-  }
-});
-app.patch("/api/hotels/:id/activate", async (req, res) => {
-  try {
-    const hotel = await Hotel.findByIdAndUpdate(req.params.id, { isActive: true }, { new: true });
-    if (!hotel) return res.status(404).json({ message: "Hotel not found" });
-    res.json({ message: "Hotel activated" });
-  } catch (err) {
-    console.error("PATCH /api/hotels/:id/activate - Error:", err);
-    res.status(500).json({ message: "Failed to activate hotel" });
-  }
-});
+// // Hotel Routes
+// app.get("/api/cities/:cityId/hotels", async (req, res) => {
+//   try {
+//     const hotels = await Hotel.find({ city: req.params.cityId }).populate({
+//       path: "city",
+//       populate: { path: "state" },
+//     });
+//     res.json(hotels);
+//   } catch (err) {
+//     console.error("GET /api/cities/:cityId/hotels - Error:", err);
+//     res.status(500).json({ message: "Failed to fetch hotels" });
+//   }
+// });
+// app.post("/api/hotels/add", async (req, res) => {
+//   try {
+//     const hotel = new Hotel(req.body);
+//     await hotel.save();
+//     const populatedHotel = await Hotel.findById(hotel._id).populate({
+//       path: "city",
+//       populate: { path: "state" },
+//     });
+//     res.json(populatedHotel);
+//   } catch (err) {
+//     console.error("POST /api/hotels/add - Error:", err);
+//     res.status(400).json({ message: err.message || "Failed to add hotel" });
+//   }
+// });
+// app.put("/api/hotels/:id", async (req, res) => {
+//   try {
+//     const hotel = await Hotel.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate({
+//       path: "city",
+//       populate: { path: "state" },
+//     });
+//     if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+//     res.json(hotel);
+//   } catch (err) {
+//     console.error("PUT /api/hotels/:id - Error:", err);
+//     res.status(400).json({ message: err.message || "Failed to update hotel" });
+//   }
+// });
+// app.delete("/api/hotels/:id", async (req, res) => {
+//   try {
+//     const hotel = await Hotel.findByIdAndDelete(req.params.id);
+//     if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+//     res.json({ message: "Hotel deleted" });
+//   } catch (err) {
+//     console.error("DELETE /api/hotels/:id - Error:", err);
+//     res.status(500).json({ message: "Failed to delete hotel" });
+//   }
+// });
+// app.patch("/api/hotels/:id/softdelete", async (req, res) => {
+//   try {
+//     const hotel = await Hotel.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+//     if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+//     res.json({ message: "Hotel deactivated" });
+//   } catch (err) {
+//     console.error("PATCH /api/hotels/:id/softdelete - Error:", err);
+//     res.status(500).json({ message: "Failed to deactivate hotel" });
+//   }
+// });
+// app.patch("/api/hotels/:id/activate", async (req, res) => {
+//   try {
+//     const hotel = await Hotel.findByIdAndUpdate(req.params.id, { isActive: true }, { new: true });
+//     if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+//     res.json({ message: "Hotel activated" });
+//   } catch (err) {
+//     console.error("PATCH /api/hotels/:id/activate - Error:", err);
+//     res.status(500).json({ message: "Failed to activate hotel" });
+//   }
+// });
 
-// Location Routes
-app.get("/locations/all", async (req, res) => {
-  try {
-    const locations = await Location.find();
-    res.json(locations);
-  } catch (err) {
-    console.error("GET /locations/all - Error:", err);
-    res.status(500).json({ message: "Failed to fetch locations" });
-  }
-});
-app.post("/locations/add", async (req, res) => {
-  try {
-    const location = new Location(req.body);
-    await location.save();
-    res.json(location);
-  } catch (err) {
-    console.error("POST /locations/add - Error:", err);
-    res.status(400).json({ message: err.message || "Failed to add location" });
-  }
-});
-app.put("/locations/:id", async (req, res) => {
-  try {
-    const location = await Location.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!location) return res.status(404).json({ message: "Location not found" });
-    res.json(location);
-  } catch (err) {
-    console.error("PUT /locations/:id - Error:", err);
-    res.status(400).json({ message: err.message || "Failed to update location" });
-  }
-});
-app.delete("/locations/:id", async (req, res) => {
-  try {
-    const location = await Location.findByIdAndDelete(req.params.id);
-    if (!location) return res.status(404).json({ message: "Location not found" });
-    res.json({ message: "Location deleted" });
-  } catch (err) {
-    console.error("DELETE /locations/:id - Error:", err);
-    res.status(500).json({ message: "Failed to delete location" });
-  }
-});
-app.patch("/locations/:id/softdelete", async (req, res) => {
-  try {
-    const location = await Location.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
-    if (!location) return res.status(404).json({ message: "Location not found" });
-    res.json({ message: "Location deactivated" });
-  } catch (err) {
-    console.error("PATCH /locations/:id/softdelete - Error:", err);
-    res.status(500).json({ message: "Failed to deactivate location" });
-  }
-});
-app.patch("/locations/:id/activate", async (req, res) => {
-  try {
-    const location = await Location.findByIdAndUpdate(req.params.id, { isActive: true }, { new: true });
-    if (!location) return res.status(404).json({ message: "Location not found" });
-    res.json({ message: "Location activated" });
-  } catch (err) {
-    console.error("PATCH /locations/:id/activate - Error:", err);
-    res.status(500).json({ message: "Failed to activate location" });
-  }
-});
+// // Location Routes
+// app.get("/locations/all", async (req, res) => {
+//   try {
+//     const locations = await Location.find();
+//     res.json(locations);
+//   } catch (err) {
+//     console.error("GET /locations/all - Error:", err);
+//     res.status(500).json({ message: "Failed to fetch locations" });
+//   }
+// });
+// app.post("/locations/add", async (req, res) => {
+//   try {
+//     const location = new Location(req.body);
+//     await location.save();
+//     res.json(location);
+//   } catch (err) {
+//     console.error("POST /locations/add - Error:", err);
+//     res.status(400).json({ message: err.message || "Failed to add location" });
+//   }
+// });
+// app.put("/locations/:id", async (req, res) => {
+//   try {
+//     const location = await Location.findByIdAndUpdate(req.params.id, req.body, { new: true });
+//     if (!location) return res.status(404).json({ message: "Location not found" });
+//     res.json(location);
+//   } catch (err) {
+//     console.error("PUT /locations/:id - Error:", err);
+//     res.status(400).json({ message: err.message || "Failed to update location" });
+//   }
+// });
+// app.delete("/locations/:id", async (req, res) => {
+//   try {
+//     const location = await Location.findByIdAndDelete(req.params.id);
+//     if (!location) return res.status(404).json({ message: "Location not found" });
+//     res.json({ message: "Location deleted" });
+//   } catch (err) {
+//     console.error("DELETE /locations/:id - Error:", err);
+//     res.status(500).json({ message: "Failed to delete location" });
+//   }
+// });
+// app.patch("/locations/:id/softdelete", async (req, res) => {
+//   try {
+//     const location = await Location.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+//     if (!location) return res.status(404).json({ message: "Location not found" });
+//     res.json({ message: "Location deactivated" });
+//   } catch (err) {
+//     console.error("PATCH /locations/:id/softdelete - Error:", err);
+//     res.status(500).json({ message: "Failed to deactivate location" });
+//   }
+// });
+// app.patch("/locations/:id/activate", async (req, res) => {
+//   try {
+//     const location = await Location.findByIdAndUpdate(req.params.id, { isActive: true }, { new: true });
+//     if (!location) return res.status(404).json({ message: "Location not found" });
+//     res.json({ message: "Location activated" });
+//   } catch (err) {
+//     console.error("PATCH /locations/:id/activate - Error:", err);
+//     res.status(500).json({ message: "Failed to activate location" });
+//   }
+// });
 
 // Error Handling
 app.use((err, req, res, next) => {
