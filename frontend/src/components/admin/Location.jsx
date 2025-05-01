@@ -46,10 +46,10 @@ const LocationManager = () => {
     const [selectedHotel, setSelectedHotel] = useState(null);
 
     const baseURL = "http://localhost:6969";
-   
+
 
     // Fetch Data
- 
+
     const fetchStates = async () => {
         try {
             const response = await axios.get(`${baseURL}/api/states`);
@@ -57,6 +57,9 @@ const LocationManager = () => {
             const inactive = response.data.filter((s) => !s.isActive);
             setStates(active);
             setInactiveStates(inactive);
+
+            console.log("Fetched states:", response.data);
+
         } catch (err) {
             console.error("fetchStates - Error:", err);
             setError(err.response?.data?.message || "Failed to fetch states.");
@@ -77,6 +80,8 @@ const LocationManager = () => {
             const inactive = response.data.filter((c) => !c.isActive);
             setCities(active);
             setInactiveCities(inactive);
+            console.log("Fetched cities:", response.data);
+
         } catch (err) {
             console.error("fetchCities - Error:", err);
             setError(err.response?.data?.message || "Failed to fetch cities.");
@@ -98,6 +103,8 @@ const LocationManager = () => {
             const inactive = response.data.filter((h) => !h.isActive);
             setHotels(active);
             setInactiveHotels(inactive);
+            console.log("Fetched hotels:", response.data);
+
         } catch (err) {
             console.error("fetchHotels - Error:", err);
             setError(err.response?.data?.message || "Failed to fetch hotels.");
@@ -107,7 +114,7 @@ const LocationManager = () => {
     };
 
     useEffect(() => {
-        
+
         fetchStates();
     }, []);
 
@@ -154,6 +161,9 @@ const LocationManager = () => {
         try {
             await axios.delete(`${baseURL}/api/states/${id}`);
             await fetchStates();
+            console.log("State deleted successfully with cities and hotels");
+            alert("State deleted successfully with cities and hotels");
+
         } catch (err) {
             console.error("handleStateDelete - Error:", err);
             setError(err.response?.data?.message || "Failed to delete state.");
@@ -226,13 +236,13 @@ const LocationManager = () => {
     };
 
     const handleCityEdit = (city) => {
-  setCityForm({
-    name: city.name || "",
-    stateId: city.state?._id || "", 
-  });
-  setEditCityId(city._id);
-  setCityTab("active");
-};
+        setCityForm({
+            name: city.name || "",
+            stateId: city.state?._id || "",
+        });
+        setEditCityId(city._id);
+        setCityTab("active");
+    };
 
     const handleCityDelete = async (id) => {
         setLoading(true);
@@ -249,29 +259,31 @@ const LocationManager = () => {
     };
 
     const handleCitySoftDelete = async (id) => {
-  setLoading(true);
-  setError("");
-  try {
-    // Find the city to get its state ID
-    const city = cities.find((c) => c._id === id) || inactiveCities.find((c) => c._id === id);
-    const stateId = city?.state?._id || selectedState || "";
-    await axios.patch(`${baseURL}/api/cities/${id}/softdelete`);
-    if (stateId) {
-      await fetchCities(stateId); // Refresh city list for the state
-      setSelectedState(stateId); // Ensure selectedState is set
-    } else {
-      setCities([]);
-      setInactiveCities([]);
-      setError("No state selected. Please select a state to view cities.");
-    }
-    setCityTab("inactive");
-  } catch (err) {
-    console.error("handleCitySoftDelete - Error:", err);
-    setError(err.response?.data?.message || "Failed to soft-delete city.");
-  } finally {
-    setLoading(false);
-  }
-};
+        setLoading(true);
+        setError("");
+        try {
+
+            const city = cities.find((c) => c._id === id) || inactiveCities.find((c) => c._id === id);
+            const stateId = city?.state?._id || selectedState || "";
+            await axios.patch(`${baseURL}/api/cities/${id}/softdelete`);
+            if (stateId) {
+                await fetchCities(stateId);
+                setSelectedState(stateId);
+            } else {
+                setCities([]);
+                setInactiveCities([]);
+                setError("No state selected. Please select a state to view cities.");
+            }
+            setCityTab("inactive");
+            console.log("City inactiveted successfully");
+
+        } catch (err) {
+            console.error("handleCitySoftDelete - Error:", err);
+            setError(err.response?.data?.message || "Failed to soft-delete city.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleCityActivate = async (id) => {
         setLoading(true);
@@ -280,6 +292,7 @@ const LocationManager = () => {
             await axios.patch(`${baseURL}/api/cities/${id}/activate`);
             await fetchCities(selectedState);
             setCityTab("active");
+            console.log("City activated successfully");
         } catch (err) {
             console.error("handleCityActivate - Error:", err);
             setError(err.response?.data?.message || "Failed to activate city.");
@@ -326,8 +339,8 @@ const LocationManager = () => {
             }
             const cityId = hotelForm.cityId;
             setHotelForm({
-                stateId: hotelForm.stateId,  
-                cityId: cityId,  
+                stateId: hotelForm.stateId,
+                cityId: cityId,
                 name: "",
                 address: "",
                 rating: "",
@@ -349,29 +362,29 @@ const LocationManager = () => {
     };
 
     const handleHotelEdit = (hotel) => {
-  const cityId = hotel.city?._id || "";  
-  const stateId = hotel.city?.state?._id || selectedState || ""; 
-  setHotelForm({
-    stateId,
-    cityId,
-    name: hotel.name || "",
-    address: hotel.address || "",
-    rating: hotel.rating?.toString() || "",
-    amenities: hotel.amenities?.join(", ") || "",
-    priceMin: hotel.priceRange?.min?.toString() || "",
-    priceMax: hotel.priceRange?.max?.toString() || "",
-    contactPhone: hotel.contact?.phone || "",
-    contactEmail: hotel.contact?.email || "",
-  });
-  setEditHotelId(hotel._id);
-  setHotelTab("active");
-  if (stateId) {
-    fetchCities(stateId);  
-  }
-  if (cityId) {
-    fetchHotels(cityId);  
-  }
-};
+        const cityId = hotel.city?._id || "";
+        const stateId = hotel.city?.state?._id || selectedState || "";
+        setHotelForm({
+            stateId,
+            cityId,
+            name: hotel.name || "",
+            address: hotel.address || "",
+            rating: hotel.rating?.toString() || "",
+            amenities: hotel.amenities?.join(", ") || "",
+            priceMin: hotel.priceRange?.min?.toString() || "",
+            priceMax: hotel.priceRange?.max?.toString() || "",
+            contactPhone: hotel.contact?.phone || "",
+            contactEmail: hotel.contact?.email || "",
+        });
+        setEditHotelId(hotel._id);
+        setHotelTab("active");
+        if (stateId) {
+            fetchCities(stateId);
+        }
+        if (cityId) {
+            fetchHotels(cityId);
+        }
+    };
 
     const handleHotelDelete = async (id) => {
         setLoading(true);
@@ -417,7 +430,7 @@ const LocationManager = () => {
         }
     };
 
- 
+
     const handleStateChange = async (e) => {
         const stateId = e.target.value;
         setSelectedState(stateId);
@@ -445,7 +458,7 @@ const LocationManager = () => {
         }
     };
 
-   
+
     // const filteredActiveLocations = locations.filter(
     //     (loc) =>
     //         loc.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -487,9 +500,9 @@ const LocationManager = () => {
         <div className="min-h-screen bg-gray-900 text-gray-100 flex">
             {/* Sidebar */}
             <div className="w-80 bg-gray-800 p-6 flex-shrink-0">
-            <h1>
-                <button onClick={handleLogout}>Logout</button>
-            </h1>
+                <h1>
+                    <button onClick={handleLogout}>Logout</button>
+                </h1>
                 <h2 className="text-xl font-bold text-indigo-400 mb-6 flex items-center">
                     <FaMapMarkerAlt className="mr-2" /> Manage Locations
                 </h2>
