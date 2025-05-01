@@ -7,18 +7,18 @@ const stateController = require('../controller/StateController');
 router.get('/states', stateController.getAllStates);
 
 // POST new state
-router.post('/add', stateController.addState);
+router.post('/states/add', stateController.addState);
 
 // PUT update state
-router.put('/:id', stateController.updateState);
+router.put('/states/:id', stateController.updateState);
 
 // DELETE state
-router.delete('/:id', stateController.deleteState);
+router.delete('/states/:id', stateController.deleteState);
 
 // PATCH soft delete
-router.patch('/:id/softdelete', stateController.softDeleteState);
+router.patch('/states/:id/softdelete', stateController.softDeleteState);
 
 // PATCH activate
-router.patch('/:id/activate', stateController.activateState);
+router.patch('/states/:id/activate', stateController.activateState);
 
 module.exports = router;

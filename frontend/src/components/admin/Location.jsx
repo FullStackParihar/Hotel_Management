@@ -226,10 +226,13 @@ const LocationManager = () => {
     };
 
     const handleCityEdit = (city) => {
-        setCityForm({ name: city.name, stateId: city.state });
-        setEditCityId(city._id);
-        setCityTab("active");
-    };
+  setCityForm({
+    name: city.name || "",
+    stateId: city.state?._id || "", 
+  });
+  setEditCityId(city._id);
+  setCityTab("active");
+};
 
     const handleCityDelete = async (id) => {
         setLoading(true);
@@ -246,19 +249,29 @@ const LocationManager = () => {
     };
 
     const handleCitySoftDelete = async (id) => {
-        setLoading(true);
-        setError("");
-        try {
-            await axios.patch(`${baseURL}/api/cities/${id}/softdelete`);
-            await fetchCities(selectedState);
-            setCityTab("inactive");
-        } catch (err) {
-            console.error("handleCitySoftDelete - Error:", err);
-            setError(err.response?.data?.message || "Failed to soft-delete city.");
-        } finally {
-            setLoading(false);
-        }
-    };
+  setLoading(true);
+  setError("");
+  try {
+    // Find the city to get its state ID
+    const city = cities.find((c) => c._id === id) || inactiveCities.find((c) => c._id === id);
+    const stateId = city?.state?._id || selectedState || "";
+    await axios.patch(`${baseURL}/api/cities/${id}/softdelete`);
+    if (stateId) {
+      await fetchCities(stateId); // Refresh city list for the state
+      setSelectedState(stateId); // Ensure selectedState is set
+    } else {
+      setCities([]);
+      setInactiveCities([]);
+      setError("No state selected. Please select a state to view cities.");
+    }
+    setCityTab("inactive");
+  } catch (err) {
+    console.error("handleCitySoftDelete - Error:", err);
+    setError(err.response?.data?.message || "Failed to soft-delete city.");
+  } finally {
+    setLoading(false);
+  }
+};
 
     const handleCityActivate = async (id) => {
         setLoading(true);

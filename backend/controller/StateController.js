@@ -1,5 +1,6 @@
 const State = require('../model/StateModel');
-
+const City = require("../model/CityModel");
+const Hotel = require("../model/HotelModel");
 
 exports.getAllStates = async (req, res) => {
   try {
@@ -34,14 +35,30 @@ exports.updateState = async (req, res) => {
 };
 
 exports.deleteState = async (req, res) => {
-  try {
-    const state = await State.findByIdAndDelete(req.params.id);
-    if (!state) return res.status(404).json({ message: "State not found" });
-    res.json({ message: "State deleted" });
-  } catch (err) {
-    console.error("DELETE /api/states/:id - Error:", err);
-    res.status(500).json({ message: "Failed to delete state" });
-  }
+    try {
+        const state = await State.findById(req.params.id);
+        if (!state) return res.status(404).json({ message: "State not found" });
+    
+        // Find all cities for this state
+        const cities = await City.find({ state: req.params.id });
+        const cityIds = cities.map((city) => city._id);
+    
+        // Delete all hotels for these cities
+        if (cityIds.length > 0) {
+          await Hotel.deleteMany({ city: { $in: cityIds } });
+        }
+    
+        // Delete all cities for this state
+        await City.deleteMany({ state: req.params.id });
+    
+        // Delete the state
+        await State.findByIdAndDelete(req.params.id);
+    
+        res.json({ message: "State and associated cities and hotels deleted" });
+      } catch (err) {
+        console.error("DELETE /api/states/:id - Error:", err);
+        res.status(500).json({ message: "Failed to delete state and associated data" });
+      }
 };
 
 exports.softDeleteState = async (req, res) => {

@@ -1,4 +1,5 @@
 const City = require('../model/CityModel');
+const Hotel = require("../model/HotelModel");
 
 exports.getCitiesByState = async (req, res) => {
   try {
@@ -34,14 +35,16 @@ exports.updateCity = async (req, res) => {
 };
 
 exports.deleteCity = async (req, res) => {
-  try {
-    const city = await City.findByIdAndDelete(req.params.id);
-    if (!city) return res.status(404).json({ message: "City not found" });
-    res.json({ message: "City deleted" });
-  } catch (err) {
-    console.error("DELETE /api/cities/:id - Error:", err);
-    res.status(500).json({ message: "Failed to delete city" });
-  }
+    try {
+        const city = await City.findById(req.params.id);
+        if (!city) return res.status(404).json({ message: "City not found" });
+        await Hotel.deleteMany({ city: req.params.id });  
+        await city.deleteOne();
+        res.json({ message: "City and associated hotels deleted" });
+      } catch (err) {
+        console.error("DELETE /api/cities/:id - Error:", err);
+        res.status(500).json({ message: "Failed to delete city" });
+      }
 };
 
 exports.softDeleteCity = async (req, res) => {
