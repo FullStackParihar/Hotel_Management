@@ -1,3 +1,4 @@
+const mongoose = require('mongoose')
 const hotelSchema = new mongoose.Schema({
   name: { type: String, required: true },
   city: { type: mongoose.Schema.Types.ObjectId, ref: "City", required: true },
@@ -9,4 +10,4 @@ const hotelSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
 });
 
-const Hotel = mongoose.model('Hotel', hotelSchema);
+module.exports = mongoose.model('Hotel', hotelSchema);

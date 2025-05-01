@@ -1039,6 +1039,8 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const StateRoute = require('./routes/StateRoute')
 const CityRoute = require('./routes/CityRoute')
+const hotelRoutes = require('./routes/HotelRoute')
+
 
 const app = express();
 app.use(cors());
@@ -1061,21 +1063,21 @@ mongoose.connect("mongodb://localhost:27017/location-manager", {
 //   state: { type: mongoose.Schema.Types.ObjectId, ref: "State", required: true },
 //   isActive: { type: Boolean, default: true },
 // });
-const hotelSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  city: { type: mongoose.Schema.Types.ObjectId, ref: "City", required: true },
-  address: String,
-  rating: Number,
-  amenities: [String],
-  priceRange: { min: Number, max: Number },
-  contact: { phone: String, email: String },
-  isActive: { type: Boolean, default: true },
-});
+// const hotelSchema = new mongoose.Schema({
+//   name: { type: String, required: true },
+//   city: { type: mongoose.Schema.Types.ObjectId, ref: "City", required: true },
+//   address: String,
+//   rating: Number,
+//   amenities: [String],
+//   priceRange: { min: Number, max: Number },
+//   contact: { phone: String, email: String },
+//   isActive: { type: Boolean, default: true },
+// });
  
 
 // const State = mongoose.model("State", stateSchema);
 // const City = mongoose.model("City", citySchema);
-const Hotel = mongoose.model("Hotel", hotelSchema);
+// const Hotel = mongoose.model("Hotel", hotelSchema);
  
 
 // State Routes
@@ -1142,7 +1144,7 @@ const Hotel = mongoose.model("Hotel", hotelSchema);
 // City Routes
 app.use("/api", StateRoute);
 app.use("/api", CityRoute);
-
+app.use('/api', hotelRoutes);
 // app.get("/api/states/:stateId/cities", async (req, res) => {
 //   try {
 //     const cities = await City.find({ state: req.params.stateId }).populate("state");
@@ -1336,20 +1338,7 @@ app.use("/api", CityRoute);
 //   }
 // });
 
-// Error Handling
-app.use((err, req, res, next) => {
-  console.error("Global Error:", err);
-  if (err instanceof mongoose.Error.ValidationError) {
-    return res.status(400).json({ message: err.message });
-  }
-  if (err instanceof mongoose.Error.CastError) {
-    return res.status(400).json({ message: "Invalid ID format" });
-  }
-  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-    return res.status(400).json({ message: "Invalid JSON payload" });
-  }
-  res.status(500).json({ message: "Internal server error" });
-});
+
 
 app.listen(6969, () => {
   console.log("Server running on port 6969");

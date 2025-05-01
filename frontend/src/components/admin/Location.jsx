@@ -5,15 +5,15 @@ import { useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt, FaCity, FaHotel, FaSignOutAlt, FaSearch, FaSort } from "react-icons/fa";
 
 const LocationManager = () => {
-    const [locations, setLocations] = useState([]);
-    const [inactiveLocations, setInactiveLocations] = useState([]);
+    // const [locations, setLocations] = useState([]);
+    // const [inactiveLocations, setInactiveLocations] = useState([]);
     const [states, setStates] = useState([]);
     const [inactiveStates, setInactiveStates] = useState([]);
     const [cities, setCities] = useState([]);
     const [inactiveCities, setInactiveCities] = useState([]);
     const [hotels, setHotels] = useState([]);
     const [inactiveHotels, setInactiveHotels] = useState([]);
-    const [form, setForm] = useState({ state: "", city: "" });
+    // const [form, setForm] = useState({ state: "", city: "" });
     const [stateForm, setStateForm] = useState({ name: "", code: "" });
     const [cityForm, setCityForm] = useState({ name: "", stateId: "" });
     const [hotelForm, setHotelForm] = useState({
@@ -28,47 +28,28 @@ const LocationManager = () => {
         contactPhone: "",
         contactEmail: "",
     });
-    const [editId, setEditId] = useState(null);
+    // const [editId, setEditId] = useState(null);
     const [editStateId, setEditStateId] = useState(null);
     const [editCityId, setEditCityId] = useState(null);
     const [editHotelId, setEditHotelId] = useState(null);
-    const [tab, setTab] = useState("active");
+    // const [tab, setTab] = useState("active");
     const [sidebarTab, setSidebarTab] = useState("states");
     const [stateTab, setStateTab] = useState("active");
     const [cityTab, setCityTab] = useState("active");
     const [hotelTab, setHotelTab] = useState("active");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [searchTerm, setSearchTerm] = useState("");
-    const [sortOption, setSortOption] = useState("latest");
+    // const [searchTerm, setSearchTerm] = useState("");
+    // const [sortOption, setSortOption] = useState("latest");
     const [selectedState, setSelectedState] = useState("");
     const [selectedCity, setSelectedCity] = useState("");
     const [selectedHotel, setSelectedHotel] = useState(null);
 
     const baseURL = "http://localhost:6969";
-    //   const navigate = useNavigate();
+   
 
     // Fetch Data
-    const fetchLocations = async () => {
-        setLoading(true);
-        setError("");
-        try {
-            const response = await axios.get(`${baseURL}/locations/all`);
-            const active = response.data.filter((l) => l.isActive);
-            const inactive = response.data.filter((l) => !l.isActive);
-            setLocations(active);
-            setInactiveLocations(inactive);
-            if (response.data.length === 0) {
-                setError("No locations found. Try adding a new location.");
-            }
-        } catch (err) {
-            console.error("fetchLocations - Error:", err);
-            setError(err.response?.data?.message || "Failed to fetch locations.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
+ 
     const fetchStates = async () => {
         try {
             const response = await axios.get(`${baseURL}/api/states`);
@@ -103,6 +84,8 @@ const LocationManager = () => {
     };
 
     const fetchHotels = async (cityId) => {
+        console.log("cityId passed to fetchHotels:", cityId);
+
         if (!cityId) {
             setHotels([]);
             setInactiveHotels([]);
@@ -124,7 +107,7 @@ const LocationManager = () => {
     };
 
     useEffect(() => {
-        fetchLocations();
+        
         fetchStates();
     }, []);
 
@@ -209,7 +192,7 @@ const LocationManager = () => {
         }
     };
 
-    // City CRUD
+    // City  
     const handleCitySubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -330,8 +313,8 @@ const LocationManager = () => {
             }
             const cityId = hotelForm.cityId;
             setHotelForm({
-                stateId: hotelForm.stateId, // Retain stateId
-                cityId: cityId, // Retain cityId to keep list
+                stateId: hotelForm.stateId,  
+                cityId: cityId,  
                 name: "",
                 address: "",
                 rating: "",
@@ -353,23 +336,29 @@ const LocationManager = () => {
     };
 
     const handleHotelEdit = (hotel) => {
-        setHotelForm({
-            stateId: cities.find((c) => c._id === hotel.city)?.state || selectedState,
-            cityId: hotel.city,
-            name: hotel.name,
-            address: hotel.address || "",
-            rating: hotel.rating?.toString() || "",
-            amenities: hotel.amenities?.join(", ") || "",
-            priceMin: hotel.priceRange?.min?.toString() || "",
-            priceMax: hotel.priceRange?.max?.toString() || "",
-            contactPhone: hotel.contact?.phone || "",
-            contactEmail: hotel.contact?.email || "",
-        });
-        setEditHotelId(hotel._id);
-        setHotelTab("active");
-        fetchCities(cities.find((c) => c._id === hotel.city)?.state || selectedState);
-        fetchHotels(hotel.city);
-    };
+  const cityId = hotel.city?._id || "";  
+  const stateId = hotel.city?.state?._id || selectedState || ""; 
+  setHotelForm({
+    stateId,
+    cityId,
+    name: hotel.name || "",
+    address: hotel.address || "",
+    rating: hotel.rating?.toString() || "",
+    amenities: hotel.amenities?.join(", ") || "",
+    priceMin: hotel.priceRange?.min?.toString() || "",
+    priceMax: hotel.priceRange?.max?.toString() || "",
+    contactPhone: hotel.contact?.phone || "",
+    contactEmail: hotel.contact?.email || "",
+  });
+  setEditHotelId(hotel._id);
+  setHotelTab("active");
+  if (stateId) {
+    fetchCities(stateId);  
+  }
+  if (cityId) {
+    fetchHotels(cityId);  
+  }
+};
 
     const handleHotelDelete = async (id) => {
         setLoading(true);
@@ -415,7 +404,7 @@ const LocationManager = () => {
         }
     };
 
-    // Hotel Browser
+ 
     const handleStateChange = async (e) => {
         const stateId = e.target.value;
         setSelectedState(stateId);
@@ -443,28 +432,28 @@ const LocationManager = () => {
         }
     };
 
-    // Search and Sort for Locations
-    const filteredActiveLocations = locations.filter(
-        (loc) =>
-            loc.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            loc.city.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    const filteredInactiveLocations = inactiveLocations.filter(
-        (loc) =>
-            loc.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            loc.city.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+   
+    // const filteredActiveLocations = locations.filter(
+    //     (loc) =>
+    //         loc.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //         loc.city.toLowerCase().includes(searchTerm.toLowerCase())
+    // );
+    // const filteredInactiveLocations = inactiveLocations.filter(
+    //     (loc) =>
+    //         loc.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //         loc.city.toLowerCase().includes(searchTerm.toLowerCase())
+    // );
 
-    const sortLocations = (locs) => {
-        return [...locs].sort((a, b) => {
-            const timeA = new Date(parseInt(a._id.toString().substring(0, 8), 16) * 1000);
-            const timeB = new Date(parseInt(b._id.toString().substring(0, 8), 16) * 1000);
-            return sortOption === "latest" ? timeB - timeA : timeA - timeB;
-        });
-    };
+    // const sortLocations = (locs) => {
+    //     return [...locs].sort((a, b) => {
+    //         const timeA = new Date(parseInt(a._id.toString().substring(0, 8), 16) * 1000);
+    //         const timeB = new Date(parseInt(b._id.toString().substring(0, 8), 16) * 1000);
+    //         return sortOption === "latest" ? timeB - timeA : timeA - timeB;
+    //     });
+    // };
 
-    const sortedActiveLocations = sortLocations(filteredActiveLocations);
-    const sortedInactiveLocations = sortLocations(filteredInactiveLocations);
+    // const sortedActiveLocations = sortLocations(filteredActiveLocations);
+    // const sortedInactiveLocations = sortLocations(filteredInactiveLocations);
 
     // Logout
     const handleLogout = async () => {
@@ -485,6 +474,9 @@ const LocationManager = () => {
         <div className="min-h-screen bg-gray-900 text-gray-100 flex">
             {/* Sidebar */}
             <div className="w-80 bg-gray-800 p-6 flex-shrink-0">
+            <h1>
+                <button onClick={handleLogout}>Logout</button>
+            </h1>
                 <h2 className="text-xl font-bold text-indigo-400 mb-6 flex items-center">
                     <FaMapMarkerAlt className="mr-2" /> Manage Locations
                 </h2>
