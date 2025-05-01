@@ -7,13 +7,12 @@ const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 
 dotenv.config();
-
-// In-memory OTP store (use Redis or DB in production)
+ 
 const otpStore = new Map();
 
-// Basic email validation regex
+ 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Basic phone validation regex (10-12 digits, optional +)
+ 
 const phoneRegex = /^\+?\d{10,12}$/;
 
 const userController = {

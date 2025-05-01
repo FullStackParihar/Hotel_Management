@@ -44,11 +44,24 @@ const LocationManager = () => {
     const [selectedState, setSelectedState] = useState("");
     const [selectedCity, setSelectedCity] = useState("");
     const [selectedHotel, setSelectedHotel] = useState(null);
-
+    const [isHotelExpanded, setIsHotelExpanded] = useState(false);
+    const [expandedHotels, setExpandedHotels] = useState({})
     const baseURL = "http://localhost:6969";
 
 
     // Fetch Data
+
+    const toggleHotelDetails = (hotelId) => {
+        console.log("Toggling hotel:", hotelId);
+        setExpandedHotels((prev) => {
+            const newState = {
+                ...prev,
+                [hotelId]: !prev[hotelId],
+            };
+            console.log("New expandedHotels:", newState);
+            return newState;
+        });
+    };
 
     const fetchStates = async () => {
         try {
@@ -82,6 +95,7 @@ const LocationManager = () => {
             setInactiveCities(inactive);
             console.log("Fetched cities:", response.data);
 
+
         } catch (err) {
             console.error("fetchCities - Error:", err);
             setError(err.response?.data?.message || "Failed to fetch cities.");
@@ -103,6 +117,7 @@ const LocationManager = () => {
             const inactive = response.data.filter((h) => !h.isActive);
             setHotels(active);
             setInactiveHotels(inactive);
+            setExpandedHotels({});
             console.log("Fetched hotels:", response.data);
 
         } catch (err) {
@@ -118,7 +133,7 @@ const LocationManager = () => {
         fetchStates();
     }, []);
 
-    // State CRUD
+    // State 
     const handleStateSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -301,7 +316,7 @@ const LocationManager = () => {
         }
     };
 
-    // Hotel CRUD
+    // Hotel 
     const handleHotelSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -352,7 +367,7 @@ const LocationManager = () => {
             });
             setEditHotelId(null);
             setHotelTab("active");
-            await fetchHotels(cityId); // Refresh hotel list
+            await fetchHotels(cityId);
         } catch (err) {
             console.error("handleHotelSubmit - Error:", err);
             setError(err.response?.data?.message || "Failed to save hotel.");
@@ -536,7 +551,7 @@ const LocationManager = () => {
                     </button>
                 </div>
 
-                {/* State Form */}
+                {/*---------------------------- State--------------------------   */}
                 {sidebarTab === "states" && (
                     <div>
                         <form onSubmit={handleStateSubmit} className="space-y-4" aria-label="State form">
@@ -650,7 +665,7 @@ const LocationManager = () => {
                     </div>
                 )}
 
-                {/* City Form */}
+                {/*-------------------------- City -------------------------- */}
                 {sidebarTab === "cities" && (
                     <div>
                         <form onSubmit={handleCitySubmit} className="space-y-4" aria-label="City form">
@@ -678,7 +693,7 @@ const LocationManager = () => {
                                     onChange={(e) => {
                                         const stateId = e.target.value;
                                         setCityForm({ ...cityForm, stateId });
-                                        fetchCities(stateId); // Fetch cities when state changes
+                                        fetchCities(stateId);
                                     }}
                                     required
                                     className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -771,7 +786,7 @@ const LocationManager = () => {
                         </ul>
                     </div>
                 )}
-
+                {/* --------------------------hotel -------------------------- */}
                 {sidebarTab === "hotels" && (
                     <div>
                         <form onSubmit={handleHotelSubmit} className="space-y-4" aria-label="Hotel form">
@@ -957,7 +972,7 @@ const LocationManager = () => {
                             <button
                                 onClick={() => {
                                     setHotelTab("active");
-                                    if (hotelForm.cityId) fetchHotels(hotelForm.cityId); // Refresh list on tab change
+                                    if (hotelForm.cityId) fetchHotels(hotelForm.cityId);
                                 }}
                                 className={`px-4 py-2 rounded ${hotelTab === "active" ? "bg-indigo-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                                     }`}
@@ -969,7 +984,7 @@ const LocationManager = () => {
                             <button
                                 onClick={() => {
                                     setHotelTab("inactive");
-                                    if (hotelForm.cityId) fetchHotels(hotelForm.cityId); // Refresh list on tab change
+                                    if (hotelForm.cityId) fetchHotels(hotelForm.cityId);
                                 }}
                                 className={`px-4 py-2 rounded ${hotelTab === "inactive" ? "bg-red-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                                     }`}
@@ -1252,10 +1267,8 @@ const LocationManager = () => {
                         )} */}
 
                         {/* Hotel Browser */}
-                        <div className="mt-8">
-                            <h3 className="text-xl font-bold text-indigo-400 mb-4 flex items-center">
-                                <FaHotel className="mr-2" /> Browse Hotels
-                            </h3>
+                        <div className="mt-6">
+                            <h3 className="text-xl font-semibold">Hotel Browser</h3>
                             <div className="space-y-4">
                                 <div>
                                     <label htmlFor="state-select" className="block text-sm font-medium">
@@ -1296,61 +1309,97 @@ const LocationManager = () => {
                                         ))}
                                     </select>
                                 </div>
-                                <div>
-                                    <label htmlFor="hotel-select" className="block text-sm font-medium">
-                                        Select Hotel
-                                    </label>
-                                    <select
-                                        id="hotel-select"
-                                        value={selectedHotel?._id || ""}
-                                        onChange={handleHotelChange}
-                                        disabled={!selectedCity}
-                                        className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-600"
-                                        aria-label="Select hotel"
-                                    >
-                                        <option value="">-- Select Hotel --</option>
+                            </div>
+                            {/* Hotel list */}
+                            <div className="mt-6">
+                                {loading && <p className="text-gray-400">Loading hotels...</p>}
+                                {error && <p className="text-red-400">{error}</p>}
+                                {hotels.length > 0 ? (
+                                    <ul className="space-y-4">
                                         {hotels.map((hotel) => (
-                                            <option key={hotel._id} value={hotel._id}>
-                                                {hotel.name}
-                                            </option>
+                                            <li
+                                                key={hotel._id}
+                                                className="p-4 bg-gray-750 rounded-lg border border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors"
+                                                role="region"
+                                                aria-live="polite"
+                                                onClick={() => toggleHotelDetails(hotel._id)}
+                                                tabIndex={0}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter" || e.key === " ") {
+                                                        e.preventDefault();
+                                                        toggleHotelDetails(hotel._id);
+                                                    }
+                                                }}
+                                                aria-expanded={!!expandedHotels[hotel._id]}
+                                                aria-controls={`hotel-details-${hotel._id}`}
+                                            >
+                                                <div className="flex justify-between items-center">
+                                                    <h4 className="text-lg font-semibold text-indigo-300">{hotel.name}</h4>
+                                                    <span className="text-gray-400 text-sm">
+                                                        {expandedHotels[hotel._id] ? (
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                            </svg>
+                                                        )}
+                                                    </span>
+
+                                                </div>
+                                                <div className="flex gap-2 mt-2">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleHotelEdit(hotel);
+                                                        }}
+                                                        className="text-yellow-400 hover:text-yellow-500"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                </div>
+                                                <p className="mt-2">
+                                                    <strong>Address:</strong> {hotel.address || "N/A"}
+                                                </p>
+                                                <p>
+                                                    <strong>Rating:</strong> {hotel.rating || "N/A"}/5
+                                                </p>
+                                                {expandedHotels[hotel._id] && (
+                                                    <div
+                                                        id={`hotel-details-${hotel._id}`}
+                                                        className="mt-4 overflow-hidden transition-max-height duration-300 ease-in-out"
+                                                        style={{ maxHeight: expandedHotels[hotel._id] ? "200px" : "0" }}
+                                                    >
+                                                        <p>
+                                                            <strong>Amenities:</strong> {hotel.amenities?.join(", ") || "N/A"}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Price Range:</strong> ₹{hotel.priceRange?.min || "N/A"} - ₹
+                                                            {hotel.priceRange?.max || "N/A"}
+                                                        </p>
+                                                        <p>
+                                                            <strong>Contact:</strong>{" "}
+                                                            {(hotel.contact?.phone || hotel.contact?.email)
+                                                                ? [hotel.contact?.phone, hotel.contact?.email]
+                                                                    .filter(Boolean)
+                                                                    .join(" | ")
+                                                                : "N/A"}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </li>
                                         ))}
-                                    </select>
-                                </div>
-                                {selectedHotel && (
-                                    <div
-                                        className="mt-4 p-4 bg-gray-750 rounded-lg border border-gray-700"
-                                        role="region"
-                                        aria-live="polite"
-                                    >
-                                        <h4 className="text-lg font-semibold text-indigo-300">{selectedHotel.name}</h4>
-                                        <p>
-                                            <strong>Address:</strong> {selectedHotel.address || "N/A"}
-                                        </p>
-                                        <p>
-                                            <strong>Rating:</strong> {selectedHotel.rating || "N/A"}/5
-                                        </p>
-                                        <p>
-                                            <strong>Amenities:</strong> {selectedHotel.amenities?.join(", ") || "N/A"}
-                                        </p>
-                                        <p>
-                                            <strong>Price Range:</strong> ₹{selectedHotel.priceRange?.min || "N/A"} - ₹
-                                            {selectedHotel.priceRange?.max || "N/A"}
-                                        </p>
-                                        <p>
-                                            <strong>Contact:</strong>{" "}
-                                            {(selectedHotel.contact?.phone || selectedHotel.contact?.email)
-                                                ? [selectedHotel.contact?.phone, selectedHotel.contact?.email].filter(Boolean).join(" | ")
-                                                : "N/A"}
-                                        </p>
-                                    </div>
+                                    </ul>
+                                ) : selectedCity ? (
+                                    <p className="text-gray-400">No active hotels found for this city.</p>
+                                ) : (
+                                    <p className="text-gray-400">Please select a state and city to view hotels.</p>
                                 )}
                             </div>
                         </div>
 
-                        {/* Error Message */}
-                        {error && (
-                            <div className="mt-4 p-3 bg-red-900/50 border border-red-700 rounded text-red-200">{error}</div>
-                        )}
+
                     </div>
                 </div>
             </div>
