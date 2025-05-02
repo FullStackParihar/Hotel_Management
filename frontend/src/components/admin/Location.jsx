@@ -17,7 +17,7 @@ const LocationManager = () => {
     const [stateForm, setStateForm] = useState({ name: "", code: "" });
     const [cityForm, setCityForm] = useState({ name: "", stateId: "" });
     const [hotelForm, setHotelForm] = useState({
-        stateId: "", // Added for state selection
+        stateId: "",
         cityId: "",
         name: "",
         address: "",
@@ -48,21 +48,7 @@ const LocationManager = () => {
     const [expandedHotels, setExpandedHotels] = useState({})
     const baseURL = "http://localhost:6969";
 
-
-    // Fetch Data
-
-    const toggleHotelDetails = (hotelId) => {
-        console.log("Toggling hotel:", hotelId);
-        setExpandedHotels((prev) => {
-            const newState = {
-                ...prev,
-                [hotelId]: !prev[hotelId],
-            };
-            console.log("New expandedHotels:", newState);
-            return newState;
-        });
-    };
-
+    // Fetch data
     const fetchStates = async () => {
         try {
             const response = await axios.get(`${baseURL}/api/states`);
@@ -70,9 +56,7 @@ const LocationManager = () => {
             const inactive = response.data.filter((s) => !s.isActive);
             setStates(active);
             setInactiveStates(inactive);
-
             console.log("Fetched states:", response.data);
-
         } catch (err) {
             console.error("fetchStates - Error:", err);
             setError(err.response?.data?.message || "Failed to fetch states.");
@@ -94,8 +78,6 @@ const LocationManager = () => {
             setCities(active);
             setInactiveCities(inactive);
             console.log("Fetched cities:", response.data);
-
-
         } catch (err) {
             console.error("fetchCities - Error:", err);
             setError(err.response?.data?.message || "Failed to fetch cities.");
@@ -104,10 +86,10 @@ const LocationManager = () => {
 
     const fetchHotels = async (cityId) => {
         console.log("cityId passed to fetchHotels:", cityId);
-
         if (!cityId) {
             setHotels([]);
             setInactiveHotels([]);
+            setExpandedHotels({});
             return;
         }
         setLoading(true);
@@ -119,7 +101,6 @@ const LocationManager = () => {
             setInactiveHotels(inactive);
             setExpandedHotels({});
             console.log("Fetched hotels:", response.data);
-
         } catch (err) {
             console.error("fetchHotels - Error:", err);
             setError(err.response?.data?.message || "Failed to fetch hotels.");
@@ -129,11 +110,23 @@ const LocationManager = () => {
     };
 
     useEffect(() => {
-
         fetchStates();
     }, []);
 
-    // State 
+    // Toggle expand/collapse
+    const toggleHotelDetails = (hotelId) => {
+        console.log("Toggling hotel:", hotelId);
+        setExpandedHotels((prev) => {
+            const newState = {
+                ...prev,
+                [hotelId]: !prev[hotelId],
+            };
+            console.log("New expandedHotels:", newState);
+            return newState;
+        });
+    };
+
+    // State handlers
     const handleStateSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -178,7 +171,6 @@ const LocationManager = () => {
             await fetchStates();
             console.log("State deleted successfully with cities and hotels");
             alert("State deleted successfully with cities and hotels");
-
         } catch (err) {
             console.error("handleStateDelete - Error:", err);
             setError(err.response?.data?.message || "Failed to delete state.");
@@ -217,7 +209,7 @@ const LocationManager = () => {
         }
     };
 
-    // City  
+    // City handlers
     const handleCitySubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -277,7 +269,6 @@ const LocationManager = () => {
         setLoading(true);
         setError("");
         try {
-
             const city = cities.find((c) => c._id === id) || inactiveCities.find((c) => c._id === id);
             const stateId = city?.state?._id || selectedState || "";
             await axios.patch(`${baseURL}/api/cities/${id}/softdelete`);
@@ -290,8 +281,7 @@ const LocationManager = () => {
                 setError("No state selected. Please select a state to view cities.");
             }
             setCityTab("inactive");
-            console.log("City inactiveted successfully");
-
+            console.log("City inactivated successfully");
         } catch (err) {
             console.error("handleCitySoftDelete - Error:", err);
             setError(err.response?.data?.message || "Failed to soft-delete city.");
@@ -316,7 +306,7 @@ const LocationManager = () => {
         }
     };
 
-    // Hotel 
+    // Hotel handlers
     const handleHotelSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -340,9 +330,10 @@ const LocationManager = () => {
                 phone: hotelForm.contactPhone?.trim() || "",
                 email: hotelForm.contactEmail?.trim() || "",
             },
+            totalRooms: parseInt(hotelForm.totalRooms, 10) || undefined,
         };
-        if (!payload.name || !payload.city) {
-            setError("Name and city are required.");
+        if (!payload.name || !payload.city || payload.totalRooms === undefined) {
+            setError("Name, city, and total rooms are required.");
             setLoading(false);
             return;
         }
@@ -364,6 +355,7 @@ const LocationManager = () => {
                 priceMax: "",
                 contactPhone: "",
                 contactEmail: "",
+                totalRooms: "",
             });
             setEditHotelId(null);
             setHotelTab("active");
@@ -390,6 +382,7 @@ const LocationManager = () => {
             priceMax: hotel.priceRange?.max?.toString() || "",
             contactPhone: hotel.contact?.phone || "",
             contactEmail: hotel.contact?.email || "",
+            totalRooms: hotel.totalRooms?.toString() || "",
         });
         setEditHotelId(hotel._id);
         setHotelTab("active");
@@ -445,56 +438,23 @@ const LocationManager = () => {
         }
     };
 
-
+    // Dropdown handlers
     const handleStateChange = async (e) => {
         const stateId = e.target.value;
         setSelectedState(stateId);
         setSelectedCity("");
-        setSelectedHotel(null);
         setHotels([]);
         setInactiveHotels([]);
+        setExpandedHotels({});
         await fetchCities(stateId);
     };
 
     const handleCityChange = async (e) => {
         const cityId = e.target.value;
         setSelectedCity(cityId);
-        setSelectedHotel(null);
+        setHotelForm((prev) => ({ ...prev, cityId }));
         await fetchHotels(cityId);
     };
-
-    const handleHotelChange = (e) => {
-        const hotelId = e.target.value;
-        if (hotelId) {
-            const hotel = hotels.find((h) => h._id === hotelId);
-            setSelectedHotel(hotel);
-        } else {
-            setSelectedHotel(null);
-        }
-    };
-
-
-    // const filteredActiveLocations = locations.filter(
-    //     (loc) =>
-    //         loc.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //         loc.city.toLowerCase().includes(searchTerm.toLowerCase())
-    // );
-    // const filteredInactiveLocations = inactiveLocations.filter(
-    //     (loc) =>
-    //         loc.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //         loc.city.toLowerCase().includes(searchTerm.toLowerCase())
-    // );
-
-    // const sortLocations = (locs) => {
-    //     return [...locs].sort((a, b) => {
-    //         const timeA = new Date(parseInt(a._id.toString().substring(0, 8), 16) * 1000);
-    //         const timeB = new Date(parseInt(b._id.toString().substring(0, 8), 16) * 1000);
-    //         return sortOption === "latest" ? timeB - timeA : timeA - timeB;
-    //     });
-    // };
-
-    // const sortedActiveLocations = sortLocations(filteredActiveLocations);
-    // const sortedInactiveLocations = sortLocations(filteredInactiveLocations);
 
     // Logout
     const handleLogout = async () => {
@@ -510,6 +470,467 @@ const LocationManager = () => {
             setLoading(false);
         }
     };
+
+    // const toggleHotelDetails = (hotelId) => {
+    //     console.log("Toggling hotel:", hotelId);
+    //     setExpandedHotels((prev) => {
+    //         const newState = {
+    //             ...prev,
+    //             [hotelId]: !prev[hotelId],
+    //         };
+    //         console.log("New expandedHotels:", newState);
+    //         return newState;
+    //     });
+    // };
+
+    // // Fetch all data
+    // const fetchStates = async () => {
+    //     try {
+    //         const response = await axios.get(`${baseURL}/api/states`);
+    //         const active = response.data.filter((s) => s.isActive);
+    //         const inactive = response.data.filter((s) => !s.isActive);
+    //         setStates(active);
+    //         setInactiveStates(inactive);
+
+    //         console.log("Fetched states:", response.data);
+
+    //     } catch (err) {
+    //         console.error("fetchStates - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to fetch states.");
+    //     }
+    // };
+
+    // const fetchCities = async (stateId) => {
+    //     if (!stateId) {
+    //         setCities([]);
+    //         setInactiveCities([]);
+    //         setHotels([]);
+    //         setInactiveHotels([]);
+    //         return;
+    //     }
+    //     try {
+    //         const response = await axios.get(`${baseURL}/api/states/${stateId}/cities`);
+    //         const active = response.data.filter((c) => c.isActive);
+    //         const inactive = response.data.filter((c) => !c.isActive);
+    //         setCities(active);
+    //         setInactiveCities(inactive);
+    //         console.log("Fetched cities:", response.data);
+
+
+    //     } catch (err) {
+    //         console.error("fetchCities - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to fetch cities.");
+    //     }
+    // };
+
+    // const fetchHotels = async (cityId) => {
+    //     console.log("cityId passed to fetchHotels:", cityId);
+
+    //     if (!cityId) {
+    //         setHotels([]);
+    //         setInactiveHotels([]);
+    //         return;
+    //     }
+    //     setLoading(true);
+    //     try {
+    //         const response = await axios.get(`${baseURL}/api/cities/${cityId}/hotels`);
+    //         const active = response.data.filter((h) => h.isActive);
+    //         const inactive = response.data.filter((h) => !h.isActive);
+    //         setHotels(active);
+    //         setInactiveHotels(inactive);
+    //         setExpandedHotels({});
+    //         console.log("Fetched hotels:", response.data);
+
+    //     } catch (err) {
+    //         console.error("fetchHotels - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to fetch hotels.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // useEffect(() => {
+
+    //     fetchStates();
+    // }, []);
+
+    // // State 
+    // const handleStateSubmit = async (e) => {
+    //     e.preventDefault();
+    //     setLoading(true);
+    //     setError("");
+    //     const payload = {
+    //         name: stateForm.name?.trim(),
+    //         code: stateForm.code?.trim(),
+    //     };
+    //     if (!payload.name || !payload.code) {
+    //         setError("Name and code are required.");
+    //         setLoading(false);
+    //         return;
+    //     }
+    //     try {
+    //         if (editStateId) {
+    //             await axios.put(`${baseURL}/api/states/${editStateId}`, payload);
+    //         } else {
+    //             await axios.post(`${baseURL}/api/states/add`, payload);
+    //         }
+    //         setStateForm({ name: "", code: "" });
+    //         setEditStateId(null);
+    //         await fetchStates();
+    //     } catch (err) {
+    //         console.error("handleStateSubmit - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to save state.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // const handleStateEdit = (state) => {
+    //     setStateForm({ name: state.name, code: state.code });
+    //     setEditStateId(state._id);
+    //     setStateTab("active");
+    // };
+
+    // const handleStateDelete = async (id) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         await axios.delete(`${baseURL}/api/states/${id}`);
+    //         await fetchStates();
+    //         console.log("State deleted successfully with cities and hotels");
+    //         alert("State deleted successfully with cities and hotels");
+
+    //     } catch (err) {
+    //         console.error("handleStateDelete - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to delete state.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // const handleStateSoftDelete = async (id) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         await axios.patch(`${baseURL}/api/states/${id}/softdelete`);
+    //         await fetchStates();
+    //         setStateTab("inactive");
+    //     } catch (err) {
+    //         console.error("handleStateSoftDelete - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to soft-delete state.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // const handleStateActivate = async (id) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         await axios.patch(`${baseURL}/api/states/${id}/activate`);
+    //         await fetchStates();
+    //         setStateTab("active");
+    //     } catch (err) {
+    //         console.error("handleStateActivate - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to activate state.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // // City  
+    // const handleCitySubmit = async (e) => {
+    //     e.preventDefault();
+    //     setLoading(true);
+    //     setError("");
+    //     const payload = {
+    //         name: cityForm.name?.trim(),
+    //         state: cityForm.stateId,
+    //     };
+    //     if (!payload.name || !payload.state) {
+    //         setError("Name and state are required.");
+    //         setLoading(false);
+    //         return;
+    //     }
+    //     try {
+    //         if (editCityId) {
+    //             await axios.put(`${baseURL}/api/cities/${editCityId}`, payload);
+    //         } else {
+    //             await axios.post(`${baseURL}/api/cities/add`, payload);
+    //         }
+    //         const stateId = cityForm.stateId;
+    //         setCityForm({ name: "", stateId: "" });
+    //         setEditCityId(null);
+    //         setCityTab("active");
+    //         await fetchCities(stateId);
+    //     } catch (err) {
+    //         console.error("handleCitySubmit - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to save city.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // const handleCityEdit = (city) => {
+    //     setCityForm({
+    //         name: city.name || "",
+    //         stateId: city.state?._id || "",
+    //     });
+    //     setEditCityId(city._id);
+    //     setCityTab("active");
+    // };
+
+    // const handleCityDelete = async (id) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         await axios.delete(`${baseURL}/api/cities/${id}`);
+    //         await fetchCities(selectedState);
+    //     } catch (err) {
+    //         console.error("handleCityDelete - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to delete city.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+    // onChange={(e) => setHotelForm({ ...hotelForm, cityId: e.target.value })}
+    // const handleCitySoftDelete = async (id) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+
+    //         const city = cities.find((c) => c._id === id) || inactiveCities.find((c) => c._id === id);
+    //         const stateId = city?.state?._id || selectedState || "";
+    //         await axios.patch(`${baseURL}/api/cities/${id}/softdelete`);
+    //         if (stateId) {
+    //             await fetchCities(stateId);
+    //             setSelectedState(stateId);
+    //         } else {
+    //             setCities([]);
+    //             setInactiveCities([]);
+    //             setError("No state selected. Please select a state to view cities.");
+    //         }
+    //         setCityTab("inactive");
+    //         console.log("City inactiveted successfully");
+
+    //     } catch (err) {
+    //         console.error("handleCitySoftDelete - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to soft-delete city.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // const handleCityActivate = async (id) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         await axios.patch(`${baseURL}/api/cities/${id}/activate`);
+    //         await fetchCities(selectedState);
+    //         setCityTab("active");
+    //         console.log("City activated successfully");
+    //     } catch (err) {
+    //         console.error("handleCityActivate - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to activate city.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // // Hotel 
+    // const handleHotelSubmit = async (e) => {
+    //     e.preventDefault();
+    //     setLoading(true);
+    //     setError("");
+    //     const payload = {
+    //         name: hotelForm.name?.trim() || "",
+    //         city: hotelForm.cityId || "",
+    //         address: hotelForm.address?.trim() || "",
+    //         rating: parseFloat(hotelForm.rating) || undefined,
+    //         amenities: hotelForm.amenities
+    //             ? hotelForm.amenities
+    //                 .split(",")
+    //                 .map((a) => a.trim())
+    //                 .filter((a) => a)
+    //             : [],
+    //         priceRange: {
+    //             min: parseFloat(hotelForm.priceMin) || undefined,
+    //             max: parseFloat(hotelForm.priceMax) || undefined,
+    //         },
+    //         contact: {
+    //             phone: hotelForm.contactPhone?.trim() || "",
+    //             email: hotelForm.contactEmail?.trim() || "",
+    //         },
+    //     };
+    //     if (!payload.name || !payload.city) {
+    //         setError("Name and city are required.");
+    //         setLoading(false);
+    //         return;
+    //     }
+    //     try {
+    //         if (editHotelId) {
+    //             await axios.put(`${baseURL}/api/hotels/${editHotelId}`, payload);
+    //         } else {
+    //             await axios.post(`${baseURL}/api/hotels/add`, payload);
+    //         }
+    //         const cityId = hotelForm.cityId;
+    //         setHotelForm({
+    //             stateId: hotelForm.stateId,
+    //             cityId: cityId,
+    //             name: "",
+    //             address: "",
+    //             rating: "",
+    //             amenities: "",
+    //             priceMin: "",
+    //             priceMax: "",
+    //             contactPhone: "",
+    //             contactEmail: "",
+    //         });
+    //         setEditHotelId(null);
+    //         setHotelTab("active");
+    //         await fetchHotels(cityId);
+    //     } catch (err) {
+    //         console.error("handleHotelSubmit - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to save hotel.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // const handleHotelEdit = (hotel) => {
+    //     const cityId = hotel.city?._id || "";
+    //     const stateId = hotel.city?.state?._id || selectedState || "";
+    //     setHotelForm({
+    //         stateId,
+    //         cityId,
+    //         name: hotel.name || "",
+    //         address: hotel.address || "",
+    //         rating: hotel.rating?.toString() || "",
+    //         amenities: hotel.amenities?.join(", ") || "",
+    //         priceMin: hotel.priceRange?.min?.toString() || "",
+    //         priceMax: hotel.priceRange?.max?.toString() || "",
+    //         contactPhone: hotel.contact?.phone || "",
+    //         contactEmail: hotel.contact?.email || "",
+    //     });
+    //     setEditHotelId(hotel._id);
+    //     setHotelTab("active");
+    //     if (stateId) {
+    //         fetchCities(stateId);
+    //     }
+    //     if (cityId) {
+    //         fetchHotels(cityId);
+    //     }
+    // };
+
+    // const handleHotelDelete = async (id) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         await axios.delete(`${baseURL}/api/hotels/${id}`);
+    //         await fetchHotels(hotelForm.cityId || selectedCity);
+    //     } catch (err) {
+    //         console.error("handleHotelDelete - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to delete hotel.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // const handleHotelSoftDelete = async (id) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         await axios.patch(`${baseURL}/api/hotels/${id}/softdelete`);
+    //         await fetchHotels(hotelForm.cityId || selectedCity);
+    //         setHotelTab("inactive");
+    //     } catch (err) {
+    //         console.error("handleHotelSoftDelete - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to soft-delete hotel.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // const handleHotelActivate = async (id) => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         await axios.patch(`${baseURL}/api/hotels/${id}/activate`);
+    //         await fetchHotels(hotelForm.cityId || selectedCity);
+    //         setHotelTab("active");
+    //     } catch (err) {
+    //         console.error("handleHotelActivate - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to activate hotel.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+
+    // const handleStateChange = async (e) => {
+    //     const stateId = e.target.value;
+    //     setSelectedState(stateId);
+    //     setSelectedCity("");
+    //     setSelectedHotel(null);
+    //     setHotels([]);
+    //     setInactiveHotels([]);
+    //     await fetchCities(stateId);
+    // };
+
+    // const handleCityChange = async (e) => {
+    //     const cityId = e.target.value;
+    //     setSelectedCity(cityId);
+    //     setSelectedHotel(null);
+    //     await fetchHotels(cityId);
+    // };
+
+    // const handleHotelChange = (e) => {
+    //     const hotelId = e.target.value;
+    //     if (hotelId) {
+    //         const hotel = hotels.find((h) => h._id === hotelId);
+    //         setSelectedHotel(hotel);
+    //     } else {
+    //         setSelectedHotel(null);
+    //     }
+    // };
+
+
+    // // const filteredActiveLocations = locations.filter(
+    // //     (loc) =>
+    // //         loc.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    // //         loc.city.toLowerCase().includes(searchTerm.toLowerCase())
+    // // );
+    // // const filteredInactiveLocations = inactiveLocations.filter(
+    // //     (loc) =>
+    // //         loc.state.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    // //         loc.city.toLowerCase().includes(searchTerm.toLowerCase())
+    // // );
+
+    // // const sortLocations = (locs) => {
+    // //     return [...locs].sort((a, b) => {
+    // //         const timeA = new Date(parseInt(a._id.toString().substring(0, 8), 16) * 1000);
+    // //         const timeB = new Date(parseInt(b._id.toString().substring(0, 8), 16) * 1000);
+    // //         return sortOption === "latest" ? timeB - timeA : timeA - timeB;
+    // //     });
+    // // };
+
+    // // const sortedActiveLocations = sortLocations(filteredActiveLocations);
+    // // const sortedInactiveLocations = sortLocations(filteredInactiveLocations);
+
+    // // Logout
+    // const handleLogout = async () => {
+    //     setLoading(true);
+    //     setError("");
+    //     try {
+    //         localStorage.removeItem("token");
+    //         navigate("/");
+    //     } catch (err) {
+    //         console.error("handleLogout - Error:", err);
+    //         setError(err.response?.data?.message || "Failed to log out.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     return (
         <div className="min-h-screen bg-gray-900 text-gray-100 flex">
@@ -787,7 +1208,7 @@ const LocationManager = () => {
                     </div>
                 )}
                 {/* --------------------------hotel -------------------------- */}
-                {sidebarTab === "hotels" && (
+                {/* {sidebarTab === "hotels" && (
                     <div>
                         <form onSubmit={handleHotelSubmit} className="space-y-4" aria-label="Hotel form">
                             <div>
@@ -1064,6 +1485,266 @@ const LocationManager = () => {
                             </ul>
                         )}
                     </div>
+                )} */}
+                {sidebarTab === "hotels" && (
+                    <div>
+                        <form onSubmit={handleHotelSubmit} className="space-y-4" aria-label="Hotel form">
+                            <div>
+                                <label htmlFor="hotel-state" className="block text-sm font-medium">
+                                    State
+                                </label>
+                                <select
+                                    id="hotel-state"
+                                    value={hotelForm.stateId}
+                                    onChange={(e) => {
+                                        const stateId = e.target.value;
+                                        setHotelForm({ ...hotelForm, stateId, cityId: "" });
+                                        setSelectedState(stateId);
+                                        fetchCities(stateId);
+                                    }}
+                                    className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                    aria-label="Select state for hotel"
+                                >
+                                    <option value="">-- Select State --</option>
+                                    {states.map((state) => (
+                                        <option key={state._id} value={state._id}>
+                                            {state.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label htmlFor="hotel-city" className="block text-sm font-medium">
+                                    City
+                                </label>
+                                <select
+                                    id="hotel-city"
+                                    value={hotelForm.cityId}
+                                    onChange={(e) => {
+                                        const cityId = e.target.value;
+                                        setHotelForm({ ...hotelForm, cityId });
+                                        setSelectedCity(cityId);
+                                        if (cityId) {
+                                            fetchHotels(cityId);
+                                        } else {
+                                            setHotels([]);
+                                            setInactiveHotels([]);
+                                            setExpandedHotels({});
+                                        }
+                                    }}
+
+                                    disabled={!hotelForm.stateId}
+                                    className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100 disabled:bg-gray-600"
+                                    aria-label="Select city for hotel"
+                                >
+                                    <option value="">-- Select City --</option>
+                                    {cities.map((city) => (
+                                        <option key={city._id} value={city._id}>
+                                            {city.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label htmlFor="hotel-name" className="block text-sm font-medium">
+                                    Hotel Name
+                                </label>
+                                <input
+                                    id="hotel-name"
+                                    type="text"
+                                    value={hotelForm.name}
+                                    onChange={(e) => setHotelForm({ ...hotelForm, name: e.target.value })}
+                                    required
+                                    className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                    aria-label="Hotel name"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="hotel-address" className="block text-sm font-medium">
+                                    Address
+                                </label>
+                                <input
+                                    id="hotel-address"
+                                    type="text"
+                                    value={hotelForm.address}
+                                    onChange={(e) => setHotelForm({ ...hotelForm, address: e.target.value })}
+                                    className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                    aria-label="Hotel address"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="hotel-rating" className="block text-sm font-medium">
+                                    Rating (1-5)
+                                </label>
+                                <input
+                                    id="hotel-rating"
+                                    type="number"
+                                    min="1"
+                                    max="5"
+                                    step="0.1"
+                                    value={hotelForm.rating}
+                                    onChange={(e) => setHotelForm({ ...hotelForm, rating: e.target.value })}
+                                    className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                    aria-label="Hotel rating"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="hotel-amenities" className="block text-sm font-medium">
+                                    Amenities (comma-separated)
+                                </label>
+                                <input
+                                    id="hotel-amenities"
+                                    type="text"
+                                    value={hotelForm.amenities}
+                                    onChange={(e) => setHotelForm({ ...hotelForm, amenities: e.target.value })}
+                                    className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                    aria-label="Hotel amenities"
+                                />
+                            </div>
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label htmlFor="hotel-price-min" className="block text-sm font-medium">
+                                        Price Min
+                                    </label>
+                                    <input
+                                        id="hotel-price-min"
+                                        type="number"
+                                        min="0"
+                                        value={hotelForm.priceMin}
+                                        onChange={(e) => setHotelForm({ ...hotelForm, priceMin: e.target.value })}
+                                        className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                        aria-label="Hotel price minimum"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <label htmlFor="hotel-price-max" className="block text-sm font-medium">
+                                        Price Max
+                                    </label>
+                                    <input
+                                        id="hotel-price-max"
+                                        type="number"
+                                        min="0"
+                                        value={hotelForm.priceMax}
+                                        onChange={(e) => setHotelForm({ ...hotelForm, priceMax: e.target.value })}
+                                        className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                        aria-label="Hotel price maximum"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label htmlFor="hotel-contact-phone" className="block text-sm font-medium">
+                                    Contact Phone
+                                </label>
+                                <input
+                                    id="hotel-contact-phone"
+                                    type="text"
+                                    value={hotelForm.contactPhone}
+                                    onChange={(e) => setHotelForm({ ...hotelForm, contactPhone: e.target.value })}
+                                    className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                    aria-label="Hotel contact phone"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="hotel-contact-email" className="block text-sm font-medium">
+                                    Contact Email
+                                </label>
+                                <input
+                                    id="hotel-contact-email"
+                                    type="email"
+                                    value={hotelForm.contactEmail}
+                                    onChange={(e) => setHotelForm({ ...hotelForm, contactEmail: e.target.value })}
+                                    className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                    aria-label="Hotel contact email"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="hotel-total-rooms" className="block text-sm font-medium">
+                                    Total Rooms
+                                </label>
+                                <input
+                                    id="hotel-total-rooms"
+                                    type="number"
+                                    min="0"
+                                    value={hotelForm.totalRooms}
+                                    onChange={(e) => setHotelForm({ ...hotelForm, totalRooms: e.target.value })}
+                                    required
+                                    className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100"
+                                    aria-label="Hotel total rooms"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:bg-indigo-800"
+                                disabled={loading || !hotelForm.cityId}
+                                aria-label={editHotelId ? "Update hotel" : "Add hotel"}
+                            >
+                                {loading ? "Saving..." : editHotelId ? "Update" : "Add"}
+                            </button>
+                        </form>
+                        {/* Hotel list and tabs (active/inactive) */}
+                        <div className="flex gap-4 justify-center my-4">
+                            <button
+                                onClick={() => setHotelTab("active")}
+                                className={`px-4 py-2 rounded ${hotelTab === "active" ? "bg-indigo-600 text-white" : "bg-gray-700 text-gray-300"
+                                    }`}
+                            >
+                                Active
+                            </button>
+                            <button
+                                onClick={() => setHotelTab("inactive")}
+                                className={`px-4 py-2 rounded ${hotelTab === "inactive" ? "bg-red-600 text-white" : "bg-gray-700 text-gray-300"
+                                    }`}
+                            >
+                                Inactive
+                            </button>
+                        </div>
+                        <ul className="mt-4 space-y-2">
+                            {(hotelTab === "active" ? hotels : inactiveHotels).map((hotel) => (
+                                <li
+                                    key={hotel._id}
+                                    className="flex justify-between items-center p-2 bg-gray-750 rounded border border-gray-700"
+                                >
+                                    <span>{hotel.name}</span>
+                                    <div className="flex gap-2">
+                                        {hotelTab === "active" ? (
+                                            <>
+                                                <button
+                                                    onClick={() => handleHotelEdit(hotel)}
+                                                    className="text-yellow-400 hover:text-yellow-500"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleHotelDelete(hotel._id)}
+                                                    className="text-red-400 hover:text-red-500"
+                                                >
+                                                    Delete
+                                                </button>
+                                                <button
+                                                    onClick={() => handleHotelSoftDelete(hotel._id)}
+                                                    className="text-gray-400 hover:text-gray-500"
+                                                >
+                                                    Deactivate
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleHotelActivate(hotel._id)}
+                                                className="text-green-400 hover:text-green-500"
+                                            >
+                                                Activate
+                                            </button>
+                                        )}
+                                    </div>
+                                </li>
+                            ))}
+                            {(hotelTab === "active" ? hotels : inactiveHotels).length === 0 && (
+                                <li className="text-center text-gray-400 py-4">
+                                    No {hotelTab} hotels found.
+                                </li>
+                            )}
+                        </ul>
+                    </div>
                 )}
             </div>
 
@@ -1268,136 +1949,118 @@ const LocationManager = () => {
 
                         {/* Hotel Browser */}
                         <div className="mt-6">
-                            <h3 className="text-xl font-semibold">Hotel Browser</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <label htmlFor="state-select" className="block text-sm font-medium">
-                                        Select State
-                                    </label>
-                                    <select
-                                        id="state-select"
-                                        value={selectedState}
-                                        onChange={handleStateChange}
-                                        className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                        aria-label="Select state"
-                                    >
-                                        <option value="">-- Select State --</option>
-                                        {states.map((state) => (
-                                            <option key={state._id} value={state._id}>
-                                                {state.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label htmlFor="city-select" className="block text-sm font-medium">
-                                        Select City
-                                    </label>
-                                    <select
-                                        id="city-select"
-                                        value={selectedCity}
-                                        onChange={handleCityChange}
-                                        disabled={!selectedState}
-                                        className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-600"
-                                        aria-label="Select city"
-                                    >
-                                        <option value="">-- Select City --</option>
-                                        {cities.map((city) => (
-                                            <option key={city._id} value={city._id}>
-                                                {city.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-                            {/* Hotel list */}
-                            <div className="mt-6">
-                                {loading && <p className="text-gray-400">Loading hotels...</p>}
-                                {error && <p className="text-red-400">{error}</p>}
-                                {hotels.length > 0 ? (
-                                    <ul className="space-y-4">
-                                        {hotels.map((hotel) => (
-                                            <li
-                                                key={hotel._id}
-                                                className="p-4 bg-gray-750 rounded-lg border border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors"
-                                                role="region"
-                                                aria-live="polite"
-                                                onClick={() => toggleHotelDetails(hotel._id)}
-                                                tabIndex={0}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Enter" || e.key === " ") {
-                                                        e.preventDefault();
-                                                        toggleHotelDetails(hotel._id);
-                                                    }
-                                                }}
-                                                aria-expanded={!!expandedHotels[hotel._id]}
-                                                aria-controls={`hotel-details-${hotel._id}`}
-                                            >
-                                                <div className="flex justify-between items-center">
-                                                    <h4 className="text-lg font-semibold text-indigo-300">{hotel.name}</h4>
-                                                    <span className="text-gray-400 text-sm">
-                                                        {expandedHotels[hotel._id] ? (
-                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" />
-                                                            </svg>
-                                                        ) : (
-                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        )}
-                                                    </span>
-
-                                                </div>
-                                                <div className="flex gap-2 mt-2">
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleHotelEdit(hotel);
-                                                        }}
-                                                        className="text-yellow-400 hover:text-yellow-500"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                </div>
-                                                <p className="mt-2">
-                                                    <strong>Address:</strong> {hotel.address || "N/A"}
-                                                </p>
-                                                <p>
-                                                    <strong>Rating:</strong> {hotel.rating || "N/A"}/5
-                                                </p>
-                                                {expandedHotels[hotel._id] && (
-                                                    <div
-                                                        id={`hotel-details-${hotel._id}`}
-                                                        className="mt-4 overflow-hidden transition-max-height duration-300 ease-in-out"
-                                                        style={{ maxHeight: expandedHotels[hotel._id] ? "200px" : "0" }}
-                                                    >
-                                                        <p>
-                                                            <strong>Amenities:</strong> {hotel.amenities?.join(", ") || "N/A"}
-                                                        </p>
-                                                        <p>
-                                                            <strong>Price Range:</strong> ₹{hotel.priceRange?.min || "N/A"} - ₹
-                                                            {hotel.priceRange?.max || "N/A"}
-                                                        </p>
-                                                        <p>
-                                                            <strong>Contact:</strong>{" "}
-                                                            {(hotel.contact?.phone || hotel.contact?.email)
-                                                                ? [hotel.contact?.phone, hotel.contact?.email]
-                                                                    .filter(Boolean)
-                                                                    .join(" | ")
-                                                                : "N/A"}
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : selectedCity ? (
-                                    <p className="text-gray-400">No active hotels found for this city.</p>
-                                ) : (
-                                    <p className="text-gray-400">Please select a state and city to view hotels.</p>
-                                )}
-                            </div>
-                        </div>
+  <h3 className="text-xl font-semibold">Hotel Browser</h3>
+  <div className="space-y-4">
+    <div>
+      <label htmlFor="state-select" className="block text-sm font-medium">
+        Select State
+      </label>
+      <select
+        id="state-select"
+        value={selectedState}
+        onChange={handleStateChange}
+        className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        aria-label="Select state"
+      >
+        <option value="">-- Select State --</option>
+        {states.map((state) => (
+          <option key={state._id} value={state._id}>
+            {state.name}
+          </option>
+        ))}
+      </select>
+    </div>
+    <div>
+      <label htmlFor="city-select" className="block text-sm font-medium">
+        Select City
+      </label>
+      <select
+        id="city-select"
+        value={selectedCity}
+        onChange={handleCityChange}
+        disabled={!selectedState}
+        className="w-full bg-gray-700 border border-gray-600 px-3 py-2 rounded text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-600"
+        aria-label="Select city"
+      >
+        <option value="">-- Select City --</option>
+        {cities.map((city) => (
+          <option key={city._id} value={city._id}>
+            {city.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+  <div className="mt-6">
+    {loading && <p className="text-gray-400">Loading hotels...</p>}
+    {error && <p className="text-red-400">{error}</p>}
+    {hotels.length > 0 ? (
+      <ul className="space-y-4">
+        {hotels.map((hotel) => (
+          <li
+            key={hotel._id}
+            className="p-4 bg-gray-750 rounded-lg border border-gray-700 cursor-pointer hover:bg-gray-700 transition-colors"
+            role="region"
+            aria-live="polite"
+            onClick={() => toggleHotelDetails(hotel._id)}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleHotelDetails(hotel._id);
+              }
+            }}
+            aria-expanded={!!expandedHotels[hotel._id]}
+            aria-controls={`hotel-details-${hotel._id}`}
+          >
+            <div className="flex justify-between items-center">
+              <h4 className="text-lg font-semibold text-indigo-300">{hotel.name}</h4>
+              <span className="text-gray-400 text-sm">
+                {expandedHotels[hotel._id] ? "Collapse" : "Expand"}
+              </span>
+            </div>
+            <p className="mt-2">
+              <strong>Address:</strong> {hotel.address || "N/A"}
+            </p>
+            <p>
+              <strong>Rating:</strong> {hotel.rating || "N/A"}/5
+            </p>
+            {expandedHotels[hotel._id] && (
+              <div
+                id={`hotel-details-${hotel._id}`}
+                className="mt-4 overflow-hidden transition-max-height duration-300 ease-in-out"
+                style={{ maxHeight: expandedHotels[hotel._id] ? "250px" : "0" }}
+              >
+                <p>
+                  <strong>Amenities:</strong> {hotel.amenities?.join(", ") || "N/A"}
+                </p>
+                <p>
+                  <strong>Price Range:</strong> ₹{hotel.priceRange?.min || "N/A"} - ₹
+                  {hotel.priceRange?.max || "N/A"}
+                </p>
+                <p>
+                  <strong>Contact:</strong>{" "}
+                  {(hotel.contact?.phone || hotel.contact?.email)
+                    ? [hotel.contact?.phone, hotel.contact?.email]
+                        .filter(Boolean)
+                        .join(" | ")
+                    : "N/A"}
+                </p>
+                <p>
+                  <strong>Total Rooms:</strong> {hotel.totalRooms ?? "N/A"}
+                </p>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    ) : selectedCity ? (
+      <p className="text-gray-400">No active hotels found for this city.</p>
+    ) : (
+      <p className="text-gray-400">Please select a state and city to view hotels.</p>
+    )}
+  </div>
+</div>
 
 
                     </div>

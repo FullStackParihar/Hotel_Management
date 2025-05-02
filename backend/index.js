@@ -357,7 +357,7 @@ const cors = require("cors");
 const StateRoute = require('./routes/StateRoute')
 const CityRoute = require('./routes/CityRoute')
 const hotelRoutes = require('./routes/HotelRoute')
-
+const RoomRoutes = require("./routes/RoomRoute");
 
 const app = express();
 app.use(cors());
@@ -462,6 +462,7 @@ mongoose.connect("mongodb://localhost:27017/location-manager", {
 app.use("/api", StateRoute);
 app.use("/api", CityRoute);
 app.use('/api', hotelRoutes);
+app.use("/api", RoomRoutes);
 // app.get("/api/states/:stateId/cities", async (req, res) => {
 //   try {
 //     const cities = await City.find({ state: req.params.stateId }).populate("state");
