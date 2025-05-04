@@ -921,6 +921,18 @@ const filteredHotels = hotels
     fetchStates();
   }, []);
 
+
+  const scrollPositionRef = React.useRef(0);
+
+ 
+useEffect(() => {
+  
+  if (scrollPositionRef.current !== 0) {
+    window.scrollTo({ top: scrollPositionRef.current, behavior: "smooth" });
+  }
+}, [rooms]);  
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 text-gray-100 font-sans">
       
@@ -1194,237 +1206,259 @@ const filteredHotels = hotels
             <div className="grid grid-cols-1 gap-8">
               {filteredHotels.map((hotel) => (
                 <div
-                  key={hotel._id}
-                  className="bg-gradient-to-r from-slate-800/90 to-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-blue-900/30 hover:shadow-xl border border-slate-700/50"
+  key={hotel._id}
+  className="bg-gradient-to-r from-slate-800/90 to-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-blue-900/30 hover:shadow-xl border border-slate-700/50"
+>
+  <div className="p-6">
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400">
+        {hotel.name}
+      </h3>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          // Save the current scroll position before toggling
+          scrollPositionRef.current = window.scrollY;
+          toggleHotelDetails(hotel._id);
+          if (!expandedHotels[hotel._id]) {
+            fetchRooms(hotel._id);
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            // Save the current scroll position before toggling
+            scrollPositionRef.current = window.scrollY;
+            toggleHotelDetails(hotel._id);
+            if (!expandedHotels[hotel._id]) {
+              fetchRooms(hotel._id);
+            }
+          }
+        }}
+        className="text-white px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-md hover:shadow-blue-900/50 text-sm font-medium"
+        aria-expanded={!!expandedHotels[hotel._id]}
+        aria-controls={`hotel-details-${hotel._id}`}
+      >
+        {expandedHotels[hotel._id] ? "Hide Rooms" : "View Rooms"}
+      </button>
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="col-span-2">
+        <p className="text-gray-200 flex items-start mb-2">
+          <FaMapMarkerAlt className="mt-1 mr-2 text-blue-400 flex-shrink-0" />
+          <span>
+            <strong className="text-blue-200">Address:</strong> {hotel.address || "N/A"}
+          </span>
+        </p>
+        <div className="text-gray-200 mb-2">
+          <span className="flex items-center mb-1">
+            <strong className="text-blue-200 mr-2">Rating:</strong>
+            {renderStars(hotel.rating)}
+          </span>
+        </div>
+        <p className="text-gray-200 flex items-center">
+          <strong className="text-blue-200 mr-2">Price Range:</strong>
+          <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent font-semibold">
+            ₹{hotel.priceRange?.min || "N/A"} - ₹{hotel.priceRange?.max || "N/A"}
+          </span>
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {hotel.amenities &&
+            hotel.amenities.map((amenity, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-900/40 text-blue-200"
+              >
+                {amenity === "Pool" && <FaSwimmingPool className="mr-1" />}
+                {amenity === "Parking" && <FaParking className="mr-1" />}
+                {amenity === "Restaurant" && <FaCoffee className="mr-1" />}
+                {amenity}
+              </span>
+            ))}
+        </div>
+      </div>
+      <div className="text-right">
+        <p className="text-gray-200 mb-2">
+          <FaHotel className="inline mr-2 text-blue-400" />
+          <strong className="text-blue-200">Total Rooms:</strong>{" "}
+          {hotel.totalRooms ?? "N/A"}
+        </p>
+        <p className="text-gray-200">
+          <strong className="text-blue-200">Contact:</strong>{" "}
+          {(hotel.contact?.phone || hotel.contact?.email) ? (
+            <span className="text-blue-300">
+              {[hotel.contact?.phone, hotel.contact?.email]
+                .filter(Boolean)
+                .join(" | ")}
+            </span>
+          ) : (
+            "N/A"
+          )}
+        </p>
+      </div>
+    </div>
+  </div>
+  {expandedHotels[hotel._id] && (
+    <div
+      id={`hotel-details-${hotel._id}`}
+      className="bg-slate-900/80 p-6 border-t border-slate-700/50 transition-all duration-300 ease-in-out animate-fadeIn"
+    >
+      <h4 className="text-xl font-semibold text-blue-300 mb-6 flex items-center">
+        <FaBed className="mr-2" /> Available Rooms
+      </h4>
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+        </div>
+      ) : rooms.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {rooms.map((room) => (
+            <div
+              key={room._id}
+              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-5 shadow-lg transition-all duration-200 hover:shadow-blue-900/20 hover:shadow-lg border border-slate-700/30"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h5 className="text-lg font-medium text-blue-200">
+                  Room {room.roomNumber}{" "}
+                  <span className="text-blue-400">
+                    ({room.type || "Standard"})
+                  </span>
+                </h5>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    room.isAvailable
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                      : "bg-gradient-to-r from-red-500 to-red-600 text-white"
+                  }`}
                 >
-                  <div
-                    className="p-6 cursor-pointer transition-colors duration-200 hover:bg-slate-700/20"
-                    onClick={() => {
-                      toggleHotelDetails(hotel._id);
-                      if (!expandedHotels[hotel._id]) {
-                        fetchRooms(hotel._id);
-                      }
-                    }}
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        toggleHotelDetails(hotel._id);
-                        if (!expandedHotels[hotel._id]) {
-                          fetchRooms(hotel._id);
-                        }
-                      }
-                    }}
-                    aria-expanded={!!expandedHotels[hotel._id]}
-                    aria-controls={`hotel-details-${hotel._id}`}
-                  >
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-400">
-                        {hotel.name}
-                      </h3>
-                      <button className="text-white px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full hover:from-blue-500 hover:to-purple-500 transition-all duration-200 shadow-md hover:shadow-blue-900/50 text-sm font-medium">
-                        {expandedHotels[hotel._id] ? "Hide Rooms" : "View Rooms"}
+                  {room.isAvailable ? "Available" : "Booked"}
+                </span>
+              </div>
+              {room.images && room.images.length > 0 ? (
+                <div className="relative mb-4 rounded-lg overflow-hidden shadow-inner shadow-slate-900">
+                  <img
+                    src={room.images[currentImageIndex[room._id] || 0]}
+                    alt={`Room ${room.roomNumber} image ${
+                      (currentImageIndex[room._id] || 0) + 1
+                    }`}
+                    className="w-full h-52 object-cover transition-all duration-700 hover:scale-110"
+                  />
+                  {room.images.length > 1 && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePrevImage(room._id, room.images.length);
+                        }}
+                        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-slate-900/70 text-white p-2 rounded-full hover:bg-slate-800 transition-colors duration-200"
+                        aria-label="Previous image"
+                      >
+                        <FaArrowLeft />
                       </button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                      <div className="col-span-2">
-                        <p className="text-gray-200 flex items-start mb-2">
-                          <FaMapMarkerAlt className="mt-1 mr-2 text-blue-400 flex-shrink-0" />
-                          <span>
-                            <strong className="text-blue-200">Address:</strong> {hotel.address || "N/A"}
-                          </span>
-                        </p>
-                        <div className="text-gray-200 mb-2">
-                          <span className="flex items-center mb-1">
-                            <strong className="text-blue-200 mr-2">Rating:</strong>
-                            {renderStars(hotel.rating)}
-                          </span>
-                        </div>
-                        <p className="text-gray-200 flex items-center">
-                          <strong className="text-blue-200 mr-2">Price Range:</strong>
-                          <span className="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent font-semibold">
-                            ₹{hotel.priceRange?.min || "N/A"} - ₹{hotel.priceRange?.max || "N/A"}
-                          </span>
-                        </p>
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {hotel.amenities && hotel.amenities.map((amenity, index) => (
-                            <span 
-                              key={index}
-                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-900/40 text-blue-200"
-                            >
-                              {amenity === "Pool" && <FaSwimmingPool className="mr-1" />}
-                              {amenity === "Parking" && <FaParking className="mr-1" />}
-                              {amenity === "Restaurant" && <FaCoffee className="mr-1" />}
-                              {amenity}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-gray-200 mb-2">
-                          <FaHotel className="inline mr-2 text-blue-400" />
-                          <strong className="text-blue-200">Total Rooms:</strong> {hotel.totalRooms ?? "N/A"}
-                        </p>
-                        <p className="text-gray-200">
-                          <strong className="text-blue-200">Contact:</strong>{" "}
-                          {(hotel.contact?.phone || hotel.contact?.email) ? (
-                            <span className="text-blue-300">
-                              {[hotel.contact?.phone, hotel.contact?.email]
-                                .filter(Boolean)
-                                .join(" | ")}
-                            </span>
-                          ) : (
-                            "N/A"
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  {expandedHotels[hotel._id] && (
-                    <div
-                      id={`hotel-details-${hotel._id}`}
-                      className="bg-slate-900/80 p-6 border-t border-slate-700/50 transition-all duration-300 ease-in-out animate-fadeIn"
-                    >
-                      <h4 className="text-xl font-semibold text-blue-300 mb-6 flex items-center">
-                        <FaBed className="mr-2" /> Available Rooms
-                      </h4>
-                      {loading ? (
-                        <div className="flex justify-center py-8">
-                          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
-                        </div>
-                      ) : rooms.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {rooms.map((room) => (
-                            <div
-                              key={room._id}
-                              className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-5 shadow-lg transition-all duration-200 hover:shadow-blue-900/20 hover:shadow-lg border border-slate-700/30"
-                            >
-                              <div className="flex justify-between items-center mb-4">
-                                <h5 className="text-lg font-medium text-blue-200">
-                                  Room {room.roomNumber} <span className="text-blue-400">({room.type || "Standard"})</span>
-                                </h5>
-                                <span
-                                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                    room.isAvailable
-                                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white"
-                                      : "bg-gradient-to-r from-red-500 to-red-600 text-white"
-                                  }`}
-                                >
-                                  {room.isAvailable ? "Available" : "Booked"}
-                                </span>
-                              </div>
-                              {room.images && room.images.length > 0 ? (
-                                <div className="relative mb-4 rounded-lg overflow-hidden shadow-inner shadow-slate-900">
-                                  <img
-                                    src={room.images[currentImageIndex[room._id] || 0]}
-                                    alt={`Room ${room.roomNumber} image ${
-                                      (currentImageIndex[room._id] || 0) + 1
-                                    }`}
-                                    className="w-full h-52 object-cover transition-all duration-700 hover:scale-110"
-                                  />
-                                  {room.images.length > 1 && (
-                                    <>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handlePrevImage(room._id, room.images.length);
-                                        }}
-                                        className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-slate-900/70 text-white p-2 rounded-full hover:bg-slate-800 transition-colors duration-200"
-                                        aria-label="Previous image"
-                                      >
-                                        <FaArrowLeft />
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleNextImage(room._id, room.images.length);
-                                        }}
-                                        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-slate-900/70 text-white p-2 rounded-full hover:bg-slate-800 transition-colors duration-200"
-                                        aria-label="Next image"
-                                      >
-                                        <FaArrowRight />
-                                      </button>
-                                    </>
-                                  )}
-                                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900/90 to-transparent p-3">
-                                    <p className="text-white font-medium flex items-center">
-                                      <FaBed className="mr-2 text-blue-400" />
-                                      <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent font-bold">
-                                        ₹{room.price || "N/A"}
-                                      </span>
-                                      <span className="text-xs ml-2 text-gray-300">per night</span>
-                                    </p>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="w-full h-52 bg-slate-800 rounded-lg flex items-center justify-center text-slate-600 shadow-inner shadow-slate-900 mb-4">
-                                  No Images Available
-                                </div>
-                              )}
-                              <div className="grid grid-cols-1 gap-3 text-gray-200">
-                                <p className="flex items-center">
-                                  <strong className="text-blue-200 min-w-24">Capacity:</strong> 
-                                  <span className="flex items-center">
-                                    {Array(room.capacity || 1).fill().map((_, i) => (
-                                      <FaUser key={i} className="text-gray-400 mr-1" />
-                                    ))}
-                                    {room.capacity || "N/A"} guests
-                                  </span>
-                                </p>
-                                <div>
-                                  <strong className="text-blue-200 block mb-2">Amenities:</strong>
-                                  <div className="flex flex-wrap gap-2">
-                                    {room.amenities?.length > 0 ? (
-                                      room.amenities.map((amenity, index) => {
-                                        const iconMap = {
-                                          WiFi: <FaWifi className="text-blue-400" />,
-                                          TV: <FaTv className="text-blue-400" />,
-                                          "Air Conditioning": <FaSnowflake className="text-blue-400" />,
-                                          "Mini Bar": <FaGlassMartini className="text-blue-400" />,
-                                          "Room Service": <FaConciergeBell className="text-blue-400" />,
-                                          Balcony: <FaDoorOpen className="text-blue-400" />,
-                                        };
-                                        return (
-                                          <span
-                                            key={index}
-                                            className="flex items-center gap-1 bg-slate-800 px-3 py-1 rounded-full text-sm"
-                                          >
-                                            {iconMap[amenity] || null} {amenity}
-                                          </span>
-                                        );
-                                      })
-                                    ) : (
-                                      "N/A"
-                                    )}
-                                  </div>
-                                </div>
-                                <p className="mt-1">
-                                  <strong className="text-blue-200">Description:</strong>{" "}
-                                  <span className="text-gray-300 italic">
-                                    {room.description || "No description available."}
-                                  </span>
-                                </p>
-                              </div>
-                              {room.isAvailable && (
-                                <button className="mt-4 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-900/50 font-medium flex items-center justify-center">
-                                  <FaCalendarAlt className="mr-2" /> Book Now
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="bg-slate-800/50 rounded-xl p-8 text-center border border-slate-700/30">
-                          <FaBed className="text-4xl text-blue-400/50 mx-auto mb-4" />
-                          <p className="text-gray-300 text-lg">
-                            No active rooms available for this hotel.
-                          </p>
-                          <p className="text-blue-300/70 mt-2">Please check back later or try another hotel.</p>
-                        </div>
-                      )}
-                    </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNextImage(room._id, room.images.length);
+                        }}
+                        className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-slate-900/70 text-white p-2 rounded-full hover:bg-slate-800 transition-colors duration-200"
+                        aria-label="Next image"
+                      >
+                        <FaArrowRight />
+                      </button>
+                    </>
                   )}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900/90 to-transparent p-3">
+                    <p className="text-white font-medium flex items-center">
+                      <FaBed className="mr-2 text-blue-400" />
+                      <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent font-bold">
+                        ₹{room.price || "N/A"}
+                      </span>
+                      <span className="text-xs ml-2 text-gray-300">
+                        per night
+                      </span>
+                    </p>
+                  </div>
                 </div>
+              ) : (
+                <div className="w-full h-52 bg-slate-800 rounded-lg flex items-center justify-center text-slate-600 shadow-inner shadow-slate-900 mb-4">
+                  No Images Available
+                </div>
+              )}
+              <div className="grid grid-cols-1 gap-3 text-gray-200">
+                <p className="flex items-center">
+                  <strong className="text-blue-200 min-w-24">Capacity:</strong>
+                  <span className="flex items-center">
+                    {Array(room.capacity || 1)
+                      .fill()
+                      .map((_, i) => (
+                        <FaUser key={i} className="text-gray-400 mr-1" />
+                      ))}
+                    {room.capacity || "N/A"} guests
+                  </span>
+                </p>
+                <div>
+                  <strong className="text-blue-200 block mb-2">
+                    Amenities:
+                  </strong>
+                  <div className="flex flex-wrap gap-2">
+                    {room.amenities?.length > 0 ? (
+                      room.amenities.map((amenity, index) => {
+                        const iconMap = {
+                          WiFi: <FaWifi className="text-blue-400" />,
+                          TV: <FaTv className="text-blue-400" />,
+                          "Air Conditioning": (
+                            <FaSnowflake className="text-blue-400" />
+                          ),
+                          "Mini Bar": <FaGlassMartini className="text-blue-400" />,
+                          "Room Service": (
+                            <FaConciergeBell className="text-blue-400" />
+                          ),
+                          Balcony: <FaDoorOpen className="text-blue-400" />,
+                        };
+                        return (
+                          <span
+                            key={index}
+                            className="flex items-center gap-1 bg-slate-800 px-3 py-1 rounded-full text-sm"
+                          >
+                            {iconMap[amenity] || null} {amenity}
+                          </span>
+                        );
+                      })
+                    ) : (
+                      "N/A"
+                    )}
+                  </div>
+                </div>
+                <p className="mt-1">
+                  <strong className="text-blue-200">Description:</strong>{" "}
+                  <span className="text-gray-300 italic">
+                    {room.description || "No description available."}
+                  </span>
+                </p>
+              </div>
+              {room.isAvailable && (
+                <button className="mt-4 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-900/50 font-medium flex items-center justify-center">
+                  <FaCalendarAlt className="mr-2" /> Book Now
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-slate-800/50 rounded-xl p-8 text-center border border-slate-700/30">
+          <FaBed className="text-4xl text-blue-400/50 mx-auto mb-4" />
+          <p className="text-gray-300 text-lg">
+            No active rooms available for this hotel.
+          </p>
+          <p className="text-blue-300/70 mt-2">
+            Please check back later or try another hotel.
+          </p>
+        </div>
+      )}
+    </div>
+  )}
+</div>
               ))}
             </div>
           ) : selectedCity ? (
