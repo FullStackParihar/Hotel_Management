@@ -11,10 +11,10 @@ const ProtectedRoute = ({ isAuthenticated, children }) => {
 export default ProtectedRoute;
 
  
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { FaMapMarkerAlt, FaCity, FaHotel, FaSignOutAlt, FaSearch, FaSort } from "react-icons/fa";
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import { useNavigate } from "react-router-dom";
+// import { FaMapMarkerAlt, FaCity, FaHotel, FaSignOutAlt, FaSearch, FaSort } from "react-icons/fa";
 
 // const LocationManager = () => {
 //     const [locations, setLocations] = useState([]);

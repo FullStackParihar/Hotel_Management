@@ -4,7 +4,6 @@
  const AdminPage = () => {
    return (
      <div>
-       hello i am admin page
        <LocationManager/>
      </div>
    )

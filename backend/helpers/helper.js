@@ -2,7 +2,7 @@ const cloudinary = require("../config/cloudinary");
 
 const uploadToCloudinary = async (buffer, originalname) => {
   try {
-    // Upload buffer to Cloudinary
+    
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {

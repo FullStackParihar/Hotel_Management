@@ -16,6 +16,8 @@ app.use(express.json());
  
 
 app.use("/user", userRoutes);
+
+
 app.use('/locations', locationRoute);
  
 

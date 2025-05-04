@@ -12,16 +12,33 @@ exports.getAllStates = async (req, res) => {
   }
 };
 
+// exports.addState = async (req, res) => {
+//   try {
+//     const state = new State(req.body);
+//     await state.save();
+//     res.json(state);
+//   } catch (err) {
+//     console.error("POST /api/states/add - Error:", err);
+//     res.status(400).json({ message: err.message || "Failed to add state" });
+//   }
+// };
+
 exports.addState = async (req, res) => {
-  try {
-    const state = new State(req.body);
-    await state.save();
-    res.json(state);
-  } catch (err) {
-    console.error("POST /api/states/add - Error:", err);
-    res.status(400).json({ message: err.message || "Failed to add state" });
-  }
-};
+    try {
+      const existing = await State.findOne({ name: req.body.name });
+      if (existing) {
+        return res.status(400).json({ message: "State already exists" });
+      }
+  
+      const state = new State(req.body);
+      await state.save();
+      res.json(state);
+    } catch (err) {
+      console.error("POST /api/states/add - Error:", err);
+      res.status(400).json({ message: err.message || "Failed to add state" });
+    }
+  };
+  
 
 exports.updateState = async (req, res) => {
   try {
@@ -39,19 +56,18 @@ exports.deleteState = async (req, res) => {
         const state = await State.findById(req.params.id);
         if (!state) return res.status(404).json({ message: "State not found" });
     
-        // Find all cities for this state
+       
         const cities = await City.find({ state: req.params.id });
         const cityIds = cities.map((city) => city._id);
     
-        // Delete all hotels for these cities
+         
         if (cityIds.length > 0) {
           await Hotel.deleteMany({ city: { $in: cityIds } });
         }
-    
-        // Delete all cities for this state
+        p
         await City.deleteMany({ state: req.params.id });
     
-        // Delete the state
+    
         await State.findByIdAndDelete(req.params.id);
     
         res.json({ message: "State and associated cities and hotels deleted" });
