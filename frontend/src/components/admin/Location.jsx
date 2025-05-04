@@ -332,7 +332,7 @@ const LocationManager = () => {
         }
     };
 
-    // Hotel handlers
+    // Hotel handle submit ------------------------------------
     const handleHotelSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -464,7 +464,7 @@ const LocationManager = () => {
         }
     };
 
-    // Room handlers
+    // Room image upload-----------------------------
     const handleImageUpload = async (e) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
@@ -644,7 +644,7 @@ const LocationManager = () => {
         }
     };
 
-    // Dropdown handlers
+    // Dropdown--------------------------
     const handleStateChange = async (e) => {
         const stateId = e.target.value;
         setSelectedState(stateId);
@@ -676,7 +676,7 @@ const LocationManager = () => {
         setHotelForm((prev) => ({ ...prev, cityId }));
         setRooms([]);
         setInactiveRooms([]);
-        await fetchHotels(cityId); // Call the fetchHotels function properly
+        await fetchHotels(cityId); 
     };
 
 
@@ -697,7 +697,7 @@ const LocationManager = () => {
 
     return (
         <div className="min-h-screen bg-gray-900 text-gray-100 flex">
-            {/* Sidebar */}
+            {/* --------------------------------Sidebar -----------------------------*/}
             <div className="w-80 bg-gray-800 p-6 flex-shrink-0">
                 <h1 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center">
                     <button onClick={handleLogout} className="text-gray-300 mb-2 hover:text-white flex items-center">
@@ -749,7 +749,7 @@ const LocationManager = () => {
                     </button>
                 </div>
 
-                {/* States Tab */}
+                {/*-------------------------------------- States Tab--------------------------------- */}
                 {sidebarTab === "states" && (
                     <div>
                         <form onSubmit={handleStateSubmit} className="space-y-4" aria-label="State form">
@@ -863,7 +863,7 @@ const LocationManager = () => {
                     </div>
                 )}
 
-                {/* Cities Tab */}
+                {/* -------------------------------Cities Tab--------------------------------------- */}
                 {sidebarTab === "cities" && (
                     <div>
                         <form onSubmit={handleCitySubmit} className="space-y-4" aria-label="City form">
@@ -985,7 +985,7 @@ const LocationManager = () => {
                     </div>
                 )}
 
-                {/* Hotels Tab */}
+                {/*------------------------------- Hotels Tab ------------------------------- */}
                 {sidebarTab === "hotels" && (
                     <div>
                         <form onSubmit={handleHotelSubmit} className="space-y-4" aria-label="Hotel form">
@@ -1243,7 +1243,7 @@ const LocationManager = () => {
                     </div>
                 )}
 
-                {/* Rooms Tab */}
+                {/* ------------------------------- Rooms Tab -------------------------------*/}
                 {sidebarTab === "rooms" && (
                     <div>
                         <form onSubmit={handleRoomSubmit} className="space-y-4" aria-label="Room form">
@@ -1544,7 +1544,7 @@ const LocationManager = () => {
                 )}
             </div>
 
-            {/* Main Content */}
+            {/* -------------------------------view------------------------------- */}
             <div className="flex-1 p-6">
                 <div className="max-w-4xl mx-auto">
                     <div className="bg-gray-800 rounded-lg p-8 shadow-lg">
