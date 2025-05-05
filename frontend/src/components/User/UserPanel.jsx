@@ -735,7 +735,7 @@ const UserPanel = () => {
 
   const baseURL = "http://localhost:6969";
 
-  // Fetch states ---------------------------
+  // ------------------------------Fetch states ---------------------------
   const fetchStates = async () => {
     try {
       const response = await axios.get(`${baseURL}/api/states`);
@@ -747,7 +747,7 @@ const UserPanel = () => {
     }
   };
 
-  // Fetch cities ----------------------------------
+  // ------------------------------Fetch cities ----------------------------------
   const fetchCities = async (stateId) => {
     if (!stateId) {
       setCities([]);
@@ -766,7 +766,7 @@ const UserPanel = () => {
     }
   };
 
-  // Fetch hotels ----------------------------
+  // ------------------------------Fetch hotels ----------------------------
   const fetchHotels = async (cityId) => {
     if (!cityId) {
       setHotels([]);
@@ -788,7 +788,7 @@ const UserPanel = () => {
     }
   };
 
-  // Fetch rooms -------------------------------
+  // ------------------------------Fetch rooms -------------------------------
   const fetchRooms = async (hotelId) => {
     if (!hotelId) {
       setRooms([]);
@@ -812,7 +812,7 @@ const UserPanel = () => {
     }
   };
 
-  // Toggle hotel------------------------------
+  //------------------------------ Toggle hotel------------------------------
   const toggleHotelDetails = (hotelId) => {
     setExpandedHotels((prev) => ({
       ...prev,
@@ -820,7 +820,7 @@ const UserPanel = () => {
     }));
   };
 
-  // Handle state ----------------------
+  //------------------------------ Handle state ---------------------- 
   const handleStateChange = async (e) => {
     const stateId = e.target.value;
     setSelectedState(stateId);
@@ -831,7 +831,7 @@ const UserPanel = () => {
     await fetchCities(stateId);
   };
 
-  // Handle city -------------------------------
+  // ------------------------------Handle city -------------------------------
   const handleCityChange = async (e) => {
     const cityId = e.target.value;
     setSelectedCity(cityId);
@@ -888,7 +888,7 @@ const filteredHotels = hotels
     }
     return 0;
   });
-  // Logout handle-----------------------------------
+  // ------------------------------Logout handle-----------------------------------
   const handleLogout = async () => {
     setLoading(true);
     setError("");
@@ -939,7 +939,7 @@ useEffect(() => {
       <header className="bg-slate-800/90 backdrop-blur-md shadow-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 flex items-center">
-            <FaHotel className="mr-2 text-blue-400" /> LuxStay
+            <FaHotel className="mr-2 text-blue-400" /> My Hotel
           </h1>
           <div className="flex items-center space-x-4">
             {/* <button className="flex items-center text-gray-300 hover:text-white bg-slate-700/70 hover:bg-slate-700 px-4 py-2 rounded-lg transition-all duration-200 shadow-md">
