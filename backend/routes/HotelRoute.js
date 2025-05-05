@@ -16,4 +16,7 @@ router.patch('/hotels/:id/softdelete', HotelController.softDeleteHotel);
  
 router.patch('/hotels/:id/activate', HotelController.activateHotel);
 
+
+router.get("/hotels", HotelController.getAllHotels); 
+
 module.exports = router;

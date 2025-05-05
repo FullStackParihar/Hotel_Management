@@ -9,6 +9,7 @@ const CityRoute = require('./routes/CityRoute')
 const hotelRoutes = require('./routes/HotelRoute')
 const RoomRoutes = require("./routes/RoomRoute");
 const userRoutes = require("./routes/userRoutes");
+const bookingRoutes = require('./routes/BookingRoute')
 const fileUpload = require("express-fileupload");
 
 const app = express();
@@ -32,6 +33,8 @@ app.use("/api", CityRoute);
 app.use('/api', hotelRoutes);
 
 app.use("/api", RoomRoutes);
+
+app.use("/api/bookings", bookingRoutes);
 
 app.listen(6969, () => {
   console.log("Server running on port 6969");

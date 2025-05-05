@@ -166,3 +166,134 @@ const Login = () => {
 };
 
 export default Login;
+
+
+// import React, { useState } from "react";
+//    import axios from "axios";
+//    import { useNavigate } from "react-router-dom";
+//    import { FaUser, FaLock, FaSignInAlt } from "react-icons/fa";
+
+//    const Login = () => {
+//      const navigate = useNavigate();
+//      const [formData, setFormData] = useState({
+//        email: "",
+//        password: "",
+//        role: "user", // Default to user role
+//      });
+//      const [error, setError] = useState("");
+//      const [loading, setLoading] = useState(false);
+
+//      const baseURL = "http://localhost:6969";
+
+//      const handleChange = (e) => {
+//        setFormData({ ...formData, [e.target.name]: e.target.value });
+//      };
+
+//      const handleSubmit = async (e) => {
+//        e.preventDefault();
+//        setLoading(true);
+//        setError("");
+//        try {
+//          const response = await axios.post(`${baseURL}/api/users/login`, formData);
+//          const { token } = response.data;
+
+//          // Store token in localStorage
+//          localStorage.setItem("token", token);
+
+//          // Redirect based on role
+//          if (formData.role === "admin") {
+//            navigate("/admin");
+//          } else {
+//            navigate("/user");
+//          }
+//        } catch (err) {
+//          console.error("Login Error:", err);
+//          setError(err.response?.data?.message || "Login failed. Please try again.");
+//        } finally {
+//          setLoading(false);
+//        }
+//      };
+
+//      return (
+//        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-blue-900">
+//          <div className="bg-slate-800 p-8 rounded-lg shadow-xl w-full max-w-md">
+//            <h2 className="text-3xl font-bold text-center text-blue-300 mb-6 flex items-center justify-center">
+//              <FaSignInAlt className="mr-2" /> Login
+//            </h2>
+//            {error && (
+//              <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-3 mb-6 text-center text-red-400">
+//                {error}
+//              </div>
+//            )}
+//            <form onSubmit={handleSubmit} className="space-y-6">
+//              <div>
+//                <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
+//                  Email
+//                </label>
+//                <div className="relative">
+//                  <input
+//                    id="email"
+//                    name="email"
+//                    type="email"
+//                    value={formData.email}
+//                    onChange={handleChange}
+//                    required
+//                    className="w-full px-4 py-3 bg-slate-700/80 border border-slate-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200"
+//                    placeholder="Enter your email"
+//                  />
+//                  <FaUser className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
+//                </div>
+//              </div>
+//              <div>
+//                <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-2">
+//                  Password
+//                </label>
+//                <div className="relative">
+//                  <input
+//                    id="password"
+//                    name="password"
+//                    type="password"
+//                    value={formData.password}
+//                    onChange={handleChange}
+//                    required
+//                    className="w-full px-4 py-3 bg-slate-700/80 border border-slate-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200"
+//                    placeholder="Enter your password"
+//                  />
+//                  <FaLock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
+//                </div>
+//              </div>
+//              <div>
+//                <label htmlFor="role" className="block text-sm font-medium text-gray-200 mb-2">
+//                  Role
+//                </label>
+//                <select
+//                  id="role"
+//                  name="role"
+//                  value={formData.role}
+//                  onChange={handleChange}
+//                  className="w-full px-4 py-3 bg-slate-700/80 border border-slate-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-200"
+//                >
+//                  <option value="user">User</option>
+//                  <option value="admin">Admin</option>
+//                </select>
+//              </div>
+//              <button
+//                type="submit"
+//                disabled={loading}
+//                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-900/50 font-medium flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+//              >
+//                {loading ? (
+//                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white mx-auto"></div>
+//                ) : (
+//                  <>
+//                    <FaSignInAlt className="mr-2" /> Login
+//                  </>
+//                )}
+//              </button>
+//            </form>
+//          </div>
+//        </div>
+//      );
+//    };
+
+//    export default Login;

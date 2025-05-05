@@ -7,10 +7,10 @@ const roomSchema = new mongoose.Schema({
   price: { type: Number, min: 0 },
   isAvailable: { type: Boolean, default: true },
   isActive: { type: Boolean, default: true },
-  images: [{ type: String }], // Cloudinary image URLs
-  amenities: [{ type: String }], // E.g., ["WiFi", "TV"]
+  images: [{ type: String }],  
+  amenities: [{ type: String }],  
   description: { type: String },
-  capacity: { type: Number, min: 1 }, // Max guests
+  capacity: { type: Number, min: 1 },  
 });
 
 module.exports = mongoose.model("Room", roomSchema);

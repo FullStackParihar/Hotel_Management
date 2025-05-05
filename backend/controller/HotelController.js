@@ -204,4 +204,18 @@ exports.activateHotel = async (req, res) => {
   }
 };
 
+exports.getAllHotels = async (req, res) => {
+  try {
+    const hotels = await Hotel.find({ isActive: true }).populate({
+      path: "city",
+      populate: { path: "state" },
+    });
+
+    res.status(200).json(hotels);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching all hotels", error });
+  }
+};
+
+
 module.exports = exports;
