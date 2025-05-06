@@ -43,7 +43,7 @@ const UserPanel = () => {
   const baseURL = "http://localhost:6969";
   const scrollPositionRef = useRef(0);
 
-  // Fetch logged-in user's ID from token
+  // Fetch user id--------------------------
   const getUserId = () => {
     const token = localStorage.getItem("token");
     if (token) {
