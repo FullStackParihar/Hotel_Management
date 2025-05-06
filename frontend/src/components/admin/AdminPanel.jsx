@@ -15,7 +15,7 @@ const AdminPanel = () => {
 
   const baseURL = "http://localhost:6969";
 
-  // Fetch all bookings
+  //----------------------------------- Fetch all booking-----------------------------------
   const fetchBookings = async () => {
     setLoading(true);
     setError("");
@@ -32,7 +32,7 @@ const AdminPanel = () => {
     }
   };
 
-  // Handle booking status update
+  //----------------------------------- Handle booking status -----------------------------------
   const handleUpdateStatus = async (bookingId, status) => {
     setLoading(true);
     setError("");
@@ -45,7 +45,7 @@ const AdminPanel = () => {
         }
       );
       alert(response.data.message);
-      // Refresh bookings
+     
       fetchBookings();
     } catch (err) {
       console.error("handleUpdateStatus - Error:", err);
@@ -81,21 +81,7 @@ const AdminPanel = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-blue-900 text-gray-100 font-sans">
-      <header className="bg-slate-800/90 backdrop-blur-md shadow-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 flex items-center">
-            <FaHotel className="mr-2 text-blue-400" /> Admin Panel
-          </h1>
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={handleLogout}
-              className="flex items-center text-gray-300 hover:text-white bg-red-600/90 hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200 shadow-md"
-            >
-              <FaSignOutAlt className="mr-2" /> Logout
-            </button>
-          </div>
-        </div>
-      </header>
+ 
 
       <main className="max-w-7xl mx-auto px-4 py-8 pb-16">
         <section className="bg-gradient-to-r from-slate-800/90 to-blue-900/90 rounded-2xl p-8 shadow-xl mb-10 backdrop-blur-md">
