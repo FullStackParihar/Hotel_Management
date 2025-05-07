@@ -35,7 +35,7 @@ const bookingSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-   
+
   },
   status: {
     type: String,
@@ -46,6 +46,7 @@ const bookingSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  checkedIn: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);

@@ -4064,7 +4064,7 @@ const ALocation = () => {
                 </div>
             </div>
 
-           
+
             <div className="flex-1 p-6 overflow-y-auto">
                 {/* -----------------------------------Management ----------------------------------- */}
                 <div className="bg-gradient-to-r from-slate-800/90 to-blue-900/90 rounded-2xl shadow-xl p-6 text-gray-100">
@@ -4847,10 +4847,10 @@ const ALocation = () => {
                                                 </h3>
                                                 <span
                                                     className={`px-3 py-1 rounded-full text-sm font-semibold ${booking.status === "approved"
-                                                            ? "bg-green-600/80 text-white"
-                                                            : booking.status === "rejected"
-                                                                ? "bg-red-600/80 text-white"
-                                                                : "bg-yellow-600/80 text-white"
+                                                        ? "bg-green-600/80 text-white"
+                                                        : booking.status === "rejected"
+                                                            ? "bg-red-600/80 text-white"
+                                                            : "bg-yellow-600/80 text-white"
                                                         }`}
                                                 >
                                                     {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
@@ -4877,6 +4877,30 @@ const ALocation = () => {
                                                     <p className="flex items-center">
                                                         <FaChild className="mr-2 text-blue-400" />
                                                         <strong>Children Included:</strong> {booking.hasChild ? "Yes" : "No"}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="flex items-center mb-2">
+                                                        <FaCalendarAlt className="mr-2 text-blue-400" />
+                                                        <strong>Check-In:</strong> {new Date(booking.checkIn).toLocaleDateString()}
+                                                    </p>
+                                                    <p className="flex items-center mb-2">
+                                                        <FaCalendarAlt className="mr-2 text-blue-400" />
+                                                        <strong>Check-Out:</strong> {new Date(booking.checkOut).toLocaleDateString()}
+                                                    </p>
+                                                    <p className="flex items-center mb-2">
+                                                        <FaMapMarkerAlt className="mr-2 text-blue-400" />
+                                                        <strong>Price:</strong> ₹{booking.roomId?.price || "N/A"} per night
+                                                    </p>
+                                                    <p className="flex items-center">
+                                                        <FaCheckCircle className="mr-2 text-blue-400" />
+                                                        <strong>Checked In:</strong>{" "}
+                                                        <span
+                                                            className={`${booking.checkedIn ? "text-green-400" : "text-gray-400"
+                                                                }`}
+                                                        >
+                                                            {booking.checkedIn ? "Yes" : "No"}
+                                                        </span>
                                                     </p>
                                                 </div>
                                                 <div>
