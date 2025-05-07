@@ -1381,7 +1381,7 @@ const UserPanel = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       alert(response.data.message);
-      fetchUserBookings(); // Refresh the bookings list
+      fetchUserBookings();  
     } catch (err) {
       console.error("handleCheckIn - Error:", err);
       setError(err.response?.data?.message || "Failed to check in.");
