@@ -46,7 +46,7 @@ const bookingSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  checkedIn: { type: Boolean, default: false },
+  checkedIn: { type: Boolean, default: false }, 
 });
 
 module.exports = mongoose.model("Booking", bookingSchema);
