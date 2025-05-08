@@ -1,6 +1,5 @@
- 
-import React, { useState, useEffect } from "react";
-import { createBrowserRouter, RouterProvider, useNavigate } from "react-router-dom";
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SignUp from "./components/authentication/SignUp";
 import Login from "./components/authentication/Login";
 import ForgetPassword from "./components/authentication/ForgetPassword";
@@ -12,30 +11,10 @@ import Otp from "./components/authentication/Otp";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    localStorage.getItem("isLogin") === "true"
-  );
-
-  useEffect(() => {
-    // Update authentication state on mount and when localStorage changes
-    const handleStorageChange = () => {
-      setIsAuthenticated(localStorage.getItem("isLogin") === "true");
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("isLogin");
-    localStorage.removeItem("token"); // Remove token if used
-    setIsAuthenticated(false);
-    // Redirect to login (handled by RouterProvider)
-  };
-
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Login setIsAuthenticated={setIsAuthenticated} />,
+      element: <Login />,
     },
     {
       path: "/sign-up",
@@ -56,24 +35,24 @@ const App = () => {
     {
       path: "/user",
       element: (
-        <ProtectedRoute isAuthenticated={isAuthenticated}>
-          <User handleLogout={handleLogout} />
+        <ProtectedRoute requiredRole="user">
+          <User />
         </ProtectedRoute>
       ),
     },
     {
       path: "/users",
       element: (
-        <ProtectedRoute isAuthenticated={isAuthenticated}>
-          <UserPage handleLogout={handleLogout} />
+        <ProtectedRoute requiredRole="admin">
+          <UserPage />
         </ProtectedRoute>
       ),
     },
     {
       path: "/admin",
       element: (
-        <ProtectedRoute isAuthenticated={isAuthenticated}>
-          <AdminPage handleLogout={handleLogout} />
+        <ProtectedRoute requiredRole="admin">
+          <AdminPage />
         </ProtectedRoute>
       ),
     },
@@ -83,15 +62,3 @@ const App = () => {
 };
 
 export default App;
-// import React from 'react'
-// import LocationManager from './components/admin/Location'
-
-// const App = () => {
-//   return (
-//     <div>
-//       <LocationManager/>
-//     </div>
-//   )
-// }
-
-// export default App

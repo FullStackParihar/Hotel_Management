@@ -1,15 +1,57 @@
-import React from "react";
 import { Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const ProtectedRoute = ({ isAuthenticated, children }) => {
-  if (!isAuthenticated) {
-    return <Navigate to="/admin" replace />;
+const ProtectedRoute = ({ children, requiredRole }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setIsAuthenticated(false);
+      return;
+    }
+
+    // Call the getMe route to validate the token and fetch user details
+    axios
+      .get("http://localhost:6969/user/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const role = res.data.user.role;
+        setUserRole(role);
+        setIsAuthenticated(true);
+        // Update localStorage with the correct role
+        localStorage.setItem("userType", role);
+        console.log(`ProtectedRoute - Validated role: ${role}, Required: ${requiredRole}`);
+      })
+      .catch((error) => {
+        console.error("ProtectedRoute - getMe error:", error);
+        // Clear localStorage if token is invalid
+        localStorage.removeItem("token");
+        localStorage.removeItem("isLogin");
+        localStorage.removeItem("userType");
+        setIsAuthenticated(false);
+      });
+  }, []);
+
+  if (isAuthenticated === null) {
+    return <div>Loading...</div>; // Show a loading state while validating
   }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />; // Redirect to login if not authenticated
+  }
+
+  if (requiredRole && userRole !== requiredRole) {
+    return <Navigate to="/" replace />; // Redirect to login if role doesn't match
+  }
+
   return children;
 };
 
 export default ProtectedRoute;
-
  
 // import React, { useEffect, useState } from "react";
 // import axios from "axios";
