@@ -1,10 +1,11 @@
  import React from 'react'
  import AdminPanel from './AdminPanel'
  import ALocation from './Location'
+ import ADLocation from './AdminApp' 
  const AdminPage = () => {
    return (
      <div>
-     <ALocation/>
+     <ADLocation/>
        {/* <AdminPanel/> */}
      </div>
    )

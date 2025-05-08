@@ -10,6 +10,7 @@ const hotelRoutes = require('./routes/HotelRoute')
 const RoomRoutes = require("./routes/RoomRoute");
 const userRoutes = require("./routes/userRoutes");
 const bookingRoutes = require('./routes/BookingRoute')
+const couponRoutes = require('./routes/CouponRoute');
 const fileUpload = require("express-fileupload");
 
 const app = express();
@@ -23,6 +24,7 @@ mongoose.connect("mongodb://localhost:27017/location-manager", {
   useUnifiedTopology: true,
 });
 
+app.use('/api/coupons', couponRoutes);
 
 app.use("/user", userRoutes);
 
