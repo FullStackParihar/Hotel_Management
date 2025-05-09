@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import FormInput from "./FormInput";
+import { FaBan, FaCheckCircle, FaEdit, FaTrash } from "react-icons/fa";
 
 const HotelManagement = ({
     hotels,
@@ -85,6 +86,8 @@ const HotelManagement = ({
             setEditHotelId(null);
             setHotelTab("active");
             await fetchHotels(cityId);
+            console.log("Hotel saved successfully");
+            alert("Hotel saved successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to save hotel.");
         } finally {
@@ -124,6 +127,9 @@ const HotelManagement = ({
         try {
             await axios.delete(`${baseURL}/api/hotels/${id}`);
             await fetchHotels(hotelForm.cityId || selectedCity);
+            setHotelTab("active");
+            console.log("Hotel deleted successfully");
+            alert("Hotel deleted successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to delete hotel.");
         } finally {
@@ -138,6 +144,8 @@ const HotelManagement = ({
             await axios.patch(`${baseURL}/api/hotels/${id}/softdelete`);
             await fetchHotels(hotelForm.cityId || selectedCity);
             setHotelTab("inactive");
+            console.log("Hotel deactivated successfully");
+            alert("Hotel deactivated successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to soft-delete hotel.");
         } finally {
@@ -152,6 +160,8 @@ const HotelManagement = ({
             await axios.patch(`${baseURL}/api/hotels/${id}/activate`);
             await fetchHotels(hotelForm.cityId || selectedCity);
             setHotelTab("active");
+            console.log("Hotel activated successfully");
+            alert("Hotel activated successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to activate hotel.");
         } finally {
@@ -317,18 +327,18 @@ const HotelManagement = ({
                             {hotelTab === "active" ? (
                                 <>
                                     <button onClick={() => handleHotelEdit(hotel)} className="text-yellow-400 hover:text-yellow-500">
-                                        Edit
+                                      <FaEdit size={28} />
                                     </button>
                                     <button onClick={() => handleHotelDelete(hotel._id)} className="text-red-400 hover:text-red-500">
-                                        Delete
+                                        <FaTrash size={28} />
                                     </button>
                                     <button onClick={() => handleHotelSoftDelete(hotel._id)} className="text-gray-400 hover:text-gray-500">
-                                        Deactivate
+                                          <FaBan size={28} />
                                     </button>
                                 </>
                             ) : (
                                 <button onClick={() => handleHotelActivate(hotel._id)} className="text-green-400 hover:text-green-500">
-                                    Activate
+                                    <FaCheckCircle size={28} />
                                 </button>
                             )}
                         </div>

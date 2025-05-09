@@ -241,6 +241,43 @@ const bookingController = {
       res.status(500).json({ message: "Server error" });
     }
   },
+
+  cancelBooking : async (req, res) => {
+    try {
+        const bookingId = req.params.bookingId;
+    
+        // Find the booking
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+          return res.status(404).json({ message: 'Booking not found' });
+        }
+    
+        // Check if the booking is already cancelled
+        if (booking.status === 'cancelled') {
+          return res.status(400).json({ message: 'Booking is already cancelled' });
+        }
+    
+        // Check if the booking is already checked in
+        if (booking.checkedIn) {
+          return res.status(400).json({ message: 'Cannot cancel a checked-in booking' });
+        }
+    
+        // Update the booking status to cancelled
+        booking.status = 'cancelled';
+        await booking.save();
+    
+        // Optionally, update the room availability
+        await Room.findByIdAndUpdate(booking.roomId, { isAvailable: true });
+    
+        res.status(200).json({ message: 'Booking cancelled successfully' });
+      } catch (err) {
+        console.error('Cancel Booking Error:', err);
+        res.status(500).json({ message: 'Server error', error: err.message });
+      }}
 };
+
+
+
+
 
 module.exports = bookingController;

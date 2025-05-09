@@ -7,5 +7,6 @@ router.get("/", bookingController.getAllBookings);
 router.patch("/:bookingId/status", bookingController.updateBookingStatus);
 router.get("/my-bookings", bookingController.getUserBookings);
 router.post("/:bookingId/checkin", bookingController.checkInBooking);
+router.post("/:bookingId/cancel",  bookingController.cancelBooking);
 
 module.exports = router;

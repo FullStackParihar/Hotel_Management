@@ -12,16 +12,7 @@ exports.getAllStates = async (req, res) => {
   }
 };
 
-// exports.addState = async (req, res) => {
-//   try {
-//     const state = new State(req.body);
-//     await state.save();
-//     res.json(state);
-//   } catch (err) {
-//     console.error("POST /api/states/add - Error:", err);
-//     res.status(400).json({ message: err.message || "Failed to add state" });
-//   }
-// };
+
 
 exports.addState = async (req, res) => {
     try {
@@ -64,7 +55,7 @@ exports.deleteState = async (req, res) => {
         if (cityIds.length > 0) {
           await Hotel.deleteMany({ city: { $in: cityIds } });
         }
-        p
+        
         await City.deleteMany({ state: req.params.id });
     
     

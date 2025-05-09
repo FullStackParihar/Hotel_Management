@@ -12,8 +12,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
       setIsAuthenticated(false);
       return;
     }
-
-    // Call the getMe route to validate the token and fetch user details
+ 
     axios
       .get("http://localhost:6969/user/me", {
         headers: { Authorization: `Bearer ${token}` },
@@ -22,13 +21,13 @@ const ProtectedRoute = ({ children, requiredRole }) => {
         const role = res.data.user.role;
         setUserRole(role);
         setIsAuthenticated(true);
-        // Update localStorage with the correct role
+   
         localStorage.setItem("userType", role);
         console.log(`ProtectedRoute - Validated role: ${role}, Required: ${requiredRole}`);
       })
       .catch((error) => {
         console.error("ProtectedRoute - getMe error:", error);
-        // Clear localStorage if token is invalid
+         
         localStorage.removeItem("token");
         localStorage.removeItem("isLogin");
         localStorage.removeItem("userType");
@@ -37,15 +36,15 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }, []);
 
   if (isAuthenticated === null) {
-    return <div>Loading...</div>; // Show a loading state while validating
+    return <div>Loading...</div>;  
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/" replace />; // Redirect to login if not authenticated
+    return <Navigate to="/" replace />; 
   }
 
   if (requiredRole && userRole !== requiredRole) {
-    return <Navigate to="/" replace />; // Redirect to login if role doesn't match
+    return <Navigate to="/" replace />;  
   }
 
   return children;

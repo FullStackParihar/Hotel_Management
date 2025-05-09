@@ -9,6 +9,8 @@ import UserPage from "./components/admin/UserPage";
 import AdminPage from "./components/admin/AdminPage";
 import Otp from "./components/authentication/Otp";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
+import Profile from "./components/User/components/Profile";
+import ResetPasswordd from "./components/User/components/ResetPasswordd";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -48,11 +50,28 @@ const App = () => {
         </ProtectedRoute>
       ),
     },
+
     {
       path: "/admin",
       element: (
         <ProtectedRoute requiredRole="admin">
           <AdminPage />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/profile",
+      element: (
+        <ProtectedRoute requiredRole="user">
+          <Profile />
+        </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/reset-password",
+      element: (
+        <ProtectedRoute requiredRole="user">
+          <ResetPasswordd />
         </ProtectedRoute>
       ),
     },

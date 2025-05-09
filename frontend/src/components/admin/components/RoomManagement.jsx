@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import FormInput from "./FormInput";
+import { FaBan, FaCheckCircle, FaEdit, FaTrash } from "react-icons/fa";
 
 const RoomManagement = ({
     rooms,
@@ -428,18 +429,18 @@ const RoomManagement = ({
                             {roomTab === "active" ? (
                                 <>
                                     <button onClick={() => handleRoomEdit(room)} className="text-yellow-400 hover:text-yellow-500">
-                                        Edit
+                                        <FaEdit size={28} />
                                     </button>
                                     <button onClick={() => handleRoomDelete(room._id)} className="text-red-400 hover:text-red-500">
-                                        Delete
+                                        <FaTrash size={28} />
                                     </button>
                                     <button onClick={() => handleRoomSoftDelete(room._id)} className="text-gray-400 hover:text-gray-500">
-                                        Deactivate
+                                        <FaBan size={28} />
                                     </button>
                                 </>
                             ) : (
                                 <button onClick={() => handleRoomActivate(room._id)} className="text-green-400 hover:text-green-500">
-                                    Activate
+                                    <FaCheckCircle size={28} />
                                 </button>
                             )}
                         </div>

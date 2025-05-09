@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import FormInput from "./FormInput";
+import { FaBan, FaCheckCircle, FaEdit, FaTrash } from "react-icons/fa";
 
 const CityManagement = ({ cities, inactiveCities, states, fetchCities, selectedState, loading, setLoading, setError, baseURL }) => {
     const [cityForm, setCityForm] = useState({ name: "", stateId: "" });
@@ -31,6 +32,8 @@ const CityManagement = ({ cities, inactiveCities, states, fetchCities, selectedS
             setEditCityId(null);
             setCityTab("active");
             await fetchCities(stateId);
+            console.log("City saved successfully");
+            alert("City saved successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to save city.");
         } finally {
@@ -53,6 +56,9 @@ const CityManagement = ({ cities, inactiveCities, states, fetchCities, selectedS
         try {
             await axios.delete(`${baseURL}/api/cities/${id}`);
             await fetchCities(selectedState);
+             
+            console.log("City deleted successfully");  
+            alert("City deleted successfully"); 
         } catch (err) {
             setError(err.response?.data?.message || "Failed to delete city.");
         } finally {
@@ -75,6 +81,8 @@ const CityManagement = ({ cities, inactiveCities, states, fetchCities, selectedS
                 setError("No state selected. Please select a state to view cities.");
             }
             setCityTab("inactive");
+            console.log("City deactivated successfully");
+            alert("City deactivated successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to soft-delete city.");
         } finally {
@@ -89,6 +97,8 @@ const CityManagement = ({ cities, inactiveCities, states, fetchCities, selectedS
             await axios.patch(`${baseURL}/api/cities/${id}/activate`);
             await fetchCities(selectedState);
             setCityTab("active");
+            console.log("City activated successfully");
+            alert("City activated successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to activate city.");
         } finally {
@@ -163,18 +173,18 @@ const CityManagement = ({ cities, inactiveCities, states, fetchCities, selectedS
                             {cityTab === "active" ? (
                                 <>
                                     <button onClick={() => handleCityEdit(city)} className="text-yellow-400 hover:text-yellow-500">
-                                        Edit
+                                         <FaEdit size={28} />
                                     </button>
                                     <button onClick={() => handleCityDelete(city._id)} className="text-red-400 hover:text-red-500">
-                                        Delete
+                                        <FaTrash size={28} />
                                     </button>
                                     <button onClick={() => handleCitySoftDelete(city._id)} className="text-gray-400 hover:text-gray-500">
-                                        Deactivate
+                                      <FaBan size={28} />
                                     </button>
                                 </>
                             ) : (
                                 <button onClick={() => handleCityActivate(city._id)} className="text-green-400 hover:text-green-500">
-                                    Activate
+                                    <FaCheckCircle size={28} />
                                 </button>
                             )}
                         </div>

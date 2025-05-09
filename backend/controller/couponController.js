@@ -133,10 +133,10 @@ exports.validateCoupon = async (code, checkInDate) => {
     if (!coupon) {
       return { valid: false, message: "Invalid coupon code" };
     }
-    const now = checkInDate ? new Date(checkInDate) : new Date();
-    if (now < new Date(coupon.startDate) || now > new Date(coupon.endDate)) {
-      return { valid: false, message: "Coupon is not valid for the selected dates" };
-    }
+    // const now = checkInDate ? new Date(checkInDate) : new Date();
+    // if (now < new Date(coupon.startDate) || now > new Date(coupon.endDate)) {
+    //   return { valid: false, message: "Coupon is not valid for the selected dates" };
+    // }
     return { valid: true, discount: coupon.discount };
   } catch (err) {
     return { valid: false, message: "Failed to validate coupon" };

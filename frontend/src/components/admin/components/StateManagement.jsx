@@ -28,6 +28,9 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
             }
             setStateForm({ name: "", code: "" });
             setEditStateId(null);
+            alert("State saved successfully");
+            console.log("State saved successfully");
+            
             await fetchStates();
         } catch (err) {
             setError(err.response?.data?.message || "Failed to save state.");
@@ -48,6 +51,8 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
         try {
             await axios.delete(`${baseURL}/api/states/${id}`);
             await fetchStates();
+            console.log("State deleted successfully");
+            alert("State deleted successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to delete state.");
         } finally {
@@ -62,6 +67,8 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
             await axios.patch(`${baseURL}/api/states/${id}/softdelete`);
             await fetchStates();
             setStateTab("inactive");
+            console.log("State deactivated successfully");
+            alert("State deactivated successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to soft-delete state.");
         } finally {
@@ -76,6 +83,8 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
             await axios.patch(`${baseURL}/api/states/${id}/activate`);
             await fetchStates();
             setStateTab("active");
+            console.log("State activated successfully");
+            alert("State activated successfully");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to activate state.");
         } finally {
