@@ -173,17 +173,7 @@ const HotelList = ({
                           </div>
                         </div>
                       </div>
-                      <div className="p-4">
-                        <button
-                          onClick={() => {
-                            scrollPositionRef.current = window.scrollY;
-                            toggleHotelDetails(hotel._id);
-                          }}
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-blue-900/50 font-medium"
-                        >
-                          Explore Rooms
-                        </button>
-                      </div>
+                       
                     </div>
                   ))}
                 </div>

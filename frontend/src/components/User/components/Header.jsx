@@ -10,7 +10,7 @@ const Header = ({ userDetails, setShowBookingsModal, loading, setLoading, setErr
     setError("");
     try {
       localStorage.removeItem("token");
-      navigate("/");
+      navigate("/login");
     } catch (err) {
       console.error("handleLogout - Error:", err);
       setError(err.response?.data?.message || "Failed to log out.");
