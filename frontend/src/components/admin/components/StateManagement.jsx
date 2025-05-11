@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import FormInput from "./FormInput";
+import { FaBan, FaCheckCircle, FaEdit, FaTrash } from "react-icons/fa";
 
 const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoading, setError, baseURL }) => {
     const [stateForm, setStateForm] = useState({ name: "", code: "" });
@@ -30,7 +31,7 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
             setEditStateId(null);
             alert("State saved successfully");
             console.log("State saved successfully");
-            
+
             await fetchStates();
         } catch (err) {
             setError(err.response?.data?.message || "Failed to save state.");
@@ -143,18 +144,18 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
                             {stateTab === "active" ? (
                                 <>
                                     <button onClick={() => handleStateEdit(state)} className="text-yellow-400 hover:text-yellow-500">
-                                        Edit
+                                        <FaEdit size={28} />
                                     </button>
                                     <button onClick={() => handleStateDelete(state._id)} className="text-red-400 hover:text-red-500">
-                                        Delete
+                                        <FaTrash size={28} />
                                     </button>
                                     <button onClick={() => handleStateSoftDelete(state._id)} className="text-gray-400 hover:text-gray-500">
-                                        Deactivate
+                                        <FaBan size={28} />
                                     </button>
                                 </>
                             ) : (
                                 <button onClick={() => handleStateActivate(state._id)} className="text-green-400 hover:text-green-500">
-                                    Activate
+                                    <FaCheckCircle size={28} />
                                 </button>
                             )}
                         </div>
