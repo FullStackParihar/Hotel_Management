@@ -142,6 +142,24 @@ exports.getRoomsByHotel = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch rooms" });
   }
 };
+exports.getRooms = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+     
+
+    const room = await Room.findById(id).populate("hotel", "name");  
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    res.status(200).json(room);
+  } catch (error) {
+    console.error("GET /api/rooms/:id - Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 exports.uploadRoomImages = async (req, res) => {
   try {

@@ -9,13 +9,12 @@ const Otp = () => {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    // Get email from localStorage when component mounts
+ 
     const storedEmail = localStorage.getItem("otpEmail");
     if (storedEmail) {
       setEmail(storedEmail);
     } else {
-      // If no email found, redirect back to signup
-      // navigate("/sign-up");
+  
       alert("Please sign up first");
     }
   }, []);
@@ -37,7 +36,7 @@ const Otp = () => {
         otp,
       });
       alert("OTP Verified Successfully!");
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.error("OTP verification failed:", error);
       alert(error.response?.data?.message || "Invalid OTP");

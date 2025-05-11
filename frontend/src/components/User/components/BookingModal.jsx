@@ -1,278 +1,333 @@
-import React from "react";
-import { FaTimes, FaBed, FaUser, FaWifi, FaTv, FaSnowflake, FaGlassMartini, FaConciergeBell, FaDoorOpen, FaArrowLeft, FaArrowRight, FaUsers, FaChild, FaPhone, FaTicketAlt } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { FaTimes, FaListAlt, FaFilter, FaCheck, FaBan, FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 
-const BookingModal = ({
-  room,
-  bookingForm,
-  coupons,
-  isFirstBooking,
-  totalPrice,
-  discountApplied,
-  couponError,
-  loading,
-  currentImageIndex,
-  onClose,
-  onFormChange,
-  onImageChange,
-  onSubmit,
-}) => {
-  const iconMap = {
-    WiFi: <FaWifi className="text-blue-400" />,
-    TV: <FaTv className="text-blue-400" />,
-    "Air Conditioning": <FaSnowflake className="text-blue-400" />,
-    "Mini Bar": <FaGlassMartini className="text-blue-400" />,
-    "Room Service": <FaConciergeBell className="text-blue-400" />,
-    Balcony: <FaDoorOpen className="text-blue-400" />,
+const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) => {
+  const [bookings, setBookings] = useState([]);
+  const [bookingFilter, setBookingFilter] = useState("all");
+  const [checkInFilter, setCheckInFilter] = useState("all");
+  const [loading, setLoading] = useState(false);
+  const [hotelNames, setHotelNames] = useState({}); 
+  const baseURL = "http://localhost:6969";
+
+  const fetchUserBookings = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${baseURL}/api/bookings/my-bookings`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const fetchedBookings = Array.isArray(response.data) ? response.data : [];
+      console.log("Fetched Bookings:", fetchedBookings);
+      setBookings(fetchedBookings);
+    } catch (err) {
+      console.error("fetchUserBookings - Error:", err);
+      setError(err.response?.data?.message || "Failed to fetch your bookings.");
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  
+  const fetchHotelName = async (roomId) => {
+    if (!roomId) return "N/A";
+    if (hotelNames[roomId]) return hotelNames[roomId];  
+
+    try {
+      const response = await axios.get(`${baseURL}/api/rooms/${roomId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const hotelName = response.data.hotel?.name || "Hotel Not Found";
+      setHotelNames((prev) => ({ ...prev, [roomId]: hotelName }));
+      return hotelName;
+    } catch (err) {
+      console.error(`fetchHotelName for room ${roomId} - Error:`, err);
+      setHotelNames((prev) => ({ ...prev, [roomId]: "Hotel Not Found" }));
+      return "Hotel Not Found";
+    }
+  };
+
+ 
+  useEffect(() => {
+    const fetchAllHotelNames = async () => {
+      const hotelNamePromises = bookings.map(async (booking) => {
+        if (booking.roomId?._id && !booking.roomId?.hotelId?.name) {
+          const name = await fetchHotelName(booking.roomId._id);
+          return { roomId: booking.roomId._id, name };
+        }
+        return null;
+      });
+
+      const results = await Promise.all(hotelNamePromises);
+      const newHotelNames = results.reduce((acc, result) => {
+        if (result) acc[result.roomId] = result.name;
+        return acc;
+      }, {});
+
+      setHotelNames((prev) => ({ ...prev, ...newHotelNames }));
+    };
+
+    if (bookings.length > 0) {
+      fetchAllHotelNames();
+    }
+  }, [bookings]);
+
+  const handleCheckIn = async (bookingId) => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.post(`${baseURL}/api/bookings/${bookingId}/checkin`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      alert(response.data.message);
+      await fetchUserBookings();
+    } catch (err) {
+      console.error("handleCheckIn - Error:", err);
+      setError(err.response?.data?.message || "Failed to check in.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    if (!confirm("Are you sure you want to cancel this booking?")) return;
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.post(`${baseURL}/api/bookings/${bookingId}/cancel`, {}, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      alert(response.data.message);
+      await fetchUserBookings();
+    } catch (err) {
+      console.error("handleCancelBooking - Error:", err);
+      setError(err.response?.data?.message || "Failed to cancel booking.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredBookings = (Array.isArray(bookings) ? bookings : []).filter((booking) => {
+    const statusMatch =
+      bookingFilter === "all" ||
+      (bookingFilter === "pending" && booking.status === "pending" && !booking.checkedIn && booking.status !== "cancelled") ||
+      (bookingFilter === "checkedIn" && booking.checkedIn) ||
+      (bookingFilter === "cancelled" && booking.status === "cancelled");
+
+    const checkInMatch =
+      checkInFilter === "all" ||
+      (checkInFilter === "checkedIn" && booking.checkedIn) ||
+      (checkInFilter === "notCheckedIn" && !booking.checkedIn);
+
+    return statusMatch && checkInMatch;
+  });
+
+  useEffect(() => {
+    if (showBookingsModal) {
+      fetchUserBookings();
+    }
+  }, [showBookingsModal]);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-      <div className="bg-slate-800 rounded-xl shadow-2xl w-11/12 max-w-4xl flex overflow-hidden">
-        <div className="w-7/12 p-6 bg-gradient-to-br from-slate-900 to-blue-900">
-          <h3 className="text-2xl font-semibold text-blue-300 mb-4">
-            Room {room.roomNumber || "N/A"} ({room.type || "Standard"})
-          </h3>
-          {room.images && room.images.length > 0 ? (
-            <div className="relative mb-4 rounded-lg overflow-hidden shadow-inner shadow-slate-900">
-              <img
-                src={room.images[currentImageIndex]}
-                alt={`Room ${room.roomNumber || "N/A"}`}
-                className="w-full h-48 object-cover"
-              />
-              {room.images.length > 1 && (
-                <>
-                  <button
-                    onClick={() => onImageChange("prev")}
-                    className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-slate-900/70 text-white p-2 rounded-full hover:bg-slate-800 transition-colors duration-200"
-                  >
-                    <FaArrowLeft />
-                  </button>
-                  <button
-                    onClick={() => onImageChange("next")}
-                    className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-slate-900/70 text-white p-2 rounded-full hover:bg-slate-800 transition-colors duration-200"
-                  >
-                    <FaArrowRight />
-                  </button>
-                </>
-              )}
+    <>
+      {showBookingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-xl shadow-2xl w-11/12 max-w-5xl p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-semibold text-blue-300">My Bookings</h3>
+              <button
+                onClick={() => setShowBookingsModal(false)}
+                className="text-gray-400 hover:text-white transition-colors duration-200"
+              >
+                <FaTimes size={24} />
+              </button>
             </div>
-          ) : (
-            <div className="w-full h-48 bg-slate-800 rounded-lg flex items-center justify-center text-slate-600 shadow-inner shadow-slate-900 mb-4">
-              No Images Available
+            <div className="mb-6 flex flex-wrap gap-3">
+              <button
+                onClick={() => setBookingFilter("all")}
+                className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+                  bookingFilter === "all"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-700/80 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                <FaListAlt className="mr-2" /> All
+              </button>
+              <button
+                onClick={() => setBookingFilter("pending")}
+                className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+                  bookingFilter === "pending"
+                    ? "bg-yellow-600 text-white"
+                    : "bg-gray-700/80 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                <FaFilter className="mr-2" /> Pending
+              </button>
+              <button
+                onClick={() => setBookingFilter("checkedIn")}
+                className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+                  bookingFilter === "checkedIn"
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-700/80 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                <FaCheck className="mr-2" /> Checked In
+              </button>
+              <button
+                onClick={() => setBookingFilter("cancelled")}
+                className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+                  bookingFilter === "cancelled"
+                    ? "bg-red-600 text-white"
+                    : "bg-gray-700/80 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                <FaBan className="mr-2" /> Cancelled
+              </button>
+              <button
+                onClick={() => setCheckInFilter("all")}
+                className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+                  checkInFilter === "all"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-700/80 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                <FaListAlt className="mr-2" /> All Check-In
+              </button>
+              <button
+                onClick={() => setCheckInFilter("checkedIn")}
+                className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+                  checkInFilter === "checkedIn"
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-700/80 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                <FaSignInAlt className="mr-2" /> Checked In
+              </button>
+              <button
+                onClick={() => setCheckInFilter("notCheckedIn")}
+                className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
+                  checkInFilter === "notCheckedIn"
+                    ? "bg-orange-600 text-white"
+                    : "bg-gray-700/80 text-gray-300 hover:bg-gray-600"
+                }`}
+              >
+                <FaSignOutAlt className="mr-2" /> Not Checked In
+              </button>
             </div>
-          )}
-          <div className="text-gray-200">
-            <p className="flex items-center mb-2">
-              <FaBed className="mr-2 text-blue-400" />
-              <span className="text-green-400 font-bold">₹{room.price || "N/A"} per night</span>
-            </p>
-            <p className="flex items-center mb-2">
-              <strong className="text-blue-200 min-w-24">Capacity:</strong>
-              <span className="flex items-center">
-                {Array(room.capacity || 1)
-                  .fill()
-                  .map((_, i) => (
-                    <FaUser key={i} className="text-gray-400 mr-1" />
-                  ))}
-                {room.capacity || "N/A"} guests
-              </span>
-            </p>
-            <div className="mb-2">
-              <strong className="text-blue-200 block">Amenities:</strong>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {room.amenities?.length > 0 ? (
-                  room.amenities.map((amenity, index) => (
-                    <span key={index} className="flex items-center gap-1 bg-slate-800 px-3 py-1 rounded-full text-sm">
-                      {iconMap[amenity] || null} {amenity}
-                    </span>
-                  ))
-                ) : (
-                  "N/A"
-                )}
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
               </div>
-            </div>
-            <p>
-              <strong className="text-blue-200">Description:</strong>{" "}
-              <span className="text-gray-300 italic">{room.description || "No description available."}</span>
-            </p>
+            ) : filteredBookings.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full bg-gray-800/90 rounded-lg shadow-lg table-auto">
+                  <thead>
+                    <tr className="bg-blue-900/50 text-left text-blue-200">
+                      <th className="p-4 w-[15%]">Hotel</th>
+                      <th className="p-4 w-[15%]">Room</th>
+                      <th className="p-4 w-[10%]">Check-In</th>
+                      <th className="p-4 w-[10%]">Check-Out</th>
+                      <th className="p-4 w-[8%]">Members</th>
+                      <th className="p-4 w-[8%]">Status</th>
+                      <th className="p-4 w-[8%]">Total Price</th>
+                      <th className="p-4 w-[10%]">Discount</th>
+                      <th className="p-4 w-[10%]">Check-In Action</th>
+                      <th className="p-4 w-[6%]">Cancel</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredBookings.map((booking) => {
+                   
+                      {/* console.log(`Booking ID: ${booking._id}`, {
+                        roomId: booking.roomId,
+                        hotelId: booking.roomId?.hotelId,
+                        hotelName: booking.roomId?.hotelId?.name,
+                      }); */}
+
+                 
+                      const hotelName =
+                        booking.roomId?.hotelId?.name ||  
+                        hotelNames[booking.roomId?._id] ||  
+                        "No Hotel Name...";  
+
+                      return (
+                        <tr key={booking._id} className="border-t border-gray-700/50 hover:bg-gray-700/50 transition-all duration-200">
+                          <td className="p-4">
+                            {hotelName === "Hotel Not Found" ? (
+                              <span className="text-yellow-400">Hotel Not Found</span>
+                            ) : (
+                              hotelName
+                            )}
+                          </td>
+                          <td className="p-4">
+                            {booking.roomId ? `Room ${booking.roomId.roomNumber} (${booking.roomId.type})` : "N/A"}
+                          </td>
+                          <td className="p-4">{new Date(booking.checkIn).toLocaleDateString()}</td>
+                          <td className="p-4">{new Date(booking.checkOut).toLocaleDateString()}</td>
+                          <td className="p-4 text-center">{booking.members}</td>
+                          <td className="p-4">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold inline-block text-center w-full ${
+                                booking.status === "approved"
+                                  ? "bg-green-500/20 text-green-400"
+                                  : booking.status === "rejected"
+                                  ? "bg-red-500/20 text-red-400"
+                                  : booking.status === "cancelled"
+                                  ? "bg-red-500/20 text-red-400"
+                                  : "bg-yellow-500/20 text-yellow-400"
+                              }`}
+                            >
+                              {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                            </span>
+                          </td>
+                          <td className="p-4 text-center">₹{booking.totalPrice.toFixed(2)}</td>
+                          <td className="p-4 text-center">{booking.discountApplied}% ({booking.couponCode || "N/A"})</td>
+                          <td className="p-4">
+                            {booking.status === "approved" && !booking.checkedIn && booking.status !== "cancelled" ? (
+                              <button
+                                onClick={() => handleCheckIn(booking._id)}
+                                className="flex items-center justify-center mx-auto px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-400 hover:to-emerald-500 transition-all duration-200"
+                              >
+                                <FaCheck className="mr-2" /> Check-In
+                              </button>
+                            ) : booking.checkedIn ? (
+                              <span className="block px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-400 text-center">
+                                Checked In
+                              </span>
+                            ) : (
+                              <span className="block text-gray-400 text-center">N/A</span>
+                            )}
+                          </td>
+                          <td className="p-4">
+                            {booking.status !== "cancelled" && !booking.checkedIn ? (
+                              <button
+                                onClick={() => handleCancelBooking(booking._id)}
+                                className="flex items-center justify-center mx-auto px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-400 hover:to-red-500 transition-all duration-200"
+                              >
+                                <FaBan className="mr-2" /> Cancel
+                              </button>
+                            ) : (
+                              <span className="block text-gray-400 text-center">N/A</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="bg-gray-800/70 rounded-xl p-12 text-center shadow-lg border border-gray-700/30">
+                <FaListAlt className="text-5xl text-blue-400/50 mx-auto mb-4" />
+                <p className="text-gray-300 text-xl mb-2">No bookings found for the selected filter.</p>
+                <p className="text-blue-300/70">Try a different filter or book a room to see your reservations here.</p>
+              </div>
+            )}
           </div>
         </div>
-        <div className="w-5/12 p-6 bg-slate-800">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-blue-300">Book This Room</h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors duration-200">
-              <FaTimes size={24} />
-            </button>
-          </div>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="firstname" className="block text-sm font-semibold text-gray-200 mb-1">
-                First Name
-              </label>
-              <input
-                id="firstname"
-                name="firstname"
-                type="text"
-                value={bookingForm.firstname}
-                onChange={onFormChange}
-                required
-                className="w-full bg-slate-700/80 border border-slate-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
-                placeholder="Enter your first name"
-              />
-            </div>
-            <div>
-              <label htmlFor="lastname" className="block text-sm font-semibold text-gray-200 mb-1">
-                Last Name
-              </label>
-              <input
-                id="lastname"
-                name="lastname"
-                type="text"
-                value={bookingForm.lastname}
-                onChange={onFormChange}
-                required
-                className="w-full bg-slate-700/80 border border-slate-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
-                placeholder="Enter your last name"
-              />
-            </div>
-            <div>
-              <label htmlFor="members" className="block text-sm font-semibold text-gray-200 mb-1">
-                Number of Members
-              </label>
-              <div className="relative">
-                <input
-                  id="members"
-                  name="members"
-                  type="number"
-                  value={bookingForm.members}
-                  onChange={onFormChange}
-                  min="1"
-                  max={room.capacity || 10}
-                  required
-                  className="w-full bg-slate-700/80 border border-slate-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
-                />
-                <FaUsers className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
-              </div>
-            </div>
-            <div>
-              <label htmlFor="checkIn" className="block text-sm font-semibold text-gray-200 mb-1">
-                Check-In Date
-              </label>
-              <input
-                id="checkIn"
-                name="checkIn"
-                type="date"
-                value={bookingForm.checkIn}
-                onChange={onFormChange}
-                required
-                min={new Date().toISOString().split("T")[0]}
-                className="w-full bg-slate-700/80 border border-slate-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
-              />
-            </div>
-            <div>
-              <label htmlFor="checkOut" className="block text-sm font-semibold text-gray-200 mb-1">
-                Check-Out Date
-              </label>
-              <input
-                id="checkOut"
-                name="checkOut"
-                type="date"
-                value={bookingForm.checkOut}
-                onChange={onFormChange}
-                required
-                min={bookingForm.checkIn || new Date().toISOString().split("T")[0]}
-                className="w-full bg-slate-700/80 border border-slate-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
-              />
-            </div>
-            <div>
-              <label htmlFor="couponCode" className="block text-sm font-semibold text-gray-200 mb-1">
-                Coupon Code
-              </label>
-              <div className="relative">
-                <select
-                  id="couponCode"
-                  name="couponCode"
-                  value={bookingForm.couponCode}
-                  onChange={onFormChange}
-                  disabled={isFirstBooking}
-                  className="w-full bg-slate-700/80 border border-slate-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 disabled:bg-slate-600/50 disabled:text-gray-400 disabled:cursor-not-allowed"
-                >
-                  <option value="">-- Select a Coupon --</option>
-                  {coupons.map((coupon) => (
-                    <option key={coupon._id} value={coupon.code}>
-                      {coupon.code} ({coupon.discount}% off)
-                    </option>
-                  ))}
-                </select>
-                <FaTicketAlt className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
-              </div>
-              {isFirstBooking && (
-                <p className="text-sm text-green-400 mt-2">50% discount applied automatically for your first booking!</p>
-              )}
-              {couponError && <p className="text-sm text-red-400 mt-2">{couponError}</p>}
-            </div>
-            <div>
-              <p className="text-gray-200">
-                <strong>Base Price:</strong>{" "}
-                <span className="text-green-400 font-bold">
-                  ₹{(room.price * Math.ceil((new Date(bookingForm.checkOut) - new Date(bookingForm.checkIn)) / (1000 * 60 * 60 * 24))).toFixed(2)}
-                </span>
-              </p>
-              {discountApplied > 0 && (
-                <p className="text-gray-200">
-                  <strong>Discount Applied:</strong>{" "}
-                  <span className="text-green-400">{discountApplied}% ({bookingForm.couponCode})</span>
-                </p>
-              )}
-              <p className="text-gray-200">
-                <strong>Total Price:</strong>{" "}
-                <span className="text-green-400 font-bold">₹{totalPrice.toFixed(2)}</span>
-              </p>
-            </div>
-            <div className="flex items-center">
-              <input
-                id="hasChild"
-                name="hasChild"
-                type="checkbox"
-                checked={bookingForm.hasChild}
-                onChange={onFormChange}
-                className="mr-2 h-4 w-4 text-blue-400 bg-slate-700 border-slate-600 rounded focus:ring-blue-400"
-              />
-              <label htmlFor="hasChild" className="text-sm font-semibold text-gray-200 flex items-center">
-                <FaChild className="mr-2 text-blue-400" /> Children Included
-              </label>
-            </div>
-            <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-gray-200 mb-1">
-                Phone Number
-              </label>
-              <div className="relative">
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={bookingForm.phone}
-                  onChange={onFormChange}
-                  required
-                  pattern="\d{10}"
-                  className="w-full bg-slate-700/80 border border-slate-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
-                  placeholder="Enter 10-digit phone number"
-                />
-                <FaPhone className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
-              </div>
-            </div>
-            <button
-              type="submit"
-              disabled={loading || !!couponError}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-900/50 font-medium flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Submitting..." : "Submit Booking"}
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 
-export default BookingModal;
+export default BookingsModal;

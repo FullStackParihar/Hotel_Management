@@ -8,5 +8,6 @@ router.patch("/:bookingId/status", bookingController.updateBookingStatus);
 router.get("/my-bookings", bookingController.getUserBookings);
 router.post("/:bookingId/checkin", bookingController.checkInBooking);
 router.post("/:bookingId/cancel",  bookingController.cancelBooking);
+router.delete("/:id",  bookingController.DeleteBooking);
 
 module.exports = router;

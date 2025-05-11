@@ -168,7 +168,7 @@ const ADLocation = () => {
         setLoading(true);
         try {
             localStorage.removeItem("token");
-            navigate("/");
+            navigate("/login");
         } catch (err) {
             setError(err.response?.data?.message || "Failed to log out.");
         } finally {

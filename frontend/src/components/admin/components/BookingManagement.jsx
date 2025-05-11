@@ -1,9 +1,12 @@
+ 
 import React, { useState } from "react";
 import axios from "axios";
-import { FaUser, FaBed, FaPhone, FaUsers, FaChild, FaCalendarAlt, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaUser, FaBed, FaPhone, FaUsers, FaChild, FaCalendarAlt, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaTrash } from "react-icons/fa";
 
 const BookingManagement = ({ bookings, fetchBookings, loading, setLoading, setError, baseURL }) => {
     const [bookingFilter, setBookingFilter] = useState("all");
+    const [checkInFilter, setCheckInFilter] = useState({ start: "", end: "" });
+    const [checkedInFilter, setCheckedInFilter] = useState("all");
 
     const handleUpdateStatus = async (bookingId, status) => {
         setLoading(true);
@@ -25,13 +28,62 @@ const BookingManagement = ({ bookings, fetchBookings, loading, setLoading, setEr
         }
     };
 
-    const filteredBookings = bookingFilter === "all"
-        ? bookings
-        : bookings.filter((booking) => booking.status === bookingFilter);
+    const handleDeleteBooking = async (bookingId) => {
+        if (!confirm("Are you sure you want to delete this booking? This action cannot be undone.")) return;
+
+        setLoading(true);
+        setError("");
+        try {
+            const response = await axios.delete(
+                `${baseURL}/api/bookings/${bookingId}`,
+                {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                }
+            );
+            alert(response.data.message || "Booking deleted successfully.");
+            fetchBookings();
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to delete booking.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCheckInFilterChange = (e) => {
+        const { name, value } = e.target;
+        setCheckInFilter((prev) => ({ ...prev, [name]: value }));
+    };
+
+   
+    const filteredBookings = bookings
+        .filter((booking) => {
+           
+            if (bookingFilter !== "all") {
+                return booking.status === bookingFilter;
+            }
+            return true;
+        })
+        .filter((booking) => {
+           
+            const checkInDate = new Date(booking.checkIn);
+            const startDate = checkInFilter.start ? new Date(checkInFilter.start) : null;
+            const endDate = checkInFilter.end ? new Date(checkInFilter.end) : null;
+
+            if (startDate && checkInDate < startDate) return false;
+            if (endDate && checkInDate > endDate) return false;
+            return true;
+        })
+        .filter((booking) => {
+             
+            if (checkedInFilter === "checkedIn") return booking.checkedIn === true;
+            if (checkedInFilter === "notCheckedIn") return booking.checkedIn === false;
+            return true;
+        });
 
     return (
         <div>
             <h2 className="text-xl font-semibold text-blue-300 mb-4">Manage Bookings</h2>
+        
             <div className="flex gap-2 mb-6">
                 {["all", "pending", "approved", "rejected"].map((filter) => (
                     <button
@@ -46,6 +98,23 @@ const BookingManagement = ({ bookings, fetchBookings, loading, setLoading, setEr
                         } transition-all duration-200`}
                     >
                         {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                    </button>
+                ))}
+            </div>
+            <div className="flex gap-2 mb-6">
+                {["all", "checkedIn", "notCheckedIn"].map((filter) => (
+                    <button
+                        key={filter}
+                        onClick={() => setCheckedInFilter(filter)}
+                        className={`flex-1 py-2 rounded-md ${
+                            checkedInFilter === filter
+                                ? `bg-${
+                                    filter === "all" ? "blue" : filter === "checkedIn" ? "green" : "gray"
+                                }-600 text-white`
+                                : "bg-slate-700 text-gray-300 hover:bg-slate-600"
+                        } transition-all duration-200`}
+                    >
+                        {filter === "all" ? "All" : filter === "checkedIn" ? "Checked In" : "Not Checked In"}
                     </button>
                 ))}
             </div>
@@ -121,24 +190,33 @@ const BookingManagement = ({ bookings, fetchBookings, loading, setLoading, setEr
                                     </p>
                                 </div>
                             </div>
-                            {booking.status === "pending" && (
-                                <div className="mt-4 flex space-x-4">
-                                    <button
-                                        onClick={() => handleUpdateStatus(booking._id, "approved")}
-                                        className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 shadow-md"
-                                        disabled={loading}
-                                    >
-                                        <FaCheckCircle className="mr-2" /> Approve
-                                    </button>
-                                    <button
-                                        onClick={() => handleUpdateStatus(booking._id, "rejected")}
-                                        className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 shadow-md"
-                                        disabled={loading}
-                                    >
-                                        <FaTimesCircle className="mr-2" /> Reject
-                                    </button>
-                                </div>
-                            )}
+                            <div className="mt-4 flex space-x-4">
+                                {booking.status === "pending" && (
+                                    <>
+                                        <button
+                                            onClick={() => handleUpdateStatus(booking._id, "approved")}
+                                            className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all duration-200 shadow-md"
+                                            disabled={loading}
+                                        >
+                                            <FaCheckCircle className="mr-2" /> Approve
+                                        </button>
+                                        <button
+                                            onClick={() => handleUpdateStatus(booking._id, "rejected")}
+                                            className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all duration-200 shadow-md"
+                                            disabled={loading}
+                                        >
+                                            <FaTimesCircle className="mr-2" /> Reject
+                                        </button>
+                                    </>
+                                )}
+                                <button
+                                    onClick={() => handleDeleteBooking(booking._id)}
+                                    className="flex items-center px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-lg transition-all duration-200 shadow-md"
+                                    disabled={loading}
+                                >
+                                    <FaTrash className="mr-2" /> Delete
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
