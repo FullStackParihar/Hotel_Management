@@ -69,7 +69,10 @@ const Header = ({ userDetails, setShowBookingsModal, loading, setLoading, setErr
     setLoading(true);
     setError("");
     try {
+     const isLogout = confirm('are you sure to logout ?');
+     if(isLogout){
       localStorage.removeItem("token");
+     }
       navigate("/");
     } catch (err) {
       console.error("handleLogout - Error:", err);
@@ -87,7 +90,7 @@ const Header = ({ userDetails, setShowBookingsModal, loading, setLoading, setErr
         </h1>
         <div className="flex items-center space-x-4">
           <div className="flex items-center text-gray-300">
-            {/* Profile Image and User Name */}
+            {/* Profile Image===========  ,,,  ======== User Name */}
             <div className="flex items-center space-x-2">
               {userDetails?.profileImage ? (
                 <img

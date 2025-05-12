@@ -795,6 +795,8 @@ const Profile = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const userData = response.data.user;
+      console.log('user profile dsts',userData);
+      
       setUser(userData);
       setFormData({
         firstname: userData.firstname || '',
@@ -804,9 +806,10 @@ const Profile = () => {
         gender: userData.gender || '',
         age: userData.age || '',
       });
+     
     
       if (userData.profileImage) {
-        setImagePreview(userData.profileImage); // Use the Cloudinary URL directly
+        setImagePreview(userData.profileImage);  
       }
     } catch (err) {
       console.error('fetchUser - Error:', err);

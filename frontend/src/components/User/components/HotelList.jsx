@@ -475,10 +475,14 @@ const HotelList = ({
   const [previewImages, setPreviewImages] = useState({});  
   const baseURL = "http://localhost:6969";
   const scrollPositionRef = useRef(0);
+ console.log("hotels", hotels);
+ 
+
 
   const fetchRooms = async (hotelId) => {
     if (!hotelId) {
       setRooms([]);
+      
       return;
     }
     setRoomLoading(true);
@@ -652,7 +656,7 @@ const HotelList = ({
                           <h4 className="text-xl font-semibold text-white">{hotel.name || "Unknown Hotel"}</h4>
                           <p className="text-sm text-gray-300 flex items-center">
                             <FaMapMarkerAlt className="mr-2 text-blue-400" />
-                            {hotel.cityId?.name || "Unknown City"}
+                            {hotel.city.name || "Unknown City"}
                           </p>
                           <div className="flex items-center mt-2">
                             {renderStars(hotel.rating)}
