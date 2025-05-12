@@ -163,7 +163,7 @@ const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) =>
               >
                 <FaFilter className="mr-2" /> Pending
               </button>
-              <button
+              {/* <button
                 onClick={() => setBookingFilter("checkedIn")}
                 className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
                   bookingFilter === "checkedIn"
@@ -172,7 +172,7 @@ const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) =>
                 }`}
               >
                 <FaCheck className="mr-2" /> Checked In
-              </button>
+              </button> */}
               <button
                 onClick={() => setBookingFilter("cancelled")}
                 className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
@@ -183,7 +183,7 @@ const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) =>
               >
                 <FaBan className="mr-2" /> Cancelled
               </button>
-              <button
+              {/* <button
                 onClick={() => setCheckInFilter("all")}
                 className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${
                   checkInFilter === "all"
@@ -192,7 +192,7 @@ const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) =>
                 }`}
               >
                 <FaListAlt className="mr-2" /> All Check-In
-              </button>
+              </button> */}
               <button
                 onClick={() => setCheckInFilter("checkedIn")}
                 className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 ${

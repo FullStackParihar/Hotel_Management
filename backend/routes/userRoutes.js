@@ -30,4 +30,7 @@ router.post('/resetPassword', userController.resetPassword);
 router.get('/me', auth, userController.getMe);
 router.put('/me', auth, userController.updateMe);
 
+
+router.post('/me/profile-image', userController.verifyToken, userController.uploadProfileImage);
+
 module.exports = router;

@@ -11,6 +11,7 @@ const UserSchema = new mongoose.Schema({
   gender: { type: String, enum: ['male', 'female', 'other', ''], default: '' },
   age: { type: Number, min: 1 },
   role: { type: String, default: 'user' },
+  profileImage: String,
   isDisabled: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
