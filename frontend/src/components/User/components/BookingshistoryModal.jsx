@@ -1,3 +1,4 @@
+ 
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
 // import {
@@ -20,6 +21,7 @@
 //     couponCode: "",
 //   });
 //   const [isFirstBooking, setIsFirstBooking] = useState(false);
+//   const [isAdmin, setIsAdmin] = useState(false);
 //   const [totalPrice, setTotalPrice] = useState(0);
 //   const [discountApplied, setDiscountApplied] = useState(0);
 //   const [couponError, setCouponError] = useState("");
@@ -35,6 +37,21 @@
 //       return decoded._id;
 //     }
 //     return null;
+//   };
+
+//   const fetchUserRole = async () => {
+//     setLoading(true);
+//     try {
+//       const response = await axios.get(`${baseURL}/user/me`, {
+//         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+//       });
+//       setIsAdmin(response.data.user.role === 'admin');
+//     } catch (err) {
+//       console.error("fetchUserRole - Error:", err);
+//       setError(err.response?.data?.message || "Failed to fetch user details.");
+//     } finally {
+//       setLoading(false);
+//     }
 //   };
 
 //   const fetchUserBookings = async () => {
@@ -94,30 +111,27 @@
 //     const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
 //     let price = selectedRoom.price * nights;
 //     let discount = 0;
-//     let couponErrorMsg = "";
+//     let appliedCouponCode = bookingForm.couponCode;
 
-//     if (isFirstBooking) {
+//     if (isAdmin && !appliedCouponCode) {
+//       discount = 20;
+//       appliedCouponCode = "ADMIN20";
+//     } else if (isFirstBooking && !appliedCouponCode && !isAdmin) {
 //       discount = 50;
-//       setBookingForm((prev) => ({ ...prev, couponCode: "FIRSTBOOKING50" }));
-//     } else if (bookingForm.couponCode && bookingForm.couponCode !== "FIRSTBOOKING50") {
-//       const coupon = coupons.find((c) => c.code === bookingForm.couponCode);
+//       appliedCouponCode = "FIRSTBOOKING50";
+//     } else if (appliedCouponCode && !["FIRSTBOOKING50", "ADMIN20"].includes(appliedCouponCode)) {
+//       const coupon = coupons.find((c) => c.code === appliedCouponCode);
 //       if (coupon) {
-//         const now = new Date();
-//         const startDate = new Date(coupon.startDate);
-//         const endDate = new Date(coupon.endDate);
-//         if (now >= startDate && now <= endDate && coupon.isActive) {
-//           discount = coupon.discount;
-//         } else {
-//           couponErrorMsg = "Selected coupon is not valid or has expired.";
-//         }
+//         discount = coupon.discount; // Assume the coupon is valid; backend will validate
 //       } else {
-//         couponErrorMsg = "Invalid coupon code.";
+//         appliedCouponCode = ""; // Reset if invalid coupon
 //       }
 //     }
 
 //     setDiscountApplied(discount);
-//     setCouponError(couponErrorMsg);
+//     setCouponError("");
 //     setTotalPrice(discount > 0 ? price * (1 - discount / 100) : price);
+//     return appliedCouponCode; // Return the coupon code to use in submission
 //   };
 
 //   const handleBookingSubmit = async (e) => {
@@ -131,6 +145,10 @@
 //       const checkInDate = new Date(bookingForm.checkIn);
 //       const checkOutDate = new Date(bookingForm.checkOut);
 //       if (checkOutDate <= checkInDate) throw new Error("Check-out date must be after check-in date.");
+
+//       // Calculate the coupon code to send
+//       const appliedCouponCode = calculateTotalPrice();
+
 //       const bookingData = {
 //         userId,
 //         roomId: selectedRoom._id,
@@ -140,9 +158,8 @@
 //         checkOut: checkOutDate,
 //         hasChild: bookingForm.hasChild,
 //         phone: bookingForm.phone,
-//         couponCode: bookingForm.couponCode || null,
+//         couponCode: appliedCouponCode || null,
 //         totalPrice,
-//         discountApplied,
 //       };
 //       const response = await axios.post(`${baseURL}/api/bookings`, bookingData, {
 //         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -192,6 +209,7 @@
 
 //   useEffect(() => {
 //     if (showBookingModal && selectedRoom) {
+//       fetchUserRole();
 //       fetchUserBookings();
 //       fetchCoupons();
 //       setCurrentImageIndex(0);
@@ -200,7 +218,7 @@
 
 //   useEffect(() => {
 //     calculateTotalPrice();
-//   }, [bookingForm.checkIn, bookingForm.checkOut, bookingForm.couponCode, selectedRoom, isFirstBooking, coupons]);
+//   }, [bookingForm.checkIn, bookingForm.checkOut, bookingForm.couponCode, selectedRoom, isFirstBooking, isAdmin, coupons]);
 
 //   return (
 //     <>
@@ -399,7 +417,7 @@
 //                       name="couponCode"
 //                       value={bookingForm.couponCode}
 //                       onChange={handleFormChange}
-//                       disabled={isFirstBooking}
+//                       disabled={isFirstBooking || isAdmin}
 //                       className="w-full bg-gray-700/80 border border-gray-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 disabled:bg-gray-600/50 disabled:text-gray-400 disabled:cursor-not-allowed"
 //                     >
 //                       <option value="">-- Select a Coupon --</option>
@@ -411,7 +429,12 @@
 //                     </select>
 //                     <FaTicketAlt className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
 //                   </div>
-//                   {isFirstBooking && (
+//                   {isAdmin && !bookingForm.couponCode && (
+//                     <p className="text-sm text-green-400 mt-2">
+//                       20% discount applied automatically for admin users!
+//                     </p>
+//                   )}
+//                   {isFirstBooking && !isAdmin && !bookingForm.couponCode && (
 //                     <p className="text-sm text-green-400 mt-2">
 //                       50% discount applied automatically for your first booking!
 //                     </p>
@@ -432,7 +455,7 @@
 //                   {discountApplied > 0 && (
 //                     <p className="text-gray-200">
 //                       <strong>Discount Applied:</strong>{" "}
-//                       <span className="text-green-400">{discountApplied}% ({bookingForm.couponCode})</span>
+//                       <span className="text-green-400">{discountApplied}% ({bookingForm.couponCode || (isAdmin ? "ADMIN20" : "FIRSTBOOKING50")})</span>
 //                     </p>
 //                   )}
 //                   <p className="text-gray-200">
@@ -489,6 +512,7 @@
 // };
 
 // export default BookingFormModal;
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -602,6 +626,7 @@ const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
     let price = selectedRoom.price * nights;
     let discount = 0;
     let appliedCouponCode = bookingForm.couponCode;
+    let couponErrorMsg = "";
 
     if (isAdmin && !appliedCouponCode) {
       discount = 20;
@@ -612,14 +637,15 @@ const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
     } else if (appliedCouponCode && !["FIRSTBOOKING50", "ADMIN20"].includes(appliedCouponCode)) {
       const coupon = coupons.find((c) => c.code === appliedCouponCode);
       if (coupon) {
-        discount = coupon.discount; // Assume the coupon is valid; backend will validate
+        discount = coupon.discount; // Coupon is valid
       } else {
-        appliedCouponCode = ""; // Reset if invalid coupon
+        couponErrorMsg = "Invalid coupon code.";
+        appliedCouponCode = ""; // Reset if invalid
       }
     }
 
     setDiscountApplied(discount);
-    setCouponError("");
+    setCouponError(couponErrorMsg);
     setTotalPrice(discount > 0 ? price * (1 - discount / 100) : price);
     return appliedCouponCode; // Return the coupon code to use in submission
   };
@@ -636,7 +662,7 @@ const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
       const checkOutDate = new Date(bookingForm.checkOut);
       if (checkOutDate <= checkInDate) throw new Error("Check-out date must be after check-in date.");
 
-      // Calculate the coupon code to send
+      
       const appliedCouponCode = calculateTotalPrice();
 
       const bookingData = {
@@ -703,6 +729,7 @@ const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
       fetchUserBookings();
       fetchCoupons();
       setCurrentImageIndex(0);
+      
     }
   }, [showBookingModal, selectedRoom]);
 
@@ -902,21 +929,16 @@ const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
                     Coupon Code
                   </label>
                   <div className="relative">
-                    <select
+                    <input
                       id="couponCode"
                       name="couponCode"
+                      type="text"
                       value={bookingForm.couponCode}
                       onChange={handleFormChange}
                       disabled={isFirstBooking || isAdmin}
                       className="w-full bg-gray-700/80 border border-gray-600 rounded-lg px-4 py-2 text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 disabled:bg-gray-600/50 disabled:text-gray-400 disabled:cursor-not-allowed"
-                    >
-                      <option value="">-- Select a Coupon --</option>
-                      {coupons.map((coupon) => (
-                        <option key={coupon._id} value={coupon.code}>
-                          {coupon.code} ({coupon.discount}% off)
-                        </option>
-                      ))}
-                    </select>
+                      placeholder="Enter coupon code"
+                    />
                     <FaTicketAlt className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400" />
                   </div>
                   {isAdmin && !bookingForm.couponCode && (
