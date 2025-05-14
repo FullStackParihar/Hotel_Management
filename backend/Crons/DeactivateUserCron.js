@@ -143,7 +143,6 @@ const checkMissedBookings = async () => {
 
         // console.log("Users with more than 5 missed check-ins:", missedBookings);
 
-
         // for (const userData of missedBookings) {
         //   const userId = userData._id;
         //   const missedCount = userData.missedCount;
