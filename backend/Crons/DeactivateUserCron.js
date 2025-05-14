@@ -153,7 +153,6 @@ const checkMissedBookings = async () => {
         //     console.log(`User with ID ${userId} not found. Skipping...`);
         //     continue;
         //   }
-
         //   if (user.isDisabled) {  
         //     console.log(`User ${user.email} is already deactivated. Skipping...`);
         //   }
