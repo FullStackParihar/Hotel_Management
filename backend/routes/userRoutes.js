@@ -1,4 +1,4 @@
-
+ 
 // const express = require('express');
 // const router = express.Router();
 // const auth = require('../middleware/auth');
@@ -12,6 +12,12 @@
 // router.post('/forgot', userController.forgot);
 // router.post('/resetPassword', userController.resetPassword);
 // router.get('/me', auth, userController.getMe);
+// router.put('/me', auth, userController.updateMe);
+// router.get("/users/profile", auth, userController.getUserProfile);
+// router.patch("/users/me/background", auth, userController.updateBackgroundImage);
+
+
+// router.post('/me/profile-image', userController.verifyToken, userController.uploadProfileImage);
 
 // module.exports = router;
 
@@ -29,8 +35,8 @@ router.post('/forgot', userController.forgot);
 router.post('/resetPassword', userController.resetPassword);
 router.get('/me', auth, userController.getMe);
 router.put('/me', auth, userController.updateMe);
-
-
+router.get("/users/profile",auth, userController.getUserProfile);
+router.patch("/users/me/background", auth, userController.updateBackgroundImage);
 router.post('/me/profile-image', userController.verifyToken, userController.uploadProfileImage);
 
 module.exports = router;

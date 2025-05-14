@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema({
   profileImage: String,
   isDisabled: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
+  backgroundImage: { type: String, default: '' }
 });
 
 module.exports = mongoose.model('User', UserSchema);

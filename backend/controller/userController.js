@@ -4,25 +4,21 @@
 // const bcrypt = require('bcrypt');
 // const nodemailer = require('nodemailer');
 // const dotenv = require('dotenv');
-// const secretKey = process.env.secretKey || 'asdfghjkl';
+// const cloudinary = require('../config/cloudinary'); // For deleting old images
+// const { uploadToCloudinary } = require('../helpers/helper'); // Your existing Cloudinary upload utility
 // dotenv.config();
 
- 
+// const secretKey = process.env.secretKey || 'asdfghjkl';
 // const otpStore = new Map();
 
-// // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// // const phoneRegex = /^\+?\d{10,12}$/;
-
- 
 // exports.verifyToken = async (req, res, next) => {
 //   try {
 //     const token = req.headers.authorization?.split(' ')[1];
 //     if (!token) return res.status(401).json({ message: 'No token provided' });
 //     console.log('Signing token with secret:', process.env.secretKey);
-  
+
 //     const secretKey = process.env.secretKey || 'asdfghjkl';
     
-   
 //     console.log('Verifying token with secret:', secretKey);
     
 //     const decoded = jwt.verify(token, secretKey);
@@ -38,15 +34,12 @@
 //   }
 // };
 
- 
 // exports.signup = async (req, res) => {
 //   try {
 //     const { firstname, lastname, email, phone, password, gender, age } = req.body;
 //     if (!firstname || !lastname || !email || !phone || !password) {
 //       return res.status(400).json({ message: 'Please provide all required fields' });
 //     }
-//     // if (!emailRegex.test(email)) return res.status(400).json({ message: 'Invalid email format' });
-//     // if (!phoneRegex.test(phone)) return res.status(400).json({ message: 'Invalid phone number format' });
 //     if (password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
 
 //     const existingUser = await User.findOne({ email });
@@ -83,7 +76,6 @@
 //   }
 // };
 
- 
 // exports.verifyOtp = async (req, res) => {
 //   try {
 //     const { email, otp } = req.body;
@@ -97,7 +89,7 @@
 //     }
 
 //     const { firstname, lastname, phone, password, gender, age, role } = stored.userData;
-//     const user = new User({ firstname, lastname, email, phone, password, gender, age, role });
+//     const user = new User({ firstname, lastname, email, phone, password, age, role });
 //     await user.save();
 
 //     otpStore.delete(email);
@@ -124,12 +116,9 @@
 //   }
 // };
 
- 
 // exports.login = async (req, res) => {
 //   try {
 //     const { email, password } = req.body;
-//     // if (!email || !password) return res.status(400).json({ message: 'Please provide email and password' });
-//     // if (!emailRegex.test(email)) return res.status(400).json({ message: 'Invalid email format' });
 
 //     const user = await User.findOne({ email });
 //     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
@@ -159,22 +148,9 @@
 //   }
 // };
 
-// // Get current user
-// // exports.getMe = async (req, res) => {
-// //   try {
-// //     const user = await User.findById(req.user._id).select('firstname lastname email role');
-// //     if (!user) return res.status(404).json({ message: 'User not found' });
-// //     console.log('GetMe - User role:', user.role);
-// //     res.json({ user });
-// //   } catch (error) {
-// //     console.error('Get user error:', error);
-// //     res.status(500).json({ message: 'Server error' });
-// //   }
-// // };
-
 // exports.getMe = async (req, res) => {
 //   try {
-//     const user = await User.findById(req.user._id).select('firstname lastname email phone gender age role');
+//     const user = await User.findById(req.user._id).select('firstname lastname email phone gender age role profileImage');
 //     if (!user) return res.status(404).json({ message: 'User not found' });
 //     console.log('GetMe - User role:', user.role);
 //     res.json({ user });
@@ -184,7 +160,6 @@
 //   }
 // };
 
- 
 // exports.getUsers = async (req, res) => {
 //   try {
 //     if (req.user.role !== 'admin') {
@@ -198,7 +173,6 @@
 //   }
 // };
 
-// // Patch user for edit user profile------------------------
 // exports.patch = async (req, res) => {
 //   try {
 //     const { id } = req.params;
@@ -226,16 +200,12 @@
 //   }
 // };
 
- 
 // exports.forgot = async (req, res) => {
 //   try {
 //     const { email } = req.body;
 //     if (!email) {
 //       return res.status(400).json({ message: 'Email is required' });
 //     }
-//     // if (!emailRegex.test(email)) {
-//     //   return res.status(400).json({ message: 'Invalid email format' });
-//     // }
 
 //     const user = await User.findOne({ email });
 //     if (!user) {
@@ -268,16 +238,12 @@
 //   }
 // };
 
-// // Reset password
 // exports.resetPassword = async (req, res) => {
 //   try {
 //     const { email, otp, newPassword } = req.body;
 //     if (!email || !otp || !newPassword) {
 //       return res.status(400).json({ message: 'Email, OTP, and new password are required' });
 //     }
-//     // if (!emailRegex.test(email)) {
-//     //   return res.status(400).json({ message: 'Invalid email format' });
-//     // }
 //     if (newPassword.length < 6) {
 //       return res.status(400).json({ message: 'New password must be at least 6 characters' });
 //     }
@@ -305,21 +271,21 @@
 //     res.status(500).json({ message: 'Server error' });
 //   }
 // };
- 
+
 // exports.updateMe = async (req, res) => {
 //   try {
 //     const { firstname, lastname, email, phone, gender, age } = req.body;
 
-    
 //     if (!firstname || !lastname || !email || !phone) {
 //       return res.status(400).json({ message: 'Firstname, lastname, email, and phone are required' });
 //     }
-//     if (!emailRegex.test(email)) {
-//       return res.status(400).json({ message: 'Invalid email format' });
-//     }
-//     if (!phoneRegex.test(phone)) {
-//       return res.status(400).json({ message: 'Invalid phone number format' });
-//     }
+//     // Uncomment these if you want to use the regex validation
+//     // if (!emailRegex.test(email)) {
+//     //   return res.status(400).json({ message: 'Invalid email format' });
+//     // }
+//     // if (!phoneRegex.test(phone)) {
+//     //   return res.status(400).json({ message: 'Invalid phone number format' });
+//     // }
 //     if (gender && !['male', 'female', 'other'].includes(gender)) {
 //       return res.status(400).json({ message: 'Invalid gender. Must be male, female, or other' });
 //     }
@@ -327,13 +293,11 @@
 //       return res.status(400).json({ message: 'Invalid age. Must be between 1 and 120' });
 //     }
 
-    
 //     const existingUser = await User.findOne({ email, _id: { $ne: req.user._id } });
 //     if (existingUser) {
 //       return res.status(400).json({ message: 'Email already registered by another user' });
 //     }
 
-  
 //     const updates = {
 //       firstname,
 //       lastname,
@@ -342,12 +306,12 @@
 //       ...(gender && { gender }),
 //       ...(age && { age }),
 //     };
- 
+
 //     const user = await User.findByIdAndUpdate(
 //       req.user._id,
 //       { $set: updates },
 //       { new: true, runValidators: true }
-//     ).select('firstname lastname email phone gender age role');
+//     ).select('firstname lastname email phone gender age role profileImage');
 
 //     if (!user) {
 //       return res.status(404).json({ message: 'User not found' });
@@ -363,12 +327,113 @@
 //         gender: user.gender,
 //         age: user.age,
 //         role: user.role,
+//         profileImage: user.profileImage,
 //       },
 //     });
 //   } catch (error) {
 //     console.error('Update me error:', error);
 //     res.status(500).json({ message: 'Server error' });
 //   }
+// };
+
+ 
+// exports.uploadProfileImage = async (req, res) => {
+//   try {
+//     if (!req.files || !req.files.profileImage) {
+//       return res.status(400).json({ message: 'No file uploaded' });
+//     }
+
+//     const file = req.files.profileImage;
+
+   
+//     const filetypes = /jpeg|jpg|png/;
+//     const mimetype = filetypes.test(file.mimetype.toLowerCase());
+//     if (!mimetype) {
+//       return res.status(400).json({ message: 'Only .jpeg, .jpg, and .png files are allowed!' });
+//     }
+
+   
+//     const maxSize = 5 * 1024 * 1024;  
+//     if (file.size > maxSize) {
+//       return res.status(400).json({ message: 'File size exceeds 5MB limit' });
+//     }
+
+   
+//     const user = await User.findById(req.user._id);
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+
+   
+//     if (user.profileImage) {
+//       const publicId = user.profileImage.split('/').pop().split('.')[0];
+//       await cloudinary.uploader.destroy(`profile_images/${publicId}`);
+//     }
+
+    
+//     const imageUrl = await uploadToCloudinary(file.data, file.name, {
+//       folder: 'profile_images', 
+//     });
+
+    
+//     user.profileImage = imageUrl;
+//     await user.save();
+
+//     res.json({
+//       message: 'Profile image uploaded successfully',
+//       user: {
+//         _id: user._id,
+//         firstname: user.firstname,
+//         lastname: user.lastname,
+//         email: user.email,
+//         phone: user.phone,
+//         gender: user.gender,
+//         age: user.age,
+//         role: user.role,
+//         profileImage: user.profileImage,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Upload profile image error:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   } 
+//   exports.updateBackgroundImage = async (req, res) => {
+//     try {
+//       const userId = req.userId; // Assume userId is available from authentication middleware
+//       const { backgroundImage } = req.body;
+  
+//       if (!backgroundImage || typeof backgroundImage !== "string") {
+//         return res.status(400).json({ message: "Invalid background image URL" });
+//       }
+  
+//       const user = await User.findById(userId);
+//       if (!user) {
+//         return res.status(404).json({ message: "User not found" });
+//       }
+  
+//       user.backgroundImage = backgroundImage;
+//       await user.save();
+  
+//       res.status(200).json({ message: "Background image updated successfully", backgroundImage: user.backgroundImage });
+//     } catch (error) {
+//       console.error("PATCH /api/users/me/background - Error:", error);
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   }
+
+//   exports.getUserProfile = async (req, res) => {
+//     try {
+//       const userId = req.userId; 
+//       const user = await User.findById(userId).select("email firstname lastname backgroundImage isDisabled");
+//       if (!user) {
+//         return res.status(404).json({ message: "User not found" });
+//       }
+//       res.status(200).json(user);
+//     } catch (error) {
+//       console.error("GET /api/users/me - Error:", error);
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   };
 // };
 
 const User = require('../model/userModel');
@@ -461,7 +526,7 @@ exports.verifyOtp = async (req, res) => {
     }
 
     const { firstname, lastname, phone, password, gender, age, role } = stored.userData;
-    const user = new User({ firstname, lastname, email, phone, password, gender, age, role });
+    const user = new User({ firstname, lastname, email, phone, password, age, role });
     await user.save();
 
     otpStore.delete(email);
@@ -651,13 +716,6 @@ exports.updateMe = async (req, res) => {
     if (!firstname || !lastname || !email || !phone) {
       return res.status(400).json({ message: 'Firstname, lastname, email, and phone are required' });
     }
-    // Uncomment these if you want to use the regex validation
-    // if (!emailRegex.test(email)) {
-    //   return res.status(400).json({ message: 'Invalid email format' });
-    // }
-    // if (!phoneRegex.test(phone)) {
-    //   return res.status(400).json({ message: 'Invalid phone number format' });
-    // }
     if (gender && !['male', 'female', 'other'].includes(gender)) {
       return res.status(400).json({ message: 'Invalid gender. Must be male, female, or other' });
     }
@@ -708,7 +766,6 @@ exports.updateMe = async (req, res) => {
   }
 };
 
- 
 exports.uploadProfileImage = async (req, res) => {
   try {
     if (!req.files || !req.files.profileImage) {
@@ -717,37 +774,31 @@ exports.uploadProfileImage = async (req, res) => {
 
     const file = req.files.profileImage;
 
-   
     const filetypes = /jpeg|jpg|png/;
     const mimetype = filetypes.test(file.mimetype.toLowerCase());
     if (!mimetype) {
       return res.status(400).json({ message: 'Only .jpeg, .jpg, and .png files are allowed!' });
     }
 
-   
     const maxSize = 5 * 1024 * 1024;  
     if (file.size > maxSize) {
       return res.status(400).json({ message: 'File size exceeds 5MB limit' });
     }
 
-   
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-   
     if (user.profileImage) {
       const publicId = user.profileImage.split('/').pop().split('.')[0];
       await cloudinary.uploader.destroy(`profile_images/${publicId}`);
     }
 
-    
     const imageUrl = await uploadToCloudinary(file.data, file.name, {
       folder: 'profile_images', 
     });
 
-    
     user.profileImage = imageUrl;
     await user.save();
 
@@ -768,5 +819,43 @@ exports.uploadProfileImage = async (req, res) => {
   } catch (error) {
     console.error('Upload profile image error:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.updateBackgroundImage = async (req, res) => {
+  try {
+    const userId = req.user._id; // Assume userId is available from authentication middleware
+    const { backgroundImage } = req.body;
+
+    if (!backgroundImage || typeof backgroundImage !== "string") {
+      return res.status(400).json({ message: "Invalid background image URL" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.backgroundImage = backgroundImage;
+    await user.save();
+
+    res.status(200).json({ message: "Background image updated successfully", backgroundImage: user.backgroundImage });
+  } catch (error) {
+    console.error("PATCH /api/users/me/background - Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user._id; 
+    const user = await User.findById(userId).select("email firstname lastname backgroundImage isDisabled phone gender age role profileImage");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("GET /api/users/me - Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

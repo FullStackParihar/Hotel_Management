@@ -5,6 +5,7 @@ const User = require("../model/userModel");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const { validateCoupon } = require("./couponController");
+const { default: mongoose } = require("mongoose");
 require("dotenv").config();
 
 
@@ -66,6 +67,8 @@ const bookingController = {
       const userBookings = await Booking.find({ userId });
       const isFirstBooking = userBookings.length === 0;
 
+      console.log('userrtype--------------', isAdmin);
+
       if (isAdmin && !couponCode) {
         validatedDiscount = 20;
         validatedCouponCode = "ADMIN20";
@@ -73,10 +76,15 @@ const bookingController = {
         validatedDiscount = 50;
         validatedCouponCode = "FIRSTBOOKING50";
       } else if (couponCode) {
+        console.log('coupon code------------------', couponCode);
+
         const couponValidation = await validateCoupon(couponCode, checkInDate);
+        console.log('valid date for coupon---------------', validateCoupon);
         if (!couponValidation.valid) {
           return res.status(400).json({ message: couponValidation.message });
         }
+
+
         validatedDiscount = couponValidation.discount;
         validatedCouponCode = couponCode;
       }
@@ -126,6 +134,34 @@ const bookingController = {
       console.error("Get All Bookings error:", error);
       res.status(500).json({ message: "Server error" });
     }
+
+    // try {
+    //   const bookings = await Booking.aggregate([
+    //     // Lookup userId from User collection
+    //     {
+    //       $lookup: {
+    //         from: "users",
+    //         localField: "userId",
+    //         foreignField: "_id",
+    //         as: "userId",
+    //       },
+    //     },
+    //     // Lookup roomId from Room collection
+    //     {
+    //       $lookup: {
+    //         from: "rooms",
+    //         localField: "roomId",
+    //         foreignField: "_id",
+    //         as: "roomId",
+    //       },
+    //     },
+    //   ]);
+
+    //   res.status(200).json({ bookings });
+    // } catch (error) {
+    //   console.error("Get All Bookings error:", error);
+    //   res.status(500).json({ message: "Server error" });
+    // }
   },
 
   updateBookingStatus: async (req, res) => {
@@ -194,6 +230,8 @@ const bookingController = {
   },
 
   getUserBookings: async (req, res) => {
+
+    //using populate
     try {
       const token = req.headers.authorization?.split(" ")[1];
       if (!token) {
@@ -206,14 +244,89 @@ const bookingController = {
       }
 
       const bookings = await Booking.find({ userId: decoded._id })
-        .populate("roomId", "roomNumber type price");
+        .populate("roomId", "roomNumber type price hotel");
       res.status(200).json(bookings);
     } catch (error) {
       console.error("Get User Bookings error:", error);
       res.status(500).json({ message: "Server error" });
     }
+
+    //using lookup
+
+    // try {
+    //   const token = req.headers.authorization?.split(" ")[1];
+    //   if (!token) {
+    //     return res.status(401).json({ message: "No token provided" });
+    //   }
+
+    //   const decoded = jwt.verify(token, "asdfghjkl");
+    //   if (!decoded || !decoded._id) {
+    //     return res.status(401).json({ message: "Invalid token" });
+    //   }
+
+    //   const bookings = await Booking.aggregate([
+    //     {
+    //       $lookup: {
+    //         from: "rooms",
+    //         localField: "roomId",
+    //         foreignField: "_id",
+    //         as: "roomId",
+    //       },
+    //     },
+    //   ]);
+
+    //   //array----------------- Filter bookings for the specific user
+    //   const userBookings = bookings.filter(b => b.userId.toString() === decoded._id.toString());
+
+    //   res.status(200).json(userBookings);
+    // } catch (error) {
+    //   console.error("Get User Bookings error:", error);
+    //   res.status(500).json({ message: "Server error" });
+    // }
   },
 
+
+  // getUserBookings: async (req, res) => {
+  //   try {
+  //     const token = req.headers.authorization?.split(" ")[1];
+  //     if (!token) {
+  //       return res.status(401).json({ message: "No token provided" });
+  //     }
+  
+  //     const decoded = jwt.verify(token, "asdfghjkl");
+  //     if (!decoded || !decoded._id) {
+  //       return res.status(401).json({ message: "Invalid token" });
+  //     }
+  
+  //     const bookings = await Booking.aggregate([
+       
+  //       {
+  //         $lookup: {
+  //           from: "rooms",
+  //           localField: "roomId",
+  //           foreignField: "_id",
+  //           as: "roomDetails",
+  //         },
+  //       },
+         
+  //       {
+  //         $lookup: {
+  //           from: "hotels",
+  //           localField: "roomDetails.hotel",
+  //           foreignField: "_id",
+  //           as: "hotelDetails",
+  //         },
+  //       },
+         
+  //     ]);
+  
+  //     res.status(200).json(bookings);
+  //   } catch (error) {
+  //     console.error("Get User Bookings error:", error);
+  //     res.status(500).json({ message: "Server error" });
+  //   }
+  // },
+  
   checkInBooking: async (req, res) => {
     try {
       const { bookingId } = req.params;
@@ -222,6 +335,7 @@ const bookingController = {
       if (!token) {
         return res.status(401).json({ message: "No token provided" });
       }
+      console.log('token-------------', token);
 
       const decoded = jwt.verify(token, "asdfghjkl");
       if (!decoded || !decoded._id) {
@@ -278,6 +392,7 @@ const bookingController = {
       booking.status = 'cancelled';
       await booking.save();
 
+      console.log('booking cancle-----------------------');
 
       await Room.findByIdAndUpdate(booking.roomId, { isAvailable: true });
 

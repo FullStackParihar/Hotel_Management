@@ -141,13 +141,34 @@ exports.getRoomsByHotel = async (req, res) => {
     console.error("GET /api/hotels/:hotelId/rooms - Error:", err);
     res.status(500).json({ message: "Failed to fetch rooms" });
   }
+
+  // try {
+  //   const rooms = await Room.aggregate([
+  //     {
+  //      $lookup: {
+  //         // from: "rooms",
+  //         // localField: "hotel",
+  //         // foreignField: "_id",
+  //         // as: "hotels",
+
+  //         from: "hotels",
+  //         localField: "hotel",
+  //         foreignField: "_id",
+  //         as: "hotel"
+  //       },
+  //     },
+  //   ]);
+
+   
+  //   res.json(rooms);
+  // } catch (err) {
+  //   console.error("GET /api/hotels/:hotelId/rooms - Error:", err);
+  //   res.status(500).json({ message: "Failed to fetch rooms" });
+  // }
 };
 exports.getRooms = async (req, res) => {
   try {
     const { id } = req.params;
-
-     
-
     const room = await Room.findById(id).populate("hotel", "name");  
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
@@ -158,6 +179,27 @@ exports.getRooms = async (req, res) => {
     console.error("GET /api/rooms/:id - Error:", error);
     res.status(500).json({ message: "Server error" });
   }
+
+  //no hotel showing 
+
+  // try {
+  //   const rooms = await Room.aggregate([
+  //     {
+  //       $lookup: {
+  //         from: "hotels",  
+  //         localField: "hotel",
+  //         foreignField: "_id",
+  //         as: "hotel",
+  //       },
+  //     },
+  //   ]);
+
+    
+  //   res.status(200).json(rooms);
+  // } catch (error) {
+  //   console.error("GET /api/rooms/:id - Error:", error);
+  //   res.status(500).json({ message: "Server error" });
+  // }
 };
 
 

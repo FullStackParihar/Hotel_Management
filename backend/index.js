@@ -13,16 +13,38 @@ const bookingRoutes = require('./routes/BookingRoute')
 const couponRoutes = require('./routes/CouponRoute');
 const fileUpload = require("express-fileupload");
 
+const cron = require("node-cron");
+const { startCronJobs } = require("./Crons/DeactivateUserCron");
+
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(fileUpload());
 
 
-mongoose.connect("mongodb://localhost:27017/location-manager", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// mongoose.connect("mongodb://localhost:27017/location-manager", {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+// });
+
+// MongoDB Connection
+const connectDB = async () => {
+  try {
+    await mongoose.connect("mongodb://localhost:27017/location-manager", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("MongoDB connected successfully");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    process.exit(1); // Exit process with failure
+  }
+};
+
+
+
+
+
 
 app.use('/api/coupons', couponRoutes);
 
@@ -38,6 +60,23 @@ app.use("/api", RoomRoutes);
 
 app.use("/api/bookings", bookingRoutes);
 
-app.listen(6969, () => {
-  console.log("Server running on port 6969");
-});
+const {
+  scheduleCronJob } = require("./Crons/DeactivateUserCron");
+
+
+scheduleCronJob();
+
+const { scheduleReportCronJob } = require("./Crons/BookingReportCron");
+
+scheduleReportCronJob();
+
+
+const PORT = process.env.PORT || 6969;
+const startServer = async () => {
+  await connectDB();
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+};
+
+startServer();

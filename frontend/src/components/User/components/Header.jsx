@@ -58,39 +58,136 @@
 
 // export default Header;
 
+// import React from "react";
+// import { FaHotel, FaSignOutAlt, FaUser, FaListAlt, FaSun, FaMoon } from "react-icons/fa";
+// import { useNavigate, Link } from "react-router-dom";
+// import useDarkMode from "../hooks";
+
+
+// const Header = ({ userDetails, setShowBookingsModal, loading, setLoading, setError }) => {
+//   const navigate = useNavigate();
+//   const [darkMode, toggleDarkMode] = useDarkMode();
+
+//   const handleLogout = async () => {
+//     setLoading(true);
+//     setError("");
+//     try {
+//       const isLogout = confirm('are you sure to logout ?');
+//       if (isLogout) {
+//         localStorage.removeItem("token");
+//       }
+//       navigate("/");
+//     } catch (err) {
+//       console.error("handleLogout - Error:", err);
+//       setError(err.response?.data?.message || "Failed to log out.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <header className="bg-gray-800/90 backdrop-blur-md shadow-xl sticky top-0 z-50">
+//       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+//         <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 flex items-center">
+//           <FaHotel className="mr-2 text-blue-400" /> My Hotel
+//         </h1>
+//         <button
+//           onClick={toggleDarkMode}
+//           className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 md:hidden"
+//         >
+//           {darkMode ? <FaSun size={18} /> : <FaMoon size={18} />}
+//         </button>
+//         <div className="flex items-center space-x-4">
+//           <div className="flex items-center text-gray-300">
+//             {/* Profile Image===========  ,,,  ======== User Name */}
+//             <div className="flex items-center space-x-2">
+//               {userDetails?.profileImage ? (
+//                 <img
+//                   src={userDetails.profileImage}
+//                   alt="Profile"
+//                   className="w-10 h-10 rounded-full object-cover border-2 border-blue-500 shadow-md"
+//                   onError={(e) => console.error("Image load error:", e)}
+//                 />
+//               ) : (
+//                 <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-gray-400 border-2 border-blue-500 shadow-md">
+//                   <FaUser size={20} />
+//                 </div>
+//               )}
+//               <span className="font-medium">
+//                 {userDetails ? `Hello, ${userDetails.firstname} ${userDetails.lastname}` : "Loading..."}
+//               </span>
+//             </div>
+//           </div>
+
+//           <Link
+//             to="/profile"
+//             className="flex items-center text-gray-300 hover:text-white bg-blue-600/90 hover:bg-blue-600 px-4 py-2 rounded-lg transition-all duration-200 shadow-md"
+//           >
+//             <FaUser className="mr-2" /> Profile
+//           </Link>
+
+//           <button
+//             onClick={() => setShowBookingsModal(true)}
+//             className="flex items-center text-gray-300 hover:text-white bg-blue-600/90 hover:bg-blue-600 px-4 py-2 rounded-lg transition-all duration-200 shadow-md"
+//           >
+//             <FaListAlt className="mr-2" /> My Bookings
+//           </button>
+
+//           <button
+//             onClick={handleLogout}
+//             className="flex items-center text-gray-300 hover:text-white bg-red-600/90 hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200 shadow-md"
+//           >
+//             <FaSignOutAlt className="mr-2" /> Logout
+//           </button>
+//         </div>
+//       </div>
+//     </header>
+//   );
+// };
+
+// export default Header;
+
+
 import React from "react";
-import { FaHotel, FaSignOutAlt, FaUser, FaListAlt } from "react-icons/fa";
+import { FaHotel, FaSignOutAlt, FaUser, FaListAlt, FaSun, FaMoon } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
+import useDarkMode from "../hooks/useDarkMode";
 
 const Header = ({ userDetails, setShowBookingsModal, loading, setLoading, setError }) => {
   const navigate = useNavigate();
+  const [isDarkMode, toggleMode] = useDarkMode();
 
   const handleLogout = async () => {
     setLoading(true);
     setError("");
     try {
-     const isLogout = confirm('are you sure to logout ?');
-     if(isLogout){
-      localStorage.removeItem("token");
-     }
-      navigate("/");
+      const isLogout = confirm('Are you sure to logout?');
+      if (isLogout) {
+        localStorage.removeItem("token");
+        navigate("/");
+      }
     } catch (err) {
       console.error("handleLogout - Error:", err);
       setError(err.response?.data?.message || "Failed to log out.");
     } finally {
       setLoading(false);
-    }
+    }z
   };
 
   return (
-    <header className="bg-gray-800/90 backdrop-blur-md shadow-xl sticky top-0 z-50">
+    <header className={`${isDarkMode ? 'bg-gray-800/90 text-gray-300' : 'bg-gray-200/90 text-gray-800'} backdrop-blur-md shadow-xl sticky top-0 z-50`}>
       <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 flex items-center">
-          <FaHotel className="mr-2 text-blue-400" /> My Hotel
+        <h1 className={`text-3xl font-bold text-transparent bg-clip-text ${isDarkMode ? 'bg-gradient-to-r from-blue-400 to-purple-500' : 'bg-gradient-to-r from-blue-600 to-purple-600'} flex items-center`}>
+          <FaHotel className={`${isDarkMode ? 'text-blue-400' : 'text-blue-600'} mr-2`} /> My Hotel
         </h1>
+       
         <div className="flex items-center space-x-4">
-          <div className="flex items-center text-gray-300">
-            {/* Profile Image===========  ,,,  ======== User Name */}
+
+       
+          <div className={`flex items-center ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+
+          
+            {/* Profile Image and User Name */}
             <div className="flex items-center space-x-2">
               {userDetails?.profileImage ? (
                 <img
@@ -100,7 +197,7 @@ const Header = ({ userDetails, setShowBookingsModal, loading, setLoading, setErr
                   onError={(e) => console.error("Image load error:", e)}
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-gray-400 border-2 border-blue-500 shadow-md">
+                <div className={`${isDarkMode ? 'bg-slate-700 text-gray-400' : 'bg-gray-300 text-gray-600'} w-10 h-10 rounded-full flex items-center justify-center border-2 border-blue-500 shadow-md`}>
                   <FaUser size={20} />
                 </div>
               )}
@@ -109,24 +206,33 @@ const Header = ({ userDetails, setShowBookingsModal, loading, setLoading, setErr
               </span>
             </div>
           </div>
+
           <Link
             to="/profile"
-            className="flex items-center text-gray-300 hover:text-white bg-blue-600/90 hover:bg-blue-600 px-4 py-2 rounded-lg transition-all duration-200 shadow-md"
+            className={`${isDarkMode ? 'text-gray-300 bg-blue-600/90 hover:bg-blue-600 hover:text-white' : 'text-gray-700 bg-blue-500/90 hover:bg-blue-500 hover:text-gray-100'} flex items-center px-4 py-2 rounded-lg transition-all duration-200 shadow-md`}
           >
             <FaUser className="mr-2" /> Profile
           </Link>
+
           <button
             onClick={() => setShowBookingsModal(true)}
-            className="flex items-center text-gray-300 hover:text-white bg-blue-600/90 hover:bg-blue-600 px-4 py-2 rounded-lg transition-all duration-200 shadow-md"
+            className={`${isDarkMode ? 'text-gray-300 bg-blue-600/90 hover:bg-blue-600 hover:text-white' : 'text-gray-700 bg-blue-500/90 hover:bg-blue-500 hover:text-gray-100'} flex items-center px-4 py-2 rounded-lg transition-all duration-200 shadow-md`}
           >
             <FaListAlt className="mr-2" /> My Bookings
           </button>
+
           <button
             onClick={handleLogout}
-            className="flex items-center text-gray-300 hover:text-white bg-red-600/90 hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200 shadow-md"
+            className={`${isDarkMode ? 'text-gray-300 bg-red-600/90 hover:bg-red-600 hover:text-white' : 'text-gray-700 bg-red-500/90 hover:bg-red-500 hover:text-gray-100'} flex items-center px-4 py-2 rounded-lg transition-all duration-200 shadow-md`}
           >
             <FaSignOutAlt className="mr-2" /> Logout
           </button>
+          <button
+          onClick={toggleMode}
+          className={`${isDarkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-300 hover:bg-gray-400'} p-2 rounded-full   transition-colors duration-200`}
+        >
+          {isDarkMode ? <FaSun size={18} className="text-yellow-400" /> : <FaMoon size={18} className="text-gray-600" />}
+        </button>
         </div>
       </div>
     </header>

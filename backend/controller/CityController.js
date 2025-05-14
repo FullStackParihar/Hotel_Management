@@ -1,14 +1,53 @@
+const { default: mongoose } = require('mongoose');
 const City = require('../model/CityModel');
 const Hotel = require("../model/HotelModel");
 
 exports.getCitiesByState = async (req, res) => {
   try {
-    const cities = await City.find({ state: req.params.stateId }).populate("state");
+     const cities = await City.find({ state: req.params.stateId }).populate("state");
+
+  //   const cities = await City.find({ state: req.params.stateId }).aggregate([
+    
+  //     {
+  //       $lookup: {
+  //         from: "states",
+  //         localField: "state",
+  //         foreignField: "_id",
+  //         as: "state"
+  //       }
+  //     },
+       
+  //   ]);
     res.json(cities);
   } catch (err) {
     console.error("GET /api/states/:stateId/cities - Error:", err);
     res.status(500).json({ message: "Failed to fetch cities" });
-  }
+  } 
+
+  // try {
+  //   const { stateId } = req.params;
+
+    
+  //   const cities = await City.aggregate([
+     
+  //     {
+  //       $lookup: {
+  //         from: "states",
+  //         localField: "state",
+  //         foreignField: "_id",
+  //         as: "state"
+  //       }
+  //     },
+     
+  //   ]);
+
+     
+
+  //   res.json(cities);
+  // } catch (err) {
+  //   console.error("GET /api/states/:stateId/cities - Error:", err);
+  //   res.status(500).json({ message: "Failed to fetch cities", error: err.message });
+  // }
 };
 
 exports.addCity = async (req, res) => {
