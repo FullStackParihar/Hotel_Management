@@ -553,12 +553,48 @@ exports.verifyOtp = async (req, res) => {
   }
 };
 
+// exports.login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
+
+//     const token = jwt.sign({ _id: user._id, email: user.email, role: user.role }, secretKey, {
+//       expiresIn: '7d',
+//     });
+
+//     console.log('Login - Token generated:', token, 'Role:', user.role);
+
+//     res.json({
+//       token,
+//       user: {
+//         _id: user._id,
+//         email: user.email,
+//         firstname: user.firstname,
+//         lastname: user.lastname,
+//         role: user.role,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Login error:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+ 
+    if (user.isDisabled) {
+      return res.status(403).json({ message: 'Account is disabled. Please contact Admin.' });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
