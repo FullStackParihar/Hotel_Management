@@ -156,9 +156,7 @@ const checkMissedBookings = async () => {
 
         //   if (user.isDisabled) {  
         //     console.log(`User ${user.email} is already deactivated. Skipping...`);
-
         //   }
-
         //   user.isDisabled = true;  
         //   await user.save();
         //   console.log(`Deactivated user ${user.email} due to ${missedCount} missed check-ins.`);
