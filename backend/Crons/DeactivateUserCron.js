@@ -19,15 +19,14 @@ const sendDeactivationEmail = async (user) => {
     const mailOptions = {
         from: process.env.email,
         to: user.email,
-        subject: "Account Deactivation Notice - Missed Check-Ins",
+        subject: "Account Deactivated ",
         html: `
       <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9;">
-        <h2 style="color: #333;">Account Deactivation Notice</h2>
+        <h2 style="color: #333;">Account Deactivation  </h2>
         <p>Dear ${user.email},</p>
         <p>We have noticed that you have missed check-ins for more than 5 approved bookings in our hotel booking system.</p>
-        <p>As a result, your account has been deactivated. To reactivate your account, please contact our support team at support@hotelbookingapp.com.</p>
-        <p>Thank you for choosing our services!</p>
-        <p>Best regards,<br>The Hotel Booking Team</p>
+        <p>So, your account has been deactivated. To reactivate your account, please contact Admin</p>
+        <p>Best regards,<br>My Hotel Team</p>
       </div>
     `,
     };
@@ -56,7 +55,7 @@ const checkMissedBookings = async () => {
         }).select("userId checkIn checkedIn status");
         console.log(`Found ${pastApprovedBookings.length} approved bookings with past check-in dates and checkedIn: false`);
         if (pastApprovedBookings.length > 0) {
-            console.log("Sample booking:", pastApprovedBookings[0]);
+            console.log("------- booking--------", pastApprovedBookings[0]);
         }
         try {
             const allBookings = await Booking.find();
@@ -96,10 +95,7 @@ const checkMissedBookings = async () => {
                 const missedCount = userData.missedCount;
 
                 const user = await User.findById(userId);
-                if (!user) {
-                    console.log(`User with ID ${userId} not found. Skipping...`);
-                    continue;
-                }
+              
 
                 if (user.isDisabled) {
                     console.log(`User ${user.email} is already deactivated. Skipping...`);

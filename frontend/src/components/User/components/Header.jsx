@@ -171,7 +171,7 @@ const Header = ({ userDetails, setShowBookingsModal, loading, setLoading, setErr
       setError(err.response?.data?.message || "Failed to log out.");
     } finally {
       setLoading(false);
-    }z
+    }
   };
 
   return (

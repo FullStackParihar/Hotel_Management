@@ -11,6 +11,7 @@ const RoomRoutes = require("./routes/RoomRoute");
 const userRoutes = require("./routes/userRoutes");
 const bookingRoutes = require('./routes/BookingRoute')
 const couponRoutes = require('./routes/CouponRoute');
+const analyticsRoutes = require('./routes/DshboardRoute')
 const fileUpload = require("express-fileupload");
 
 const cron = require("node-cron");
@@ -60,15 +61,17 @@ app.use("/api", RoomRoutes);
 
 app.use("/api/bookings", bookingRoutes);
 
-const {
-  scheduleCronJob } = require("./Crons/DeactivateUserCron");
+app.use('/api', analyticsRoutes);
+
+// const {
+//   scheduleCronJob } = require("./Crons/DeactivateUserCron");
 
 
-scheduleCronJob();
+// scheduleCronJob();
 
-const { scheduleReportCronJob } = require("./Crons/BookingReportCron");
+// const { scheduleReportCronJob } = require("./Crons/BookingReportCron");
 
-scheduleReportCronJob();
+// scheduleReportCronJob();
 
 
 const PORT = process.env.PORT || 6969;

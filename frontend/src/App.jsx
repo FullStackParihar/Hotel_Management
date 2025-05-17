@@ -5,12 +5,13 @@ import Login from "./components/authentication/Login";
 import ForgetPassword from "./components/authentication/ForgetPassword";
 import ResetPassword from "./components/authentication/ResetPassword";
 import User from "./components/ui/User";
-import UserPage from "./components/admin/UserPage";
+// import UserPage from "./components/admin/UserPage";
 import AdminPage from "./components/admin/AdminPage";
 import Otp from "./components/authentication/Otp";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import Profile from "./components/User/components/Profile";
 import ResetPasswordd from "./components/User/components/ResetPasswordd";
+import { AdminDashboard, dashboardRoutes } from './components/dashboard/AdminDashboard';
 
 const App = () => {
   const router = createBrowserRouter([
@@ -42,14 +43,14 @@ const App = () => {
         </ProtectedRoute>
       ),
     },
-    {
-      path: "/users",
-      element: (
-        <ProtectedRoute requiredRole="admin">
-          <UserPage />
-        </ProtectedRoute>
-      ),
-    },
+    // {
+    //   path: "/users",
+    //   element: (
+    //     <ProtectedRoute requiredRole="admin">
+    //       <UserPage />
+    //     </ProtectedRoute>
+    //   ),
+    // },
 
     {
       path: "/admin",
@@ -74,6 +75,11 @@ const App = () => {
           <ResetPasswordd />
         </ProtectedRoute>
       ),
+    },
+    {
+      path: '/dashboard',
+      element: <AdminDashboard />,
+      children: dashboardRoutes,
     },
   ]);
 
