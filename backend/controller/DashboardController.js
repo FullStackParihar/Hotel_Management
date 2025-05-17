@@ -714,7 +714,6 @@ const getQuickStats = async (req, res) => {
       }
     });
 
- 
     const totalRooms = rooms.length;
     const currentBookings = bookings.filter(booking => {
       const now = new Date();
