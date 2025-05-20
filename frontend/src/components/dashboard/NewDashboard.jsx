@@ -28,7 +28,7 @@ api.interceptors.request.use(
 const UserDashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(null); 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
