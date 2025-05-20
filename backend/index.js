@@ -12,6 +12,7 @@ const userRoutes = require("./routes/userRoutes");
 const bookingRoutes = require('./routes/BookingRoute')
 const couponRoutes = require('./routes/CouponRoute');
 const analyticsRoutes = require('./routes/DshboardRoute')
+const locationroute = require('./routes/LocationRoute')
 const fileUpload = require("express-fileupload");
 
 const cron = require("node-cron");
@@ -50,6 +51,8 @@ const connectDB = async () => {
 app.use('/api/coupons', couponRoutes);
 
 app.use("/user", userRoutes);
+
+app.use("/api/locations", locationroute);
 
 app.use("/api", StateRoute);
 

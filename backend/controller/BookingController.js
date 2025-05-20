@@ -128,7 +128,8 @@ const bookingController = {
     try {
       const bookings = await Booking.find()
         .populate("userId", "firstname lastname email")
-        .populate("roomId", "roomNumber type price");
+        .populate("roomId", "roomNumber type price hotel");
+        // .populate("roomId", "roomNumber type price");
       res.status(200).json({ bookings });
     } catch (error) {
       console.error("Get All Bookings error:", error);

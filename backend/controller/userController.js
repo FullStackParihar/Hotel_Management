@@ -209,6 +209,17 @@ exports.getUsers = async (req, res) => {
   }
 };
 
+exports.getAllUsers = async (req, res) => {
+  try {
+   
+    const users = await User.find().select('firstname lastname email isDisabled');
+    res.json({ userData: users });
+  } catch (error) {
+    console.error('getUsers error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 exports.patch = async (req, res) => {
   try {
     const { id } = req.params;
