@@ -1,4 +1,4 @@
- 
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -142,8 +142,8 @@ const UserDashboard = () => {
             try {
                 setLoading(true);
                 const response = await api.get('user/me');
-                setUser(response.data);
-                console.log('User data:', response.data);
+                setUser(response.data.user);
+                console.log('User data:', response.data.user);
             } catch (err) {
                 setError('Failed to fetch user details. Please log in again.');
                 console.error('Error fetching user:', err);
@@ -280,7 +280,7 @@ const UserDashboard = () => {
                 const response = await api.get('/user/getAllUsers');
                 const usersData = Array.isArray(response.data) ? response.data : response.data.userData || [];
                 setProfileUsers(usersData);
-                console.log("users-----------------------",response.data.userData)
+                console.log("users-----------------------", response.data.userData)
             } catch (err) {
                 setProfileError('Failed to fetch users. Please check your permissions or try again.');
                 console.error('Error fetching users:', err);
@@ -676,11 +676,19 @@ const UserDashboard = () => {
     };
 
     const handleLogout = () => {
-      
-        confirm('Are you sure you want to log out?')  
-     
-            localStorage.removeItem('token');
-            navigate('/');
+
+        confirm('Are you sure you want to log out?')
+
+        localStorage.removeItem('token');
+        navigate('/');
+    }
+
+    const handleBack = () => {
+
+
+
+
+        navigate('/admin');
     }
 
     if (loading) {
@@ -692,7 +700,8 @@ const UserDashboard = () => {
     }
 
     if (!user) {
-        return <div className="text-center text-gray-600 dark:text-gray-300">No user data available.</div>;
+        return <div className="text-center text-gray-600
+         dark:text-gray-300">No user data available.</div>;
     }
 
     // Navigation Options
@@ -1046,6 +1055,13 @@ const UserDashboard = () => {
                         </button>
                         <span className="text-gray-600 dark:text-gray-300 font-medium">{user.firstname || 'User'}</span>
                         <button
+                            onClick={handleBack}
+                            className="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                        >
+                            <FiLogOut className="mr-2" />
+                            Back to Admin Panel
+                        </button>
+                        <button
                             onClick={handleLogout}
                             className="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"
                         >
@@ -1067,7 +1083,7 @@ const UserDashboard = () => {
                                 className={`flex items-center px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${currentScreen === screen.id
                                     ? 'bg-indigo-700 text-white shadow-lg'
                                     : 'text-indigo-100 hover:bg-indigo-700 hover:text-white'
-                                }`}
+                                    }`}
                             >
                                 {screen.icon}
                                 <span className="ml-2">{screen.label}</span>
@@ -1880,11 +1896,10 @@ const UserDashboard = () => {
                                                             <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-200">{coupon.discount}%</td>
                                                             <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-200">
                                                                 <span
-                                                                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                                                        coupon.isActive
+                                                                    className={`px-2 py-1 rounded-full text-xs font-semibold ${coupon.isActive
                                                                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                                                                             : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     {coupon.isActive ? 'Active' : 'Inactive'}
                                                                 </span>
