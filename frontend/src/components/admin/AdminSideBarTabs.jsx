@@ -385,6 +385,7 @@ import RoomManagement from "./components/RoomManagement";
 import BookingManagement from "./components/BookingManagement";
 import UserPanel from "../User/UserPanel";
 import CouponManagement from "./components/CouponManagement";
+import UserDashboard from "../dashboard/NewDashboard";
 
 const ADLocation = () => {
     const navigate = useNavigate();
@@ -545,6 +546,7 @@ const ADLocation = () => {
     const handleLogout = async () => {
         setLoading(true);
         try {
+            confirm("Are you sure you want to log out?");
             localStorage.removeItem("token");
             navigate("/");
         } catch (err) {
@@ -663,7 +665,16 @@ const ADLocation = () => {
                             </div>
                         </div>
                     )}
-                    {/* Remove the direct rendering of UserDashboard */}
+                    {/* {sidebarTab === "dash" && (
+                        <div>
+                            <h2 className="text-xl font-semibold text-blue-300 mb-4">Location View</h2>
+                            <div className="text-gray-100">
+                                <UserDashboard />
+                            </div>
+                        </div>
+                    )} */}
+                
+                
                 </div>
             </div>
         </div>

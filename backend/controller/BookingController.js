@@ -123,78 +123,124 @@ const bookingController = {
   },
 
 
+// getAllBookings: async (req, res) => {
+//   try {
+//     const bookings = await Booking.find()
+//       .populate("userId", "firstname lastname email")
+//       .populate({
+//         path: "roomId",
+//         populate: [
+//           { path: "hotel", model: "Hotel", select: "name" },
+//           { path: "city", model: "City", select: "name" },
+//           { path: "state", model: "State", select: "name" },
+//         ],
+//       });
 
-  getAllBookings: async (req, res) => {
+//     res.status(200).json({ bookings });
+//   } catch (error) {
+//     console.error("Get All Bookings error:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// },
+
+getAllBookings: async (req, res) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("userId", "firstname lastname email")
+      .populate({
+        path: "roomId",
+        populate: {
+          path: "hotel",
+          model: "Hotel",
+          select: "name city",
+          populate: {
+            path: "city",
+            model: "City",
+            select: "name state",
+            populate: {
+              path: "state",
+              model: "State",
+              select: "name",
+            },
+          },
+        },
+      });
+
+    res.status(200).json({ bookings });
+  } catch (error) {
+    console.error("Get All Bookings error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+},
+
+
+  // getAllBookings: async (req, res) => {
+  //   try {
+  //     const bookings = await Booking.find()
+  //       .populate({
+  //         path: 'roomId',
+  //         populate: [
+  //           { path: 'hotel', model: 'Hotel' },
+  //           { path: 'city', model: 'City' },
+  //           { path: 'state', model: 'State' },
+  //         ],
+  //       });
+  //     res.json({ bookings });
+  //   } catch (error) {
+  //     console.error("Get All Bookings error:", error);
+  //     res.status(500).json({ message: "Server error" });
+
+  //   }
+  // },
+
+    getAllsBookings : async (req, res) => {
     try {
-      const bookings = await Booking.find()
-        .populate("userId", "firstname lastname email")
-        .populate("roomId", "roomNumber type price hotel");
-        // .populate("roomId", "roomNumber type price");
-      res.status(200).json({ bookings });
+        const bookings = await Booking.find()
+            .populate({
+                path: 'roomId',
+                populate: [
+                    { path: 'hotel', model: 'Hotel' },
+                    { path: 'city', model: 'City' },
+                    { path: 'state', model: 'State' },
+                ],
+            });
+        res.json({ bookings });
     } catch (error) {
-      console.error("Get All Bookings error:", error);
-      res.status(500).json({ message: "Server error" });
+        console.error("Get All Bookings error:", error);
+        res.status(500).json({ message: "Server error" });
     }
+},
 
-    // try {
-    //   const bookings = await Booking.aggregate([
-    //     // Lookup userId from User collection
-    //     {
-    //       $lookup: {
-    //         from: "users",
-    //         localField: "userId",
-    //         foreignField: "_id",
-    //         as: "userId",
-    //       },
-    //     },
-    //     // Lookup roomId from Room collection
-    //     {
-    //       $lookup: {
-    //         from: "rooms",
-    //         localField: "roomId",
-    //         foreignField: "_id",
-    //         as: "roomId",
-    //       },
-    //     },
-    //   ]);
+    updateBookingStatus: async (req, res) => {
+      try {
+        const { bookingId } = req.params;
+        const { status } = req.body;
 
-    //   res.status(200).json({ bookings });
-    // } catch (error) {
-    //   console.error("Get All Bookings error:", error);
-    //   res.status(500).json({ message: "Server error" });
-    // }
-  },
+        if (!["pending", "approved", "rejected"].includes(status)) {
+          return res.status(400).json({ message: "Invalid status" });
+        }
 
-  updateBookingStatus: async (req, res) => {
-    try {
-      const { bookingId } = req.params;
-      const { status } = req.body;
+        const booking = await Booking.findById(bookingId).populate("roomId");
+        if (!booking) {
+          return res.status(404).json({ message: "Booking not found" });
+        }
 
-      if (!["pending", "approved", "rejected"].includes(status)) {
-        return res.status(400).json({ message: "Invalid status" });
-      }
+        booking.status = status;
+        await booking.save();
 
-      const booking = await Booking.findById(bookingId).populate("roomId");
-      if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
-      }
+        if (status === "approved" && booking.roomId) {
+          booking.roomId.isAvailable = false;
+          await booking.roomId.save();
 
-      booking.status = status;
-      await booking.save();
+          const populatedBooking = await Booking.findById(bookingId)
+            .populate("userId", "firstname lastname email")
+            .populate("roomId", "roomNumber type price");
 
-      if (status === "approved" && booking.roomId) {
-        booking.roomId.isAvailable = false;
-        await booking.roomId.save();
-
-        const populatedBooking = await Booking.findById(bookingId)
-          .populate("userId", "firstname lastname email")
-          .populate("roomId", "roomNumber type price");
-
-        const mailOptions = {
-          from: process.env.email,
-          to: populatedBooking.userId.email,
-          subject: "Booking Approved - My Hotel",
-          html: `
+          const mailOptions = {
+            from: process.env.email,
+            to: populatedBooking.userId.email,
+            subject: "Booking Approved - My Hotel",
+            html: `
             <h2>Booking Approved</h2>
             <p>Dear ${populatedBooking.userId.firstname} ${populatedBooking.userId.lastname},</p>
             <p>We are pleased to inform you that your booking with My Hotel has been approved. Here are the details:</p>
@@ -213,268 +259,268 @@ const bookingController = {
             <p>We look forward to welcoming you! If you have any questions, feel free to contact us.</p>
             <p>Best regards,<br>My Hotel Team</p>
           `,
-        };
+          };
 
-        try {
-          await transporter.sendMail(mailOptions);
-          console.log("Approval email sent to:", populatedBooking.userId.email);
-        } catch (emailError) {
-          console.error("Error sending approval email:", emailError);
+          try {
+            await transporter.sendMail(mailOptions);
+            console.log("Approval email sent to:", populatedBooking.userId.email);
+          } catch (emailError) {
+            console.error("Error sending approval email:", emailError);
+          }
         }
+
+        res.status(200).json({ message: `Booking ${status} successfully`, booking });
+      } catch (error) {
+        console.error("Update Booking Status error:", error);
+        res.status(500).json({ message: "Server error" });
       }
+    },
 
-      res.status(200).json({ message: `Booking ${status} successfully`, booking });
-    } catch (error) {
-      console.error("Update Booking Status error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  },
+      getUserBookings: async (req, res) => {
 
-  getUserBookings: async (req, res) => {
+        //using populate
+        try {
+          const token = req.headers.authorization?.split(" ")[1];
+          if (!token) {
+            return res.status(401).json({ message: "No token provided" });
+          }
 
-    //using populate
-    try {
-      const token = req.headers.authorization?.split(" ")[1];
-      if (!token) {
-        return res.status(401).json({ message: "No token provided" });
-      }
+          const decoded = jwt.verify(token, "asdfghjkl");
+          if (!decoded || !decoded._id) {
+            return res.status(401).json({ message: "Invalid token" });
+          }
 
-      const decoded = jwt.verify(token, "asdfghjkl");
-      if (!decoded || !decoded._id) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
+          const bookings = await Booking.find({ userId: decoded._id })
+            .populate("roomId", "roomNumber type price hotel");
+          res.status(200).json(bookings);
+        } catch (error) {
+          console.error("Get User Bookings error:", error);
+          res.status(500).json({ message: "Server error" });
+        }
 
-      const bookings = await Booking.find({ userId: decoded._id })
-        .populate("roomId", "roomNumber type price hotel");
-      res.status(200).json(bookings);
-    } catch (error) {
-      console.error("Get User Bookings error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
+        //using lookup
 
-    //using lookup
+        // try {
+        //   const token = req.headers.authorization?.split(" ")[1];
+        //   if (!token) {
+        //     return res.status(401).json({ message: "No token provided" });
+        //   }
 
-    // try {
-    //   const token = req.headers.authorization?.split(" ")[1];
-    //   if (!token) {
-    //     return res.status(401).json({ message: "No token provided" });
+        //   const decoded = jwt.verify(token, "asdfghjkl");
+        //   if (!decoded || !decoded._id) {
+        //     return res.status(401).json({ message: "Invalid token" });
+        //   }
+
+        //   const bookings = await Booking.aggregate([
+        //     {
+        //       $lookup: {
+        //         from: "rooms",
+        //         localField: "roomId",
+        //         foreignField: "_id",
+        //         as: "roomId",
+        //       },
+        //     },
+        //   ]);
+
+        //   //array----------------- Filter bookings for the specific user
+        //   const userBookings = bookings.filter(b => b.userId.toString() === decoded._id.toString());
+
+        //   res.status(200).json(userBookings);
+        // } catch (error) {
+        //   console.error("Get User Bookings error:", error);
+        //   res.status(500).json({ message: "Server error" });
+        // }
+      },
+
+
+        // getUserBookings: async (req, res) => {
+        //   try {
+        //     const token = req.headers.authorization?.split(" ")[1];
+        //     if (!token) {
+        //       return res.status(401).json({ message: "No token provided" });
+        //     }
+
+        //     const decoded = jwt.verify(token, "asdfghjkl");
+        //     if (!decoded || !decoded._id) {
+        //       return res.status(401).json({ message: "Invalid token" });
+        //     }
+
+        //     const bookings = await Booking.aggregate([
+
+        //       {
+        //         $lookup: {
+        //           from: "rooms",
+        //           localField: "roomId",
+        //           foreignField: "_id",
+        //           as: "roomDetails",
+        //         },
+        //       },
+
+        //       {
+        //         $lookup: {
+        //           from: "hotels",
+        //           localField: "roomDetails.hotel",
+        //           foreignField: "_id",
+        //           as: "hotelDetails",
+        //         },
+        //       },
+
+        //     ]);
+
+        //     res.status(200).json(bookings);
+        //   } catch (error) {
+        //     console.error("Get User Bookings error:", error);
+        //     res.status(500).json({ message: "Server error" });
+        //   }
+        // },
+
+        checkInBooking: async (req, res) => {
+          try {
+            const { bookingId } = req.params;
+
+            const token = req.headers.authorization?.split(" ")[1];
+            if (!token) {
+              return res.status(401).json({ message: "No token provided" });
+            }
+            console.log('token-------------', token);
+
+            const decoded = jwt.verify(token, "asdfghjkl");
+            if (!decoded || !decoded._id) {
+              return res.status(401).json({ message: "Invalid token" });
+            }
+
+            const booking = await Booking.findById(bookingId);
+            if (!booking) {
+              return res.status(404).json({ message: "Booking not found" });
+            }
+
+            if (booking.userId.toString() !== decoded._id) {
+              return res.status(403).json({ message: "Unauthorized: You can only check in your own bookings" });
+            }
+
+            if (booking.status !== "approved") {
+              return res.status(400).json({ message: "Booking must be approved before checking in" });
+            }
+
+            if (booking.checkedIn) {
+              return res.status(400).json({ message: "Booking is already checked in" });
+            }
+
+            booking.checkedIn = true;
+            await booking.save();
+
+            res.status(200).json({ message: "Checked in successfully", booking });
+          } catch (error) {
+            console.error("Check-In Booking error:", error);
+            res.status(500).json({ message: "Server error" });
+          }
+        },
+
+          cancelBooking: async (req, res) => {
+            try {
+              const bookingId = req.params.bookingId;
+
+
+              const booking = await Booking.findById(bookingId);
+              if (!booking) {
+                return res.status(404).json({ message: 'Booking not found' });
+              }
+
+
+              if (booking.status === 'cancelled') {
+                return res.status(400).json({ message: 'Booking is already cancelled' });
+              }
+
+
+              if (booking.checkedIn) {
+                return res.status(400).json({ message: 'Cannot cancel a checked-in booking' });
+              }
+
+              booking.status = 'cancelled';
+              await booking.save();
+
+              console.log('booking cancle-----------------------');
+
+              await Room.findByIdAndUpdate(booking.roomId, { isAvailable: true });
+
+              res.status(200).json({ message: 'Booking cancelled successfully' });
+            } catch (err) {
+              console.error('Cancel Booking Error:', err);
+              res.status(500).json({ message: 'Server error', error: err.message });
+            }
+          },
+            DeleteBooking: async (req, res) => {
+              try {
+                const booking = await Booking.findById(req.params.id);
+                if (!booking) {
+                  return res.status(404).json({ message: "Booking not found" });
+                }
+                // Optional: Add permission checks (e.g., only admins can delete)
+                // if (req.user.role !== "admin") {
+                //     return res.status(403).json({ message: "Unauthorized" });
+                // }
+
+                const room = await Room.findById(booking.roomId);
+                if (!room) {
+                  return res.status(404).json({ message: "Associated room not found" });
+                }
+                await Booking.findByIdAndDelete(req.params.id);
+                room.isAvailable = true;
+                await room.save();
+                res.json({ message: "Booking deleted successfully" });
+              } catch (error) {
+                console.error("Error deleting booking:", error);
+                res.status(500).json({ message: "Server error" });
+              }
+            }
+
+    //   DeleteBooking: async (req, res) => {
+    //   const { bookingId } = req.params;
+
+    //   try {
+    //     // Check if req.user is set
+    //     if (!req.user) {
+    //       return res.status(401).json({ message: 'User not authenticated' });
+    //     }
+
+    //     const userId = req.user._id;
+    //     const userRole = req.user.role;
+
+    //     // Find the booking
+    //     const booking = await Booking.findById(bookingId);
+    //     if (!booking) {
+    //       return res.status(404).json({ message: "Booking not found" });
+    //     }
+
+    //     // Check if the user is authorized to delete the booking
+    //     if (userRole !== 'admin' && booking.userId.toString() !== userId.toString()) {
+    //       return res.status(403).json({ message: "You are not authorized to delete this booking" });
+    //     }
+
+    //     // Get the room associated with the booking
+    //     const room = await Room.findById(booking.roomId);
+    //     if (!room) {
+    //       return res.status(404).json({ message: "Associated room not found" });
+    //     }
+
+    //     // Delete the booking
+    //     await Booking.findByIdAndDelete(bookingId);
+
+    //     // Set the room's isAvailable to true
+    //     room.isAvailable = true;
+    //     await room.save();
+
+    //     res.status(200).json({ message: "Booking deleted successfully, room is now available" });
+    //   } catch (error) {
+    //     console.error("deleteBooking - Error:", error);
+    //     res.status(500).json({ message: "Server error", error: error.message });
     //   }
+    // },
 
-    //   const decoded = jwt.verify(token, "asdfghjkl");
-    //   if (!decoded || !decoded._id) {
-    //     return res.status(401).json({ message: "Invalid token" });
-    //   }
-
-    //   const bookings = await Booking.aggregate([
-    //     {
-    //       $lookup: {
-    //         from: "rooms",
-    //         localField: "roomId",
-    //         foreignField: "_id",
-    //         as: "roomId",
-    //       },
-    //     },
-    //   ]);
-
-    //   //array----------------- Filter bookings for the specific user
-    //   const userBookings = bookings.filter(b => b.userId.toString() === decoded._id.toString());
-
-    //   res.status(200).json(userBookings);
-    // } catch (error) {
-    //   console.error("Get User Bookings error:", error);
-    //   res.status(500).json({ message: "Server error" });
-    // }
-  },
-
-
-  // getUserBookings: async (req, res) => {
-  //   try {
-  //     const token = req.headers.authorization?.split(" ")[1];
-  //     if (!token) {
-  //       return res.status(401).json({ message: "No token provided" });
-  //     }
-  
-  //     const decoded = jwt.verify(token, "asdfghjkl");
-  //     if (!decoded || !decoded._id) {
-  //       return res.status(401).json({ message: "Invalid token" });
-  //     }
-  
-  //     const bookings = await Booking.aggregate([
-       
-  //       {
-  //         $lookup: {
-  //           from: "rooms",
-  //           localField: "roomId",
-  //           foreignField: "_id",
-  //           as: "roomDetails",
-  //         },
-  //       },
-         
-  //       {
-  //         $lookup: {
-  //           from: "hotels",
-  //           localField: "roomDetails.hotel",
-  //           foreignField: "_id",
-  //           as: "hotelDetails",
-  //         },
-  //       },
-         
-  //     ]);
-  
-  //     res.status(200).json(bookings);
-  //   } catch (error) {
-  //     console.error("Get User Bookings error:", error);
-  //     res.status(500).json({ message: "Server error" });
-  //   }
-  // },
-  
-  checkInBooking: async (req, res) => {
-    try {
-      const { bookingId } = req.params;
-
-      const token = req.headers.authorization?.split(" ")[1];
-      if (!token) {
-        return res.status(401).json({ message: "No token provided" });
-      }
-      console.log('token-------------', token);
-
-      const decoded = jwt.verify(token, "asdfghjkl");
-      if (!decoded || !decoded._id) {
-        return res.status(401).json({ message: "Invalid token" });
-      }
-
-      const booking = await Booking.findById(bookingId);
-      if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
-      }
-
-      if (booking.userId.toString() !== decoded._id) {
-        return res.status(403).json({ message: "Unauthorized: You can only check in your own bookings" });
-      }
-
-      if (booking.status !== "approved") {
-        return res.status(400).json({ message: "Booking must be approved before checking in" });
-      }
-
-      if (booking.checkedIn) {
-        return res.status(400).json({ message: "Booking is already checked in" });
-      }
-
-      booking.checkedIn = true;
-      await booking.save();
-
-      res.status(200).json({ message: "Checked in successfully", booking });
-    } catch (error) {
-      console.error("Check-In Booking error:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  },
-
-  cancelBooking: async (req, res) => {
-    try {
-      const bookingId = req.params.bookingId;
-
-
-      const booking = await Booking.findById(bookingId);
-      if (!booking) {
-        return res.status(404).json({ message: 'Booking not found' });
-      }
-
-
-      if (booking.status === 'cancelled') {
-        return res.status(400).json({ message: 'Booking is already cancelled' });
-      }
-
-
-      if (booking.checkedIn) {
-        return res.status(400).json({ message: 'Cannot cancel a checked-in booking' });
-      }
-
-      booking.status = 'cancelled';
-      await booking.save();
-
-      console.log('booking cancle-----------------------');
-
-      await Room.findByIdAndUpdate(booking.roomId, { isAvailable: true });
-
-      res.status(200).json({ message: 'Booking cancelled successfully' });
-    } catch (err) {
-      console.error('Cancel Booking Error:', err);
-      res.status(500).json({ message: 'Server error', error: err.message });
-    }
-  },
-  DeleteBooking: async (req, res) => {
-    try {
-      const booking = await Booking.findById(req.params.id);
-      if (!booking) {
-        return res.status(404).json({ message: "Booking not found" });
-      }
-      // Optional: Add permission checks (e.g., only admins can delete)
-      // if (req.user.role !== "admin") {
-      //     return res.status(403).json({ message: "Unauthorized" });
-      // }
-
-      const room = await Room.findById(booking.roomId);
-      if (!room) {
-        return res.status(404).json({ message: "Associated room not found" });
-      }
-      await Booking.findByIdAndDelete(req.params.id);
-      room.isAvailable = true;
-      await room.save();
-      res.json({ message: "Booking deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting booking:", error);
-      res.status(500).json({ message: "Server error" });
-    }
-  }
-
-  //   DeleteBooking: async (req, res) => {
-  //   const { bookingId } = req.params;
-
-  //   try {
-  //     // Check if req.user is set
-  //     if (!req.user) {
-  //       return res.status(401).json({ message: 'User not authenticated' });
-  //     }
-
-  //     const userId = req.user._id;
-  //     const userRole = req.user.role;
-
-  //     // Find the booking
-  //     const booking = await Booking.findById(bookingId);
-  //     if (!booking) {
-  //       return res.status(404).json({ message: "Booking not found" });
-  //     }
-
-  //     // Check if the user is authorized to delete the booking
-  //     if (userRole !== 'admin' && booking.userId.toString() !== userId.toString()) {
-  //       return res.status(403).json({ message: "You are not authorized to delete this booking" });
-  //     }
-
-  //     // Get the room associated with the booking
-  //     const room = await Room.findById(booking.roomId);
-  //     if (!room) {
-  //       return res.status(404).json({ message: "Associated room not found" });
-  //     }
-
-  //     // Delete the booking
-  //     await Booking.findByIdAndDelete(bookingId);
-
-  //     // Set the room's isAvailable to true
-  //     room.isAvailable = true;
-  //     await room.save();
-
-  //     res.status(200).json({ message: "Booking deleted successfully, room is now available" });
-  //   } catch (error) {
-  //     console.error("deleteBooking - Error:", error);
-  //     res.status(500).json({ message: "Server error", error: error.message });
-  //   }
-  // },
-
-};
+  };
 
 
 
 
 
-module.exports = bookingController;
+  module.exports = bookingController;

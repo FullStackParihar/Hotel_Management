@@ -10,7 +10,9 @@ const roomSchema = new mongoose.Schema({
   images: [{ type: String }],  
   amenities: [{ type: String }],  
   description: { type: String },
-  capacity: { type: Number, min: 1 },  
+  capacity: { type: Number, min: 1 }, 
+  // city: { type: mongoose.Schema.Types.ObjectId, ref: 'City', required: true },
+  // state: { type: mongoose.Schema.Types.ObjectId, ref: 'State', required: true }, 
 });
 
 module.exports = mongoose.model("Room", roomSchema);

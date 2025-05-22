@@ -210,7 +210,7 @@ import Otp from "./components/authentication/Otp";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import Profile from "./components/User/components/Profile";
 import ResetPasswordd from "./components/User/components/ResetPasswordd";
-import UserDashboard, { dashboardRoutes } from './components/dashboard/NewDashboard';
+import UserDashboard from './components/dashboard/NewDashboard';
 
 const App = () => {
   const router = createBrowserRouter([
@@ -282,7 +282,7 @@ const App = () => {
             <UserDashboard />
         </ProtectedRoute>
     ),
-    children: dashboardRoutes,
+    // children: dashboardRoutes,
 },
   ]);
 
