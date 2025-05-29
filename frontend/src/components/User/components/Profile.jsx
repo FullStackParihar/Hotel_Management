@@ -961,7 +961,7 @@ const Profile = () => {
 
   const baseURL = 'http://localhost:6969';
 
-  // Predefined list of background images
+  // Predefined list of background images--------------------------------------------------
   const backgroundImages = [
 
     "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1920",
@@ -1073,7 +1073,7 @@ const Profile = () => {
       setSelectedBackgroundImage(imageUrl);
       setSuccess('Background image updated successfully!');
 
-      // Dispatch a custom event to notify other components
+    
       window.dispatchEvent(new Event('backgroundImageUpdated'));
     } catch (err) {
       console.error("handleBackgroundImageChange - Error:", err);

@@ -346,7 +346,7 @@ const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) =>
   const [loading, setLoading] = useState(false);
   const [hotelNames, setHotelNames] = useState({});
   const baseURL = "http://localhost:6969";
-  const [isDarkMode] = useDarkMode(); // Use the useDarkMode hook
+  const [isDarkMode] = useDarkMode();  
 
   const fetchUserBookings = async () => {
     setLoading(true);

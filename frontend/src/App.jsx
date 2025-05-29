@@ -81,7 +81,7 @@
 //       element: <AdminDashboard />,
 //       children: dashboardRoutes,
 //     },
-    
+
 //   ]);
 
 //   return <RouterProvider router={router} />;
@@ -211,6 +211,7 @@ import ProtectedRoute from "./components/routes/ProtectedRoute";
 import Profile from "./components/User/components/Profile";
 import ResetPasswordd from "./components/User/components/ResetPasswordd";
 import UserDashboard from './components/dashboard/NewDashboard';
+import UserrDashboard from "./components/dashboard/components/UserDashboard";
 
 const App = () => {
   const router = createBrowserRouter([
@@ -276,14 +277,14 @@ const App = () => {
     //   children: dashboardRoutes,
     // },
     {
-    path: '/user-dashboard',
-    element: (
+      path: '/user-dashboard',
+      element: (
         <ProtectedRoute requiredRole={["admin", "user"]}>
-            <UserDashboard />
+          <UserrDashboard />
         </ProtectedRoute>
-    ),
-    // children: dashboardRoutes,
-},
+      ),
+      // children: dashboardRoutes,
+    },
   ]);
 
   return <RouterProvider router={router} />;

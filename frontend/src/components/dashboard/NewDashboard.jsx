@@ -6,6 +6,7 @@ import { FiBook, FiHome, FiMap, FiTag, FiLogOut, FiMoon, FiSun, FiDollarSign, Fi
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, LineElement, PointElement } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import useDarkMode from '../User/hooks/useDarkMode';
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, LineElement, PointElement, ChartDataLabels);
 
@@ -30,18 +31,20 @@ api.interceptors.request.use(
 
 const UserDashboard = () => {
     const [currentScreen, setCurrentScreen] = useState('overview');
-    const [darkMode, setDarkMode] = useState(false);
+    // const [darkMode, setDarkMode] = useState(false);
+    //   const [isDarkMode] = useDarkMode(); 
+
+    const [isDarkMode, toggleMode] = useDarkMode();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    // Overview Section States
+
     const [overviewStats, setOverviewStats] = useState({ bookings: 0, hotels: 0, locations: 0, coupons: 0 });
     const [overviewLoading, setOverviewLoading] = useState(false);
     const [overviewError, setOverviewError] = useState(null);
 
-    // Revenue Section States
     const [bookings, setBookings] = useState([]);
     const [revenueData, setRevenueData] = useState({
         totalRevenue: 0,
@@ -60,17 +63,17 @@ const UserDashboard = () => {
     const [revenueLoading, setRevenueLoading] = useState(false);
     const [revenueError, setRevenueError] = useState(null);
 
-    // Profile Section States
+
     const [profileUsers, setProfileUsers] = useState([]);
     const [profileLoading, setProfileLoading] = useState(false);
     const [profileError, setProfileError] = useState(null);
 
-    // Users Section States (for admins)
+
     const [users, setUsers] = useState([]);
     const [usersLoading, setUsersLoading] = useState(false);
     const [usersError, setUsersError] = useState(null);
 
-    // Bookings Section States
+
     const [bookingsList, setBookingsList] = useState([]);
     const [bookingsFilters, setBookingsFilters] = useState({
         status: '',
@@ -85,24 +88,24 @@ const UserDashboard = () => {
     const [bookingsLoading, setBookingsLoading] = useState(false);
     const [bookingsError, setBookingsError] = useState(null);
 
-    // Locations Section States
+
     const [locations, setLocations] = useState([]);
     const [locationsLoading, setLocationsLoading] = useState(false);
     const [locationsError, setLocationsError] = useState(null);
 
-    // States Section States
+
     const [states, setStates] = useState([]);
     const [statesLoading, setStatesLoading] = useState(false);
     const [statesError, setStatesError] = useState(null);
 
-    // Cities Section States
+
     const [citiesStates, setCitiesStates] = useState([]);
     const [selectedState, setSelectedState] = useState('');
     const [cities, setCities] = useState([]);
     const [citiesLoading, setCitiesLoading] = useState(false);
     const [citiesError, setCitiesError] = useState(null);
 
-    // Hotels Section States
+
     const [hotelsStates, setHotelsStates] = useState([]);
     const [hotelsCities, setHotelsCities] = useState([]);
     const [selectedHotelState, setSelectedHotelState] = useState('');
@@ -114,7 +117,7 @@ const UserDashboard = () => {
     const [hotelsLoading, setHotelsLoading] = useState(false);
     const [hotelsError, setHotelsError] = useState(null);
 
-    // Rooms Section States
+
     const [roomsStates, setRoomsStates] = useState([]);
     const [roomsCities, setRoomsCities] = useState([]);
     const [roomsHotels, setRoomsHotels] = useState([]);
@@ -128,7 +131,7 @@ const UserDashboard = () => {
     const [roomsLoading, setRoomsLoading] = useState(false);
     const [roomsError, setRoomsError] = useState(null);
 
-    // Coupons Section States
+
     const [allCoupons, setAllCoupons] = useState([]);
     const [availableCoupons, setAvailableCoupons] = useState([]);
     const [couponsLoading, setCouponsLoading] = useState(false);
@@ -136,7 +139,7 @@ const UserDashboard = () => {
 
     const isAdmin = user?.role === 'admin';
 
-    // Fetch User Data
+    // Fetch User Data-------------------------------------------------------------------------
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -154,7 +157,7 @@ const UserDashboard = () => {
         fetchUser();
     }, []);
 
-    // Overview Section Data Fetch
+    // Overview Section Data Fetch--------------------------------------------------------
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -181,7 +184,7 @@ const UserDashboard = () => {
         if (user && currentScreen === 'overview') fetchStats();
     }, [user, isAdmin, currentScreen]);
 
-    // Revenue Section Data Fetch
+    // Revenue Section Data Fetch----------------------------------------
     useEffect(() => {
         const fetchBookings = async () => {
             try {
@@ -214,7 +217,7 @@ const UserDashboard = () => {
                 const checkInDate = new Date(booking.checkIn);
                 const { startDate, endDate, state, city, hotel } = revenueFilters;
 
-                // Date Range Filter
+                // Date Range Filter================
                 if (startDate && checkInDate < new Date(startDate)) continue;
                 if (endDate && checkInDate > new Date(endDate)) continue;
 
@@ -225,7 +228,7 @@ const UserDashboard = () => {
                 const cityObj = hotelObj.city;
                 const stateObj = cityObj.state;
 
-                // Location Filters
+                // Location Filters=====================
                 if (state && stateObj.name !== state) continue;
                 if (city && cityObj.name !== city) continue;
                 if (hotel && hotelObj.name !== hotel) continue;
@@ -236,9 +239,9 @@ const UserDashboard = () => {
                 const stateName = stateObj.name || 'Unknown';
                 const cityName = cityObj.name || 'Unknown';
                 const hotelName = hotelObj.name || 'Unknown';
-                const dateKey = checkInDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                const dateKey = checkInDate.toISOString().split('T')[0]; // yyyy-mm-dd
 
-                // Aggregate by State
+                // Aggregate by State========================
                 byStateMap[stateName] = (byStateMap[stateName] || 0) + revenue;
 
                 // Aggregate by City
@@ -272,7 +275,7 @@ const UserDashboard = () => {
         }
     }, [bookings, revenueFilters]);
 
-    // Users Section Data Fetch
+    // Users Section Data Fetch--------------------------------------------------
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -291,7 +294,7 @@ const UserDashboard = () => {
         if (user && currentScreen === 'profile') fetchUsers();
     }, [user, currentScreen]);
 
-    // Users Section Data Fetch (for admins)
+    // Users Section Data Fetch (for admins)--------------------------------------------------
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -309,7 +312,7 @@ const UserDashboard = () => {
         if (user && isAdmin && currentScreen === 'users') fetchUsers();
     }, [user, isAdmin, currentScreen]);
 
-    // Bookings Section Data Fetch
+    // Bookings Section Data Fetch---------------------------------------------------------
     useEffect(() => {
         const fetchBookings = async () => {
             try {
@@ -328,7 +331,7 @@ const UserDashboard = () => {
         if (user && currentScreen === 'bookings') fetchBookings();
     }, [user, isAdmin, currentScreen]);
 
-    // Filtered and Sorted Bookings
+    // Filtered and Sorted Bookings------------------------------------------------------------
     const filteredBookings = useMemo(() => {
         let filtered = [...bookingsList];
 
@@ -376,7 +379,7 @@ const UserDashboard = () => {
 
     const totalBookingPages = Math.ceil(filteredBookings.length / bookingsPerPage);
 
-    // Locations Section Data Fetch
+    // Locations Section Data Fetch------------------------------------------------
     useEffect(() => {
         const fetchLocations = async () => {
             try {
@@ -393,7 +396,7 @@ const UserDashboard = () => {
         if (user && currentScreen === 'locations') fetchLocations();
     }, [user, currentScreen]);
 
-    // States Section Data Fetch
+    // States Section Data Fetch----------------------------------------------------------
     useEffect(() => {
         const fetchStates = async () => {
             try {
@@ -410,7 +413,7 @@ const UserDashboard = () => {
         if (user && currentScreen === 'states') fetchStates();
     }, [user, currentScreen]);
 
-    // Cities Section Data Fetch
+    // Cities Section Data Fetch--------------------------------------------------------
     useEffect(() => {
         const fetchStates = async () => {
             try {
@@ -448,7 +451,7 @@ const UserDashboard = () => {
         }
     }, [selectedState, currentScreen]);
 
-    // Hotels Section Data Fetch
+    // Hotels Section Data Fetch-----------------------------------------
     useEffect(() => {
         const fetchStates = async () => {
             try {
@@ -525,7 +528,7 @@ const UserDashboard = () => {
         }
     };
 
-    // Filtered and Paginated Hotels
+    // Filtered and Paginated Hotels----------------------------------------------------
     const filteredHotels = useMemo(() => {
         let filtered = [...hotels];
         if (hotelsSearch) {
@@ -543,7 +546,7 @@ const UserDashboard = () => {
 
     const totalHotelPages = Math.ceil(filteredHotels.length / hotelsPerPage);
 
-    // Rooms Section Data Fetch
+    // Rooms Section Data Fetch--------------------------------------------------
     useEffect(() => {
         const fetchStates = async () => {
             try {
@@ -630,7 +633,7 @@ const UserDashboard = () => {
         }
     }, [selectedRoomHotel, currentScreen]);
 
-    // Filtered and Paginated Rooms
+    // Filtered and Paginated Rooms---------------------------------------------------------
     const filteredRooms = useMemo(() => {
         let filtered = [...rooms];
         if (roomsSearch) {
@@ -649,7 +652,7 @@ const UserDashboard = () => {
 
     const totalRoomPages = Math.ceil(filteredRooms.length / roomsPerPage);
 
-    // Coupons Section Data Fetch
+    // Coupons Section Data Fetch------------------------------------------------------------------
     useEffect(() => {
         const fetchCoupons = async () => {
             try {
@@ -670,10 +673,10 @@ const UserDashboard = () => {
         if (user && currentScreen === 'coupons') fetchCoupons();
     }, [user, currentScreen]);
 
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
-        document.documentElement.classList.toggle('dark');
-    };
+    // const toggleDarkMode = () => {
+    //     setDarkMode(!darkMode);
+    //     document.documentElement.classList.toggle('dark');
+    // };
 
     const handleLogout = () => {
 
@@ -704,15 +707,15 @@ const UserDashboard = () => {
          dark:text-gray-300">No user data available.</div>;
     }
 
-    // Navigation Options
+    // tab navigation Options-----------------------------------------------
     const screens = [
         { id: 'overview', label: 'Overview', icon: <FiHome /> },
         { id: 'profile', label: 'Users', icon: <FiUsers /> },
-        ...(isAdmin ? [{ id: 'users', label: 'Users', icon: <FiUsers /> }] : []),
+
         { id: 'revenue', label: 'Revenue', icon: <FiDollarSign /> },
         { id: 'bookings', label: 'Bookings', icon: <FiBook /> },
-        { id: 'states', label: 'States', icon: <FiMap /> },
-        { id: 'cities', label: 'Cities', icon: <FiMapPin /> },
+        // { id: 'states', label: 'States', icon: <FiMap /> },
+        // { id: 'cities', label: 'Cities', icon: <FiMapPin /> },
         { id: 'hotels', label: 'Hotels', icon: <FiHome /> },
         { id: 'rooms', label: 'Rooms', icon: <FiKey /> },
         { id: 'coupons', label: 'Coupons', icon: <FiTag /> },
@@ -757,20 +760,20 @@ const UserDashboard = () => {
                 title: {
                     display: true,
                     text: 'Count',
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 14, weight: 'bold' },
                 },
                 ticks: {
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 12 },
                 },
                 grid: {
-                    color: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                    color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
                 },
             },
             x: {
                 ticks: {
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 12 },
                 },
                 grid: {
@@ -784,17 +787,17 @@ const UserDashboard = () => {
             },
             datalabels: {
                 display: true,
-                color: darkMode ? '#FFFFFF' : '#000000',
+                color: isDarkMode ? '#FFFFFF' : '#000000',
                 font: { weight: 'bold', size: 12 },
                 anchor: 'end',
                 align: 'top',
                 formatter: value => value.toLocaleString(),
             },
             tooltip: {
-                backgroundColor: darkMode ? '#1F2937' : '#FFFFFF',
-                titleColor: darkMode ? '#FFFFFF' : '#000000',
-                bodyColor: darkMode ? '#D1D5DB' : '#4B5563',
-                borderColor: darkMode ? '#4B5563' : '#E5E7EB',
+                backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                titleColor: isDarkMode ? '#FFFFFF' : '#000000',
+                bodyColor: isDarkMode ? '#D1D5DB' : '#4B5563',
+                borderColor: isDarkMode ? '#4B5563' : '#E5E7EB',
                 borderWidth: 1,
                 cornerRadius: 8,
             },
@@ -811,7 +814,7 @@ const UserDashboard = () => {
             legend: {
                 position: 'bottom',
                 labels: {
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 12 },
                     padding: 20,
                     boxWidth: 20,
@@ -824,10 +827,10 @@ const UserDashboard = () => {
                 formatter: value => value.toLocaleString(),
             },
             tooltip: {
-                backgroundColor: darkMode ? '#1F2937' : '#FFFFFF',
-                titleColor: darkMode ? '#FFFFFF' : '#000000',
-                bodyColor: darkMode ? '#D1D5DB' : '#4B5563',
-                borderColor: darkMode ? '#4B5563' : '#E5E7EB',
+                backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                titleColor: isDarkMode ? '#FFFFFF' : '#000000',
+                bodyColor: isDarkMode ? '#D1D5DB' : '#4B5563',
+                borderColor: isDarkMode ? '#4B5563' : '#E5E7EB',
                 borderWidth: 1,
                 cornerRadius: 8,
             },
@@ -921,21 +924,21 @@ const UserDashboard = () => {
                 title: {
                     display: true,
                     text: 'Revenue (₹)',
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 14, weight: 'bold' },
                 },
                 ticks: {
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 12 },
                     callback: value => `₹${value.toLocaleString('en-IN')}`,
                 },
                 grid: {
-                    color: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                    color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
                 },
             },
             x: {
                 ticks: {
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 12 },
                     maxRotation: 45,
                     minRotation: 45,
@@ -950,23 +953,23 @@ const UserDashboard = () => {
                 display: true,
                 position: 'top',
                 labels: {
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 12 },
                 },
             },
             datalabels: {
                 display: true,
-                color: darkMode ? '#FFFFFF' : '#000000',
+                color: isDarkMode ? '#FFFFFF' : '#000000',
                 font: { weight: 'bold', size: 10 },
                 anchor: 'end',
                 align: 'top',
                 formatter: value => `₹${value.toLocaleString('en-IN')}`,
             },
             tooltip: {
-                backgroundColor: darkMode ? '#1F2937' : '#FFFFFF',
-                titleColor: darkMode ? '#FFFFFF' : '#000000',
-                bodyColor: darkMode ? '#D1D5DB' : '#4B5563',
-                borderColor: darkMode ? '#4B5563' : '#E5E7EB',
+                backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                titleColor: isDarkMode ? '#FFFFFF' : '#000000',
+                bodyColor: isDarkMode ? '#D1D5DB' : '#4B5563',
+                borderColor: isDarkMode ? '#4B5563' : '#E5E7EB',
                 borderWidth: 1,
                 cornerRadius: 8,
                 callbacks: {
@@ -988,21 +991,21 @@ const UserDashboard = () => {
                 title: {
                     display: true,
                     text: 'Revenue (₹)',
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 14, weight: 'bold' },
                 },
                 ticks: {
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 12 },
                     callback: value => `₹${value.toLocaleString('en-IN')}`,
                 },
                 grid: {
-                    color: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                    color: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
                 },
             },
             x: {
                 ticks: {
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 12 },
                     maxTicksLimit: 10,
                 },
@@ -1016,15 +1019,15 @@ const UserDashboard = () => {
                 display: true,
                 position: 'top',
                 labels: {
-                    color: darkMode ? '#D1D5DB' : '#4B5563',
+                    color: isDarkMode ? '#D1D5DB' : '#4B5563',
                     font: { size: 12 },
                 },
             },
             tooltip: {
-                backgroundColor: darkMode ? '#1F2937' : '#FFFFFF',
-                titleColor: darkMode ? '#FFFFFF' : '#000000',
-                bodyColor: darkMode ? '#D1D5DB' : '#4B5563',
-                borderColor: darkMode ? '#4B5563' : '#E5E7EB',
+                backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+                titleColor: isDarkMode ? '#FFFFFF' : '#000000',
+                bodyColor: isDarkMode ? '#D1D5DB' : '#4B5563',
+                borderColor: isDarkMode ? '#4B5563' : '#E5E7EB',
                 borderWidth: 1,
                 cornerRadius: 8,
                 callbacks: {
@@ -1034,24 +1037,24 @@ const UserDashboard = () => {
         },
     };
 
-    // Unique filter options for Revenue Section
+
     const uniqueStates = [...new Set(bookings.map(b => b.roomId?.hotel?.city?.state?.name).filter(Boolean))];
     const uniqueCities = [...new Set(bookings.map(b => b.roomId?.hotel?.city?.name).filter(Boolean))];
     const uniqueHotels = [...new Set(bookings.map(b => b.roomId?.hotel?.name).filter(Boolean))];
 
-    // Unique filter options for Bookings Section
+
     const uniqueBookingStatuses = [...new Set(bookingsList.map(b => b.status).filter(Boolean))];
     const uniqueBookingHotels = [...new Set(bookingsList.map(b => b.roomId?.hotel?.name).filter(Boolean))];
 
     return (
-        <div className={`min-h-screen ${darkMode ? 'dark bg-gradient-to-br from-gray-900 to-gray-700' : 'bg-gradient-to-br from-gray-100 to-gray-300'} transition-colors duration-500`}>
-            {/* Header */}
+        <div className={`min-h-screen ${isDarkMode ? 'dark bg-gradient-to-br from-gray-900 to-gray-700' : 'bg-gradient-to-br from-gray-100 to-gray-300'} transition-colors duration-500`}>
+            {/*----------------------------------------------- Header--------------------------------------------- */}
             <header className="bg-white/80 dark:bg-gray-800/80 shadow-xl backdrop-blur-lg">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
                     <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Hotel Management Dashboard</h1>
                     <div className="flex items-center space-x-4">
-                        <button onClick={toggleDarkMode} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200">
-                            {darkMode ? <FiSun size={20} className="text-yellow-400" /> : <FiMoon size={20} className="text-gray-600" />}
+                        <button onClick={toggleMode} className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200">
+                            {isDarkMode ? <FiSun size={20} className="text-yellow-400" /> : <FiMoon size={20} className="text-gray-600" />}
                         </button>
                         <span className="text-gray-600 dark:text-gray-300 font-medium">{user.firstname || 'User'}</span>
                         <button
@@ -1093,9 +1096,8 @@ const UserDashboard = () => {
                 </div>
             </nav>
 
-            {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Overview Screen */}
+                {/* ------------------------------------------------------Overview Screen------------------------------------- */}
                 {currentScreen === 'overview' && (
                     <section className="space-y-8">
                         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Overview</h2>
@@ -1174,7 +1176,7 @@ const UserDashboard = () => {
                     </section>
                 )}
 
-                {/* Revenue Screen */}
+                {/*----------------------------------------------- Revenue Screen -----------------------------------------------*/}
                 {currentScreen === 'revenue' && (
                     <section className="space-y-8">
                         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Revenue</h2>
@@ -1204,7 +1206,7 @@ const UserDashboard = () => {
                                         ₹{revenueData.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
                                 </div>
-                                {/* Revenue Filters */}
+                                {/*----------------------------------------------- Revenue Filters----------------------------------------------- */}
                                 <div className="mb-8 flex flex-wrap gap-4">
                                     <div>
                                         <label className="block text-gray-700 dark:text-gray-300 mb-2">Start Date</label>
@@ -1302,7 +1304,7 @@ const UserDashboard = () => {
                     </section>
                 )}
 
-                {/* Users Screen */}
+                {/* -----------------------------------------------Users Screen ----------------------------------------------- */}
                 {currentScreen === 'profile' && (
                     <section className="space-y-8">
                         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">All Users</h2>
@@ -1347,7 +1349,7 @@ const UserDashboard = () => {
                     </section>
                 )}
 
-                {/* Users Screen (Admin Only) */}
+                {/* ----------------------------------------------- Users Screen (Admin Only) ----------------------------------------------- */}
                 {currentScreen === 'users' && isAdmin && (
                     <section className="space-y-8">
                         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Users</h2>
@@ -1390,7 +1392,7 @@ const UserDashboard = () => {
                     </section>
                 )}
 
-                {/* Bookings Screen */}
+                {/* ------------------------------------------------------ Bookings Screen ----------------------------------------------- */}
                 {currentScreen === 'bookings' && (
                     <section className="space-y-8">
                         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Bookings</h2>
@@ -1400,7 +1402,7 @@ const UserDashboard = () => {
                             <div className="text-center text-red-600 dark:text-red-400">{bookingsError}</div>
                         ) : (
                             <>
-                                {/* Bookings Filters */}
+                                {/* ------------------------------------------------------ Bookings Filters ----------------------------------------------- */}
                                 <div className="mb-6 flex flex-wrap gap-4">
                                     <div>
                                         <label className="block text-gray-700 dark:text-gray-300 mb-2">Status</label>
@@ -1512,7 +1514,7 @@ const UserDashboard = () => {
                                             )}
                                         </tbody>
                                     </table>
-                                    {/* Pagination */}
+
                                     <div className="flex justify-between items-center px-6 py-4">
                                         <button
                                             onClick={() => setBookingsPage(p => Math.max(p - 1, 1))}
@@ -1538,81 +1540,9 @@ const UserDashboard = () => {
                     </section>
                 )}
 
-                {/* States Screen */}
-                {currentScreen === 'states' && (
-                    <section className="space-y-8">
-                        <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">States</h2>
-                        {statesLoading ? (
-                            <div className="text-center text-gray-600 dark:text-gray-300">Loading...</div>
-                        ) : statesError ? (
-                            <div className="text-center text-red-600 dark:text-red-400">{statesError}</div>
-                        ) : (
-                            <div className="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-xl overflow-x-auto backdrop-blur-md">
-                                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead className="bg-gray-100/80 dark:bg-gray-700/80">
-                                        <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Name</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white/50 dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {states.map(state => (
-                                            <tr key={state._id} className="hover:bg-gray-50/80 dark:hover:bg-gray-700/80 transition-colors duration-200">
-                                                <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-200">{state.name}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </section>
-                )}
+        
 
-                {/* Cities Screen */}
-                {currentScreen === 'cities' && (
-                    <section className="space-y-8">
-                        <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Cities</h2>
-                        {citiesLoading ? (
-                            <div className="text-center text-gray-600 dark:text-gray-300">Loading...</div>
-                        ) : citiesError ? (
-                            <div className="text-center text-red-600 dark:text-red-400">{citiesError}</div>
-                        ) : (
-                            <>
-                                <div className="mb-6">
-                                    <label className="block text-gray-700 dark:text-gray-300 mb-2">Select State</label>
-                                    <select
-                                        value={selectedState}
-                                        onChange={e => setSelectedState(e.target.value)}
-                                        className="w-full max-w-xs px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
-                                    >
-                                        {citiesStates.map(state => (
-                                            <option key={state._id} value={state._id}>
-                                                {state.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="bg-white/80 dark:bg-gray-800/80 rounded-2xl shadow-xl overflow-x-auto backdrop-blur-md">
-                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                        <thead className="bg-gray-100/80 dark:bg-gray-700/80">
-                                            <tr>
-                                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Name</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white/50 dark:bg-gray-800/50 divide-y divide-gray-200 dark:divide-gray-700">
-                                            {cities.map(city => (
-                                                <tr key={city._id} className="hover:bg-gray-50/80 dark:hover:bg-gray-700/80 transition-colors duration-200">
-                                                    <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-200">{city.name}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </>
-                        )}
-                    </section>
-                )}
-
-                {/* Hotels Screen */}
+                {/* ------------------------------------------------------ Hotels Screen ----------------------------------------------- */}
                 {currentScreen === 'hotels' && (
                     <section className="space-y-8">
                         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Hotels</h2>
@@ -1704,7 +1634,7 @@ const UserDashboard = () => {
                                             )}
                                         </tbody>
                                     </table>
-                                    {/* Pagination */}
+
                                     <div className="flex justify-between items-center px-6 py-4">
                                         <button
                                             onClick={() => setHotelsPage(p => Math.max(p - 1, 1))}
@@ -1730,7 +1660,7 @@ const UserDashboard = () => {
                     </section>
                 )}
 
-                {/* Rooms Screen */}
+                {/* ----------------------------------------------- Rooms Screen ----------------------------------------------- */}
                 {currentScreen === 'rooms' && (
                     <section className="space-y-8">
                         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Rooms</h2>
@@ -1841,7 +1771,7 @@ const UserDashboard = () => {
                                             )}
                                         </tbody>
                                     </table>
-                                    {/* Pagination */}
+
                                     <div className="flex justify-between items-center px-6 py-4">
                                         <button
                                             onClick={() => setRoomsPage(p => Math.max(p - 1, 1))}
@@ -1867,7 +1797,7 @@ const UserDashboard = () => {
                     </section>
                 )}
 
-                {/* Coupons Screen */}
+                {/*----------------------------------------------- Coupons Screen ----------------------------------------------- */}
                 {currentScreen === 'coupons' && (
                     <section className="space-y-8">
                         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Coupons</h2>
@@ -1897,8 +1827,8 @@ const UserDashboard = () => {
                                                             <td className="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-200">
                                                                 <span
                                                                     className={`px-2 py-1 rounded-full text-xs font-semibold ${coupon.isActive
-                                                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
-                                                                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                                                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
                                                                         }`}
                                                                 >
                                                                     {coupon.isActive ? 'Active' : 'Inactive'}
