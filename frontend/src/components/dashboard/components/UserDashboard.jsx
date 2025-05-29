@@ -1036,7 +1036,7 @@
 //     const [couponsLoading, setCouponsLoading] = useState(false);
 //     const [couponsError, setCouponsError] = useState(null);
 
-   
+
 //     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 //     const [reportType, setReportType] = useState('bookings');  
 //     const [reportStartDate, setReportStartDate] = useState('');
@@ -1246,7 +1246,7 @@
 //     //  reportt ganerate----------------------------------------
 //     const generateBookingsReport = async (startDate, endDate) => {
 //         try {
-            
+
 //             let filteredBookings = sortedBookings;
 //             if (startDate) {
 //                 filteredBookings = filteredBookings.filter(booking => new Date(booking.checkIn) >= new Date(startDate));
@@ -2014,7 +2014,7 @@ import UsersScreen from './UsersScreen';
 import BookingsScreen from './BookingsScreen';
 import HotelsScreen from './HotelsScreen';
 import CouponsScreen from './CouponsScreen';
-import jsPDF from 'jspdf';  
+import jsPDF from 'jspdf';
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, LineElement, PointElement, ChartDataLabels);
 
@@ -2305,6 +2305,13 @@ const UserDashboard = () => {
         }
     };
 
+
+    const recentBookings = useMemo(() => {
+        return [...bookingsList]
+            .sort((a, b) => new Date(b.checkIn) - new Date(a.checkIn)) // Sort by checkIn date, newest first
+            .slice(0, 5); // Take the 5 most recent
+    }, [bookingsList]);
+
     // Report generation using jsPDF--------------------------------------------------
     const generateBookingsReport = async (startDate, endDate) => {
         try {
@@ -2529,15 +2536,15 @@ const UserDashboard = () => {
         }
     };
 
- 
+
     const handleGenerateReport = () => {
         if (reportType === 'bookings') {
             generateBookingsReport(reportStartDate, reportEndDate);
         } else if (reportType === 'revenue') {
             generateRevenueReport(reportStartDate, reportEndDate);
         }
-        setIsReportModalOpen(false); 
-     
+        setIsReportModalOpen(false);
+
         setReportType('bookings');
         setReportStartDate('');
         setReportEndDate('');
@@ -2618,7 +2625,7 @@ const UserDashboard = () => {
                 : true;
             const matchesSearch = bookingsFilters.search
                 ? booking._id.toLowerCase().includes(bookingsFilters.search.toLowerCase()) ||
-                  booking.roomId?.hotel?.name.toLowerCase().includes(bookingsFilters.search.toLowerCase())
+                booking.roomId?.hotel?.name.toLowerCase().includes(bookingsFilters.search.toLowerCase())
                 : true;
             return matchesStatus && matchesHotel && matchesStartDate && matchesEndDate && matchesSearch;
         });
@@ -2668,7 +2675,7 @@ const UserDashboard = () => {
         return rooms.filter(room =>
             roomsSearch
                 ? room.roomNumber.toLowerCase().includes(roomsSearch.toLowerCase()) ||
-                  (room.type && room.type.toLowerCase().includes(roomsSearch.toLowerCase()))
+                (room.type && room.type.toLowerCase().includes(roomsSearch.toLowerCase()))
                 : true
         );
     }, [rooms, roomsSearch]);
@@ -2762,7 +2769,7 @@ const UserDashboard = () => {
                 currentScreen={currentScreen}
                 setCurrentScreen={setCurrentScreen}
             />
-            <div className="flex justify-end max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex justify-end max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
                 <button
                     onClick={() => setIsReportModalOpen(true)}
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -2770,7 +2777,7 @@ const UserDashboard = () => {
                     Generate Report
                 </button>
             </div>
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-12xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 {currentScreen === 'overview' && (
                     <OverviewScreen
                         overviewStats={overviewStats}
@@ -2781,6 +2788,7 @@ const UserDashboard = () => {
                         totalUsers={users.length}
                         totalRevenue={revenueData.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         setCurrentScreen={setCurrentScreen}
+                        recentBookings={recentBookings}
                     />
                 )}
                 {currentScreen === 'revenue' && (
@@ -2878,13 +2886,13 @@ const UserDashboard = () => {
                 )}
             </main>
 
-     
+
             {isReportModalOpen && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
                         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Generate Report</h2>
                         <div className="space-y-4">
-                       
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Report Type</label>
                                 <select
@@ -2897,7 +2905,7 @@ const UserDashboard = () => {
                                 </select>
                             </div>
 
-                        
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date (Optional)</label>
                                 <input
@@ -2908,7 +2916,7 @@ const UserDashboard = () => {
                                 />
                             </div>
 
-                      
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">End Date (Optional)</label>
                                 <input
@@ -2920,7 +2928,7 @@ const UserDashboard = () => {
                             </div>
                         </div>
 
-                
+
                         <div className="mt-6 flex justify-end space-x-3">
                             <button
                                 onClick={() => setIsReportModalOpen(false)}
