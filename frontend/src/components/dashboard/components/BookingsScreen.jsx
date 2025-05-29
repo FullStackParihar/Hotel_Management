@@ -14,16 +14,11 @@ const BookingsScreen = ({
     setBookingsSort,
     uniqueBookingStatuses,
     uniqueBookingHotels,
-    generateBookingsReport,
+ 
 }) => (
     <section className="space-y-8">
         <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Bookings</h2>
-          <button
-                onClick={generateBookingsReport}
-                className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-                Generate Bookings Report
-            </button>
+        
         {bookingsLoading ? (
             <div className="text-center text-gray-600 dark:text-gray-300">Loading...</div>
         ) : bookingsError ? (

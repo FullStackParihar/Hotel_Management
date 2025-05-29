@@ -14,7 +14,7 @@ const RevenueScreen = ({
     uniqueStates,
     uniqueCities,
     uniqueHotels,
-    generateRevenueReport,
+  
 }) => {
     const revenueByStateChartData = {
         labels: revenueData.byState.map(item => item.stateName || 'Unknown'),
@@ -188,12 +188,7 @@ const RevenueScreen = ({
     return (
         <section className="space-y-8">
             <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-8 tracking-tight">Revenue</h2>
-            <button
-                onClick={generateRevenueReport}
-                className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-                Generate Revenue Report
-            </button>
+         
             {revenueLoading ? (
                 <div className="text-center text-gray-600 dark:text-gray-300">Loading...</div>
             ) : revenueError ? (

@@ -17,6 +17,7 @@
     "chartjs-plugin-datalabels": "^2.2.0",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.9.2",
+    "jspdf": "^3.0.1",
     "jwt-decode": "^4.0.0",
     "motion": "^12.9.2",
     "pdf-lib": "^1.17.1",
