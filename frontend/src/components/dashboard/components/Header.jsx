@@ -17,6 +17,7 @@ const Header = ({ user, isDarkMode, toggleMode, handleLogout, handleBack }) => (
                     <FiLogOut className="mr-2" />
                     Back to Admin Panel
                 </button>
+                
                 <button
                     onClick={handleLogout}
                     className="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg"

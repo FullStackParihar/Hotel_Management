@@ -2769,10 +2769,10 @@ const UserDashboard = () => {
                 currentScreen={currentScreen}
                 setCurrentScreen={setCurrentScreen}
             />
-            <div className="flex justify-end max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div className="flex justify-end absolute top-18 right-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
                 <button
                     onClick={() => setIsReportModalOpen(true)}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
                 >
                     Generate Report
                 </button>
@@ -2789,6 +2789,7 @@ const UserDashboard = () => {
                         totalRevenue={revenueData.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         setCurrentScreen={setCurrentScreen}
                         recentBookings={recentBookings}
+                   
                     />
                 )}
                 {currentScreen === 'revenue' && (
