@@ -938,6 +938,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaPhone, FaVenusMars, FaCalendarAlt, FaLock, FaSignOutAlt, FaEdit, FaSave, FaTimes, FaCamera, FaSun, FaMoon } from 'react-icons/fa';
 import useDarkMode from '../hooks/useDarkMode';
+import api from '../../../Utils/api';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -959,7 +960,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [isDarkMode, toggleMode] = useDarkMode();
 
-  const baseURL = 'http://localhost:6969';
+  const baseURL = 'http://localhost:6969'; 
 
   // Predefined list of background images--------------------------------------------------
   const backgroundImages = [
@@ -978,7 +979,7 @@ const Profile = () => {
       if (!token) {
         throw new Error('No token found. Please log in.');
       }
-      const response = await axios.get(`${baseURL}/user/users/profile`, {
+      const response = await api.get(`/user/users/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const userData = response.data;
@@ -1034,7 +1035,7 @@ const Profile = () => {
       const formData = new FormData();
       formData.append('profileImage', imageFile);
 
-      const response = await axios.post(`${baseURL}/user/me/profile-image`, formData, {
+      const response = await api.post(`/user/me/profile-image`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -1059,14 +1060,9 @@ const Profile = () => {
         throw new Error("No authentication token found. Please log in.");
       }
 
-      const response = await axios.patch(
-        `${baseURL}/user/users/me/background`,
-        { backgroundImage: imageUrl },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await api.patch(
+        `/user/users/me/background`,
+        { backgroundImage: imageUrl }
       );
 
       setUser({ ...user, backgroundImage: response.data.backgroundImage });
@@ -1098,7 +1094,7 @@ const Profile = () => {
     setSuccess('');
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.put(`${baseURL}/user/me`, formData, {
+      const response = await api.put(`/user/me`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(response.data.user);
@@ -1121,7 +1117,7 @@ const Profile = () => {
     setError('');
     setSuccess('');
     try {
-      const response = await axios.post(`${baseURL}/user/forgot`, { email: user.email });
+      const response = await api.post(`/user/forgot`, { email: user.email });
       setSuccess('OTP sent to your email for password reset.');
       navigate('/reset-password');
     } catch (err) {

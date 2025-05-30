@@ -2308,8 +2308,8 @@ const UserDashboard = () => {
 
     const recentBookings = useMemo(() => {
         return [...bookingsList]
-            .sort((a, b) => new Date(b.checkIn) - new Date(a.checkIn)) // Sort by checkIn date, newest first
-            .slice(0, 5); // Take the 5 most recent
+            .sort((a, b) => new Date(b.checkIn) - new Date(a.checkIn)) 
+            .slice(0, 5); 
     }, [bookingsList]);
 
     // Report generation using jsPDF--------------------------------------------------

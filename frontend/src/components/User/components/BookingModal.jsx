@@ -337,7 +337,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FaTimes, FaListAlt, FaFilter, FaCheck, FaBan, FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
-import useDarkMode from "../hooks/useDarkMode"; // Import the useDarkMode hook
+import useDarkMode from "../hooks/useDarkMode"; 
+import api from "../../../Utils/api"; 
 
 const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) => {
   const [bookings, setBookings] = useState([]);
@@ -351,7 +352,7 @@ const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) =>
   const fetchUserBookings = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${baseURL}/api/bookings/my-bookings`, {
+      const response = await api.get("/api/bookings/my-bookings", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const fetchedBookings = Array.isArray(response.data) ? response.data : [];
@@ -371,7 +372,7 @@ const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) =>
     if (hotelNames[roomId]) return hotelNames[roomId];
 
     try {
-      const response = await axios.get(`${baseURL}/api/rooms/${roomId}`, {
+      const response = await api.get(`/api/rooms/${roomId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const hotelName = response.data.hotel?.name || "Hotel Not Found";

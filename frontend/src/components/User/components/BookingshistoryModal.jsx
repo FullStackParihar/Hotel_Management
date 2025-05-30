@@ -1035,6 +1035,7 @@ import {
 } from "react-icons/fa";
 import { jwtDecode } from "jwt-decode";
 import useDarkMode from "../hooks/useDarkMode";  
+import api from "../../../Utils/api";
 
 const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
   const [coupons, setCoupons] = useState([]);
@@ -1071,7 +1072,7 @@ const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
   const fetchUserRole = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${baseURL}/user/me`, {
+      const response = await api.get("/user/me", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setIsAdmin(response.data.user.role === 'admin');
@@ -1086,7 +1087,7 @@ const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
   const fetchUserBookings = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${baseURL}/api/bookings/my-bookings`, {
+      const response = await api.get("/api/bookings/my-bookings", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setIsFirstBooking(response.data.length === 0);
@@ -1101,7 +1102,7 @@ const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
   const fetchCoupons = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${baseURL}/api/coupons/available`, {
+      const response = await api.get("/api/coupons/available", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const activeCoupons = response.data.filter(
@@ -1191,7 +1192,7 @@ const BookingFormModal = ({ showBookingModal, selectedRoom, onClose }) => {
         couponCode: appliedCouponCode || null,
         totalPrice,
       };
-      const response = await axios.post(`${baseURL}/api/bookings`, bookingData, {
+      const response = await api.post("/api/bookings", bookingData, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       alert(response.data.message);

@@ -499,6 +499,7 @@ import {
   FaParking, FaUser, FaCalendarAlt,
 } from "react-icons/fa";
 import useDarkMode from "../hooks/useDarkMode"; // Import the useDarkMode hook
+import api from "../../../Utils/api";
 
 const HotelList = ({
   hotels,
@@ -529,7 +530,7 @@ const HotelList = ({
     }
     setRoomLoading(true);
     try {
-      const response = await axios.get(`${baseURL}/api/${hotelId}/rooms`);
+      const response = await api.get(`/api/${hotelId}/rooms`);
       const activeRooms = Array.isArray(response.data) ? response.data.filter((r) => r.isActive) : [];
       setRooms(activeRooms);
       const initialImageIndex = activeRooms.reduce((acc, room) => {
@@ -548,7 +549,7 @@ const HotelList = ({
 
   const fetchPreviewImage = async (hotelId) => {
     try {
-      const response = await axios.get(`${baseURL}/api/${hotelId}/rooms`);
+      const response = await api.get(`/api/${hotelId}/rooms`);
       const rooms = Array.isArray(response.data) ? response.data.filter((r) => r.isActive) : [];
       if (rooms.length > 0 && rooms[0].images && rooms[0].images.length > 0) {
         return rooms[0].images[0];
