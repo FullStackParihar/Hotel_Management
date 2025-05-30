@@ -413,7 +413,7 @@ const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) =>
     setLoading(true);
     setError("");
     try {
-      const response = await axios.post(`${baseURL}/api/bookings/${bookingId}/checkin`, {}, {
+      const response = await api.post(`/api/bookings/${bookingId}/checkin`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       alert(response.data.message);
@@ -431,7 +431,7 @@ const BookingsModal = ({ showBookingsModal, setShowBookingsModal, setError }) =>
     setLoading(true);
     setError("");
     try {
-      const response = await axios.post(`${baseURL}/api/bookings/${bookingId}/cancel`, {}, {
+      const response = await api.post(`/api/bookings/${bookingId}/cancel`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       alert(response.data.message);
