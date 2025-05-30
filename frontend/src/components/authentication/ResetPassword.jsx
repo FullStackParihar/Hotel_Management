@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { NavLink, useNavigate } from "react-router-dom";
+import api from "../../Utils/api";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -21,8 +22,7 @@ const ResetPassword = () => {
       return;
     }
     try {
-      const res = await axios.post(
-        "http://localhost:6969/user/reset",
+      const res = await api.post("/user/reset",
         formData
       );
       alert("Password Reset successfully...");

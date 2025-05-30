@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../../Utils/api";
 
 const Otp = () => {
   const [otp, setOtp] = useState("");
@@ -31,7 +32,7 @@ const Otp = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:6969/user/verifyOtp", {
+      const res = await api.post("/user/verifyOtp", {
         email,
         otp,
       });

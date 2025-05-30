@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock, FaUndo, FaKey } from "react-icons/fa";
+import api from "../../Utils/api";
 
 const ForgetPassword = () => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const ForgetPassword = () => {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:6969/user/forgot", { email: formData.email });
+      await api.post("/user/forgot", { email: formData.email });
       setShowOtpForm(true);
       setMessage("OTP sent to your email!");
       setError("");
@@ -68,7 +69,7 @@ const ForgetPassword = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:6969/user/resetPassword", {
+      const res = await api.post("/user/resetPassword", {
         email: formData.email,
         otp,
         newPassword,
