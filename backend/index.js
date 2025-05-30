@@ -23,6 +23,13 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(fileUpload());
 
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, "client/build")));
+
+// All other GET requests not handled before will return index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
 
 // mongoose.connect("mongodb://localhost:27017/location-manager", {
 //   useNewUrlParser: true,
@@ -33,12 +40,12 @@ app.use(fileUpload());
 const connectDB = async () => {
   try {
     await mongoose.connect("mongodb+srv://vishnuparihar239925:1234@cluster0.oloj4sd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
-  
+
     });
     console.log("MongoDB connected successfully");
   } catch (error) {
     console.error("MongoDB connection error:", error);
-    
+
   }
 };
 
