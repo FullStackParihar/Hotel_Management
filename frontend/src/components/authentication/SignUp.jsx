@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
+import api from "../../Utils/api";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const SignUp = () => {
       setIsLoading(true);
       setError(null);
       console.log('handleSubmit - Sending signup data:', dataToSend);
-      await axios.post("http://localhost:6969/user/signup", dataToSend);
+      await api.post("/user/signup", dataToSend);
       localStorage.setItem("otpEmail", formData.email);
       setShowOtpInput(true);
     } catch (error) {
@@ -71,7 +72,7 @@ const SignUp = () => {
       setIsLoading(true);
       setError(null);
       console.log('handleOtpSubmit - Verifying OTP for email:', formData.email, 'OTP:', otp);
-      const response = await axios.post("http://localhost:6969/user/verifyOtp", {
+      const response = await api.post("/user/verifyOtp", {
         email: formData.email,
         otp,
       });
