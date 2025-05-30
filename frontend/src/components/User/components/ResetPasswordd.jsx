@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaLock, FaEnvelope, FaKey, FaSave } from 'react-icons/fa';
+import api from '../../../Utils/api';
 
 const ResetPasswordUser = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const ResetPasswordUser = () => {
     setError('');
     setSuccess('');
     try {
-      const response = await axios.post(`${baseURL}/user/resetPassword`, formData);
+      const response = await api.post(`/user/resetPassword`, formData);
       setSuccess(response.data.message);
       setTimeout(() => navigate('/'), 2000);
     } catch (err) {
