@@ -32,7 +32,7 @@ app.use(fileUpload());
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    await mongoose.connect("mongodb://localhost:27017/location-manager", {
+    await mongoose.connect("mongodb+srv://vishnu:1234@cluster0.7j48j.mongodb.net/", {
   
     });
     console.log("MongoDB connected successfully");

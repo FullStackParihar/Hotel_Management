@@ -1,7 +1,8 @@
  
 import axios from 'axios';
 
-const API_URL = 'http://localhost:6969/';
+// const API_URL = 'http://localhost:6969/';
+const API_URL = 'https://hotel-management-1-8ktf.onrender.com';
 
 
 
