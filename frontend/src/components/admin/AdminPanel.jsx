@@ -204,6 +204,7 @@ import {
   FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaUser,
   FaPhone, FaChild
 } from "react-icons/fa";
+import api from "../../Utils/api";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -218,17 +219,15 @@ const AdminPanel = () => {
     setLoading(true);
     setError("");
     try {
-      const response = await axios.get(`${baseURL}/api/bookings`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
+      const response = await api.get("/api/bookings");
       console.log('this is checked in',response.data.bookings);
-      
+
       setBookings(response.data.bookings);
     } catch (err) {
       console.error("fetchBookings - Error:", err);
       setError(err.response?.data?.message || "Failed to fetch bookings.");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -237,13 +236,7 @@ const AdminPanel = () => {
     setLoading(true);
     setError("");
     try {
-      const response = await axios.put(
-        `${baseURL}/api/bookings/${bookingId}`,
-        { status },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+      const response = await api.put(`/api/bookings/${bookingId}`, { status });
       alert(response.data.message);
       fetchBookings();
     } catch (err) {

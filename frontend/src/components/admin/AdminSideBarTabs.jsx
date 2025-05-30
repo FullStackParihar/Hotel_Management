@@ -386,6 +386,7 @@ import BookingManagement from "./components/BookingManagement";
 import UserPanel from "../User/UserPanel";
 import CouponManagement from "./components/CouponManagement";
 import UserDashboard from "../dashboard/NewDashboard";
+import api from "../../Utils/api";
 
 const ADLocation = () => {
     const navigate = useNavigate();
@@ -412,7 +413,7 @@ const ADLocation = () => {
 
     const fetchStates = async () => {
         try {
-            const response = await axios.get(`${baseURL}/api/states`);
+            const response = await api.get(`/api/states`);
             setStates(response.data.filter((s) => s.isActive));
             setInactiveStates(response.data.filter((s) => !s.isActive));
         } catch (err) {
@@ -424,7 +425,7 @@ const ADLocation = () => {
         setLoading(true);
         setError("");
         try {
-            const response = await axios.get(`${baseURL}/api/states/${stateId}/cities`);
+            const response = await api.get(`/api/states/${stateId}/cities`);
             const cityData = response.data;
             const filteredCities = cityData.filter(
                 city => city?.state?.[0]?._id === stateId
@@ -455,7 +456,7 @@ const ADLocation = () => {
         }
         setLoading(true);
         try {
-            const response = await axios.get(`${baseURL}/api/cities/${cityId}/hotels`);
+            const response = await api.get(`/api/cities/${cityId}/hotels`);
             setHotels(response.data.filter((h) => h.isActive));
             setInactiveHotels(response.data.filter((h) => !h.isActive));
             setExpandedHotels({});
@@ -469,7 +470,7 @@ const ADLocation = () => {
     const fetchRooms = async (hotelId) => {
         setLoading(true);
         try {
-            const data = (await axios.get(`${baseURL}/api/hotels/rooms`)).data;
+            const data = (await api.get(`/api/hotels/rooms`)).data;
             const rooms = data.filter(room => {
                 const hotel = room.hotel?.[0];
                 return hotel && hotel._id === hotelId;
@@ -486,7 +487,7 @@ const ADLocation = () => {
     const fetchBookings = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${baseURL}/api/bookings`, {
+            const response = await api.get(`/api/bookings`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             setBookings(response.data.bookings);
@@ -500,7 +501,7 @@ const ADLocation = () => {
     const fetchCoupons = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${baseURL}/api/coupons`, {
+            const response = await api.get(`/api/coupons`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             setCoupons(response.data.filter((c) => c.isActive));
