@@ -1753,6 +1753,7 @@ import BookingFormModal from "./components/BookingshistoryModal";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import useDarkMode from "./hooks/useDarkMode"; 
+import api from "../../Utils/api";
 
 const UserPanel = () => {
   const [states, setStates] = useState([]);
@@ -1787,7 +1788,7 @@ const UserPanel = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found. Please log in.");
-      const response = await axios.get(`${baseURL}/user/users/profile`, {
+      const response = await api.get(`/user/users/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserDetails(response.data);
@@ -1801,7 +1802,7 @@ const UserPanel = () => {
 
   const fetchStates = async () => {
     try {
-      const response = await axios.get(`${baseURL}/api/states`);
+      const response = await api.get(`/api/states`);
       const activeStates = Array.isArray(response.data) ? response.data.filter((s) => s.isActive) : [];
       setStates(activeStates);
     } catch (err) {
@@ -1818,7 +1819,7 @@ const UserPanel = () => {
       return;
     }
     try {
-      const response = await axios.get(`${baseURL}/api/states/${stateId}/cities`);
+      const response = await api.get(`/api/states/${stateId}/cities`);
       const activeCities = Array.isArray(response.data) ? response.data.filter((c) => c.isActive) : [];
       setCities(activeCities);
     } catch (err) {
@@ -1835,7 +1836,7 @@ const UserPanel = () => {
     }
     setLoading(true);
     try {
-      const response = await axios.get(`${baseURL}/api/cities/${cityId}/hotels`);
+      const response = await api.get(`/api/cities/${cityId}/hotels`);
       const activeHotels = Array.isArray(response.data) ? response.data.filter((h) => h.isActive) : [];
       setHotels(activeHotels);
     } catch (err) {
@@ -1850,7 +1851,7 @@ const UserPanel = () => {
   const fetchAllHotels = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${baseURL}/api/hotels`);
+      const response = await api.get(`/api/hotels`);
       const activeHotels = Array.isArray(response.data) ? response.data.filter((h) => h.isActive) : [];
       setHotels(activeHotels);
     } catch (err) {
