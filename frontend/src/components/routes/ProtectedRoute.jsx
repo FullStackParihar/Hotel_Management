@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import api from "../../Utils/api";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -13,8 +14,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
       return;
     }
  
-    axios
-      .get("http://localhost:6969/user/me", {
+    api.get("/user/me", {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
