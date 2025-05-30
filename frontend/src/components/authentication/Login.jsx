@@ -172,6 +172,7 @@
 import { FaEnvelope, FaLock, FaSignInAlt } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import api from "../../Utils/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -202,7 +203,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:6969/user/login", formData);
+      const res = await api.post("/user/login", formData);
       localStorage.setItem("isLogin", "true");
       localStorage.setItem("token", res.data.token);
       setFormData({ email: "", password: "" });
@@ -222,8 +223,7 @@ const Login = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      axios
-        .get("http://localhost:6969/user/me", {
+      api.get("/user/me", {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
