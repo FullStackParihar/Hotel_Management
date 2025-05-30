@@ -32,7 +32,7 @@ app.use(fileUpload());
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    await mongoose.connect("mongodb+srv://vishnu:1234@cluster0.7j48j.mongodb.net/", {
+    await mongoose.connect("mongodb+srv://vishnuparihar239925:1234@cluster0.oloj4sd.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
   
     });
     console.log("MongoDB connected successfully");
