@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import FormInput from "./FormInput";
 import { FaBan, FaCheckCircle, FaEdit, FaTrash } from "react-icons/fa";
+import api from "../../../Utils/api";
 
 const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoading, setError, baseURL }) => {
     const [stateForm, setStateForm] = useState({ name: "", code: "" });
@@ -23,9 +24,9 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
         }
         try {
             if (editStateId) {
-                await axios.put(`${baseURL}/api/states/${editStateId}`, payload);
+                await api.put(`/api/states/${editStateId}`, payload);
             } else {
-                await axios.post(`${baseURL}/api/states/add`, payload);
+                await api.post(`/api/states/add`, payload);
             }
             setStateForm({ name: "", code: "" });
             setEditStateId(null);
@@ -50,7 +51,7 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
         setLoading(true);
         setError("");
         try {
-            await axios.delete(`${baseURL}/api/states/${id}`);
+            await api.delete(`/api/states/${id}`);
             await fetchStates();
             console.log("State deleted successfully");
             alert("State deleted successfully");
@@ -65,7 +66,7 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/states/${id}/softdelete`);
+            await api.patch(`/api/states/${id}/softdelete`);
             await fetchStates();
             setStateTab("inactive");
             console.log("State deactivated successfully");
@@ -81,7 +82,7 @@ const StateManagement = ({ states, inactiveStates, fetchStates, loading, setLoad
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/states/${id}/activate`);
+            await api.patch(`/api/states/${id}/activate`);
             await fetchStates();
             setStateTab("active");
             console.log("State activated successfully");

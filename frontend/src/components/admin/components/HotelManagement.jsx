@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import FormInput from "./FormInput";
 import { FaBan, FaCheckCircle, FaEdit, FaTrash } from "react-icons/fa";
+import api from "../../../Utils/api";
 
 const HotelManagement = ({
     hotels,
@@ -65,9 +66,9 @@ const HotelManagement = ({
         }
         try {
             if (editHotelId) {
-                await axios.put(`${baseURL}/api/hotels/${editHotelId}`, payload);
+                await api.put(`/api/hotels/${editHotelId}`, payload);
             } else {
-                await axios.post(`${baseURL}/api/hotels/add`, payload);
+                await api.post(`/api/hotels/add`, payload);
             }
             const cityId = hotelForm.cityId;
             setHotelForm({
@@ -125,7 +126,7 @@ const HotelManagement = ({
         setLoading(true);
         setError("");
         try {
-            await axios.delete(`${baseURL}/api/hotels/${id}`);
+            await api.delete(`/api/hotels/${id}`);
             await fetchHotels(hotelForm.cityId || selectedCity);
             setHotelTab("active");
             console.log("Hotel deleted successfully");
@@ -141,7 +142,7 @@ const HotelManagement = ({
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/hotels/${id}/softdelete`);
+            await api.patch(`/api/hotels/${id}/softdelete`);
             await fetchHotels(hotelForm.cityId || selectedCity);
             setHotelTab("inactive");
             console.log("Hotel deactivated successfully");
@@ -157,7 +158,7 @@ const HotelManagement = ({
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/hotels/${id}/activate`);
+            await api.patch(`/api/hotels/${id}/activate`);
             await fetchHotels(hotelForm.cityId || selectedCity);
             setHotelTab("active");
             console.log("Hotel activated successfully");

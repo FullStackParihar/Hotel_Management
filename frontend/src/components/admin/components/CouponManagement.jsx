@@ -231,6 +231,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import FormInput from "./FormInput";
 import { FaEdit, FaTrash, FaBan, FaCheckCircle } from "react-icons/fa";
+import api from "../../../Utils/api";
 
 const CouponManagement = ({ coupons, inactiveCoupons, fetchCoupons, loading, setLoading, setError, baseURL }) => {
     const [couponForm, setCouponForm] = useState({
@@ -274,11 +275,11 @@ const CouponManagement = ({ coupons, inactiveCoupons, fetchCoupons, loading, set
 
         try {
             if (editCouponId) {
-                await axios.put(`${baseURL}/api/coupons/${editCouponId}`, payload, {
+                await api.put(`/api/coupons/${editCouponId}`, payload, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
             } else {
-                await axios.post(`${baseURL}/api/coupons`, payload, {
+                await api.post(`/api/coupons`, payload, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 });
             }
@@ -313,7 +314,7 @@ const CouponManagement = ({ coupons, inactiveCoupons, fetchCoupons, loading, set
         setLoading(true);
         setError("");
         try {
-            await axios.delete(`${baseURL}/api/coupons/${id}`, {
+            await api.delete(`/api/coupons/${id}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             await fetchCoupons();
@@ -328,7 +329,7 @@ const CouponManagement = ({ coupons, inactiveCoupons, fetchCoupons, loading, set
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/coupons/${id}/deactivate`, {}, {
+            await api.patch(`/api/coupons/${id}/deactivate`, {}, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             await fetchCoupons();
@@ -344,7 +345,7 @@ const CouponManagement = ({ coupons, inactiveCoupons, fetchCoupons, loading, set
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/coupons/${id}/activate`, {}, {
+            await api.patch(`/api/coupons/${id}/activate`, {}, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             await fetchCoupons();

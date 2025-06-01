@@ -461,6 +461,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import FormInput from "./FormInput";
 import { FaBan, FaCheckCircle, FaEdit, FaTrash } from "react-icons/fa";
+import api from "../../../Utils/api";
 
 const RoomManagement = ({
   rooms,
@@ -506,7 +507,7 @@ const RoomManagement = ({
       for (let i = 0; i < files.length; i++) {
         formData.append("images", files[i]);
       }
-      const response = await axios.post(`${baseURL}/api/rooms/upload-images`, formData, {
+      const response = await api.post(`/api/rooms/upload-images`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
         timeout: 120000,
       });
@@ -560,11 +561,11 @@ const RoomManagement = ({
     }
     try {
       if (editRoomId) {
-        await axios.put(`${baseURL}/api/rooms/${editRoomId}`, payload, {
+        await api.put(`/api/rooms/${editRoomId}`, payload, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        await axios.post(`${baseURL}/api/rooms/add`, payload, {
+        await api.post(`/api/rooms/add`, payload, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
@@ -627,7 +628,7 @@ const RoomManagement = ({
     setLoading(true);
     setError("");
     try {
-      await axios.delete(`${baseURL}/api/rooms/${id}`);
+      await api.delete(`/api/rooms/${id}`);
       await fetchRooms(roomForm.hotelId || selectedHotel);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete room.");
@@ -640,7 +641,7 @@ const RoomManagement = ({
     setLoading(true);
     setError("");
     try {
-      await axios.patch(`${baseURL}/api/rooms/${id}/softdelete`);
+      await api.patch(`/api/rooms/${id}/softdelete`);
       await fetchRooms(roomForm.hotelId || selectedHotel);
       setRoomTab("inactive");
     } catch (err) {
@@ -654,7 +655,7 @@ const RoomManagement = ({
     setLoading(true);
     setError("");
     try {
-      await axios.patch(`${baseURL}/api/rooms/${id}/activate`);
+      await api.patch(`/api/rooms/${id}/activate`);
       await fetchRooms(roomForm.hotelId || selectedHotel);
       setRoomTab("active");
     } catch (err) {
