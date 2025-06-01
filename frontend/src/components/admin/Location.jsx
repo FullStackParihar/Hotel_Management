@@ -4,6 +4,7 @@ import axios from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt, FaCity, FaHotel, FaSignOutAlt, FaSearch, FaSort, FaUserAltSlash, FaUserAlt, FaBed, FaCalendarCheck, FaUsers, FaCalendarAlt, FaCheckCircle, FaTimesCircle, FaUser, FaPhone, FaChild, FaEye } from "react-icons/fa";
 import UserPanel from "../User/UserPanel";
+import api from "../../Utils/api";
 
 const ALocation = () => {
     const navigate = useNavigate();
@@ -67,7 +68,7 @@ const ALocation = () => {
     // -----------------------------------Fetch data-----------------------------------
     const fetchStates = async () => {
         try {
-            const response = await axios.get(`${baseURL}/api/states`);
+            const response = await api.get(`/api/states`);
             const active = response.data.filter((s) => s.isActive);
             const inactive = response.data.filter((s) => !s.isActive);
             setStates(active);
@@ -89,7 +90,7 @@ const ALocation = () => {
             return;
         }
         try {
-            const response = await axios.get(`${baseURL}/api/states/${stateId}/cities`);
+            const response = await api.get(`/api/states/${stateId}/cities`);
             const active = response.data.filter((c) => c.isActive);
             const inactive = response.data.filter((c) => !c.isActive);
             setCities(active);
@@ -111,7 +112,7 @@ const ALocation = () => {
         }
         setLoading(true);
         try {
-            const response = await axios.get(`${baseURL}/api/cities/${cityId}/hotels`);
+            const response = await api.get(`/api/cities/${cityId}/hotels`);
             const active = response.data.filter((h) => h.isActive);
             const inactive = response.data.filter((h) => !h.isActive);
             setHotels(active);
@@ -133,7 +134,7 @@ const ALocation = () => {
         }
         setLoading(true);
         try {
-            const response = await axios.get(`${baseURL}/api/${hotelId}/rooms`);
+            const response = await api.get(`/api/${hotelId}/rooms`);
             const active = response.data.filter((r) => r.isActive);
             const inactive = response.data.filter((r) => !r.isActive);
             setRooms(active);
@@ -150,7 +151,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            const response = await axios.get(`${baseURL}/api/bookings`, {
+            const response = await api.get(`/api/bookings`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             setBookings(response.data.bookings);
@@ -166,8 +167,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            const response = await axios.patch(
-                `${baseURL}/api/bookings/${bookingId}/status`,
+            const response = await api.patch(`/api/bookings/${bookingId}/status`,
                 { status },
                 {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -216,9 +216,9 @@ const ALocation = () => {
         }
         try {
             if (editStateId) {
-                await axios.put(`${baseURL}/api/states/${editStateId}`, payload);
+                await api.put(`/api/states/${editStateId}`, payload);
             } else {
-                await axios.post(`${baseURL}/api/states/add`, payload);
+                await api.post(`/api/states/add`, payload);
             }
             setStateForm({ name: "", code: "" });
             setEditStateId(null);
@@ -241,7 +241,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.delete(`${baseURL}/api/states/${id}`);
+            await api.delete(`/api/states/${id}`);
             await fetchStates();
             alert("State deleted successfully with cities and hotels");
         } catch (err) {
@@ -256,7 +256,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/states/${id}/softdelete`);
+            await api.patch(`/api/states/${id}/softdelete`);
             await fetchStates();
             setStateTab("inactive");
         } catch (err) {
@@ -271,7 +271,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/states/${id}/activate`);
+            await api.patch(`/api/states/${id}/activate`);
             await fetchStates();
             setStateTab("active");
         } catch (err) {
@@ -298,9 +298,9 @@ const ALocation = () => {
         }
         try {
             if (editCityId) {
-                await axios.put(`${baseURL}/api/cities/${editCityId}`, payload);
+                await api.put(`/api/cities/${editCityId}`, payload);
             } else {
-                await axios.post(`${baseURL}/api/cities/add`, payload);
+                await api.post(`/api/cities/add`, payload);
             }
             const stateId = cityForm.stateId;
             setCityForm({ name: "", stateId: "" });
@@ -328,7 +328,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.delete(`${baseURL}/api/cities/${id}`);
+            await api.delete(`/api/cities/${id}`);
             await fetchCities(selectedState);
         } catch (err) {
             console.error("handleCityDelete - Error:", err);
@@ -344,7 +344,7 @@ const ALocation = () => {
         try {
             const city = cities.find((c) => c._id === id) || inactiveCities.find((c) => c._id === id);
             const stateId = city?.state?._id || selectedState || "";
-            await axios.patch(`${baseURL}/api/cities/${id}/softdelete`);
+            await api.patch(`/api/cities/${id}/softdelete`);
             if (stateId) {
                 await fetchCities(stateId);
                 setSelectedState(stateId);
@@ -366,7 +366,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/cities/${id}/activate`);
+            await api.patch(`/api/cities/${id}/activate`);
             await fetchCities(selectedState);
             setCityTab("active");
         } catch (err) {
@@ -409,9 +409,9 @@ const ALocation = () => {
         }
         try {
             if (editHotelId) {
-                await axios.put(`${baseURL}/api/hotels/${editHotelId}`, payload);
+                await api.put(`/api/hotels/${editHotelId}`, payload);
             } else {
-                await axios.post(`${baseURL}/api/hotels/add`, payload);
+                await api.post(`/api/hotels/add`, payload);
             }
             const cityId = hotelForm.cityId;
             setHotelForm({
@@ -468,7 +468,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.delete(`${baseURL}/api/hotels/${id}`);
+            await api.axiosdelete(`/api/hotels/${id}`);
             await fetchHotels(hotelForm.cityId || selectedCity);
         } catch (err) {
             console.error("handleHotelDelete - Error:", err);
@@ -482,7 +482,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/hotels/${id}/softdelete`);
+            await api.patch(`/api/hotels/${id}/softdelete`);
             await fetchHotels(hotelForm.cityId || selectedCity);
             setHotelTab("inactive");
         } catch (err) {
@@ -497,7 +497,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/hotels/${id}/activate`);
+            await api.patch(`/api/hotels/${id}/activate`);
             await fetchHotels(hotelForm.cityId || selectedCity);
             setHotelTab("active");
         } catch (err) {
@@ -520,8 +520,8 @@ const ALocation = () => {
                 formData.append("images", files[i]);
             }
 
-            const response = await axios.post(
-                `${baseURL}/api/rooms/upload-images`,
+            const response = await api.post(
+                `/api/rooms/upload-images`,
                 formData,
                 {
                     headers: {
@@ -588,11 +588,11 @@ const ALocation = () => {
         }
         try {
             if (editRoomId) {
-                await axios.put(`${baseURL}/api/rooms/${editRoomId}`, payload, {
+                await api.put(`/api/rooms/${editRoomId}`, payload, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
             } else {
-                await axios.post(`${baseURL}/api/rooms/add`, payload, {
+                await api.post(`/api/rooms/add`, payload, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
             }
@@ -660,7 +660,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.delete(`${baseURL}/api/rooms/${id}`);
+            await api.delete(`/api/rooms/${id}`);
             await fetchRooms(roomForm.hotelId || selectedHotel);
         } catch (err) {
             console.error("handleRoomDelete - Error:", err);
@@ -674,7 +674,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/rooms/${id}/softdelete`);
+            await api.patch(`/api/rooms/${id}/softdelete`);
             await fetchRooms(roomForm.hotelId || selectedHotel);
             setRoomTab("inactive");
         } catch (err) {
@@ -689,7 +689,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await axios.patch(`${baseURL}/api/rooms/${id}/activate`);
+            await api.patch(`/api/rooms/${id}/activate`);
             await fetchRooms(roomForm.hotelId || selectedHotel);
             setRoomTab("active");
         } catch (err) {
