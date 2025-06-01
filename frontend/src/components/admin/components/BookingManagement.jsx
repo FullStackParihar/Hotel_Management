@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { FaUser, FaBed, FaPhone, FaUsers, FaChild, FaCalendarAlt, FaMapMarkerAlt, FaCheckCircle, FaTimesCircle, FaTrash } from "react-icons/fa";
+import api from "../../../Utils/api";
 
 const BookingManagement = ({ bookings, fetchBookings, loading, setLoading, setError, baseURL }) => {
     const [bookingFilter, setBookingFilter] = useState("all");
@@ -12,8 +13,7 @@ const BookingManagement = ({ bookings, fetchBookings, loading, setLoading, setEr
         setLoading(true);
         setError("");
         try {
-            const response = await axios.patch(
-                `${baseURL}/api/bookings/${bookingId}/status`,
+            const response = await api.patch(`/api/bookings/${bookingId}/status`,
                 { status },
                 {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -34,12 +34,9 @@ const BookingManagement = ({ bookings, fetchBookings, loading, setLoading, setEr
         setLoading(true);
         setError("");
         try {
-            const response = await axios.delete(
-                `${baseURL}/api/bookings/${bookingId}`,
-                {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-                }
-            );
+            const response = await api.delete(`/api/bookings/${bookingId}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+            });
             alert(response.data.message || "Booking deleted successfully.");
             fetchBookings();
         } catch (err) {
