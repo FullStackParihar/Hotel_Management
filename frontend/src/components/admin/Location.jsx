@@ -468,7 +468,7 @@ const ALocation = () => {
         setLoading(true);
         setError("");
         try {
-            await api.axiosdelete(`/api/hotels/${id}`);
+            await api.delete(`/api/hotels/${id}`);
             await fetchHotels(hotelForm.cityId || selectedCity);
         } catch (err) {
             console.error("handleHotelDelete - Error:", err);
