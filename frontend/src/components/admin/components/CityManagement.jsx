@@ -1,4 +1,4 @@
- 
+
 import React, { useState } from "react";
 import axios from "axios";
 import FormInput from "./FormInput";
@@ -14,7 +14,7 @@ const CityManagement = ({
   loading,
   setLoading,
   setError,
-  baseURL,
+
 }) => {
   const [cityForm, setCityForm] = useState({ name: "", stateId: selectedState || "" });
   const [editCityId, setEditCityId] = useState(null);
@@ -83,6 +83,7 @@ const CityManagement = ({
     setError("");
     try {
       const city = cities.find((c) => c._id === id) || inactiveCities.find((c) => c._id === id);
+      console.log(city)
       const stateId =
         (Array.isArray(city.state) && city.state.length > 0 ? city.state[0]._id : null) ||
         selectedState;
@@ -185,18 +186,16 @@ const CityManagement = ({
       <div className="flex gap-2 mb-4">
         <button
           onClick={() => setCityTab("active")}
-          className={`flex-1 py-2 rounded-md transition-all duration-200 ${
-            cityTab === "active" ? "bg-blue-600 text-white" : "bg-slate-700 text-gray-300 hover:bg-slate-600"
-          }`}
+          className={`flex-1 py-2 rounded-md transition-all duration-200 ${cityTab === "active" ? "bg-blue-600 text-white" : "bg-slate-700 text-gray-300 hover:bg-slate-600"
+            }`}
           aria-label="View active cities"
         >
           Active Cities
         </button>
         <button
           onClick={() => setCityTab("inactive")}
-          className={`flex-1 py-2 rounded-md transition-all duration-200 ${
-            cityTab === "inactive" ? "bg-red-600 text-white" : "bg-slate-700 text-gray-300 hover:bg-slate-600"
-          }`}
+          className={`flex-1 py-2 rounded-md transition-all duration-200 ${cityTab === "inactive" ? "bg-red-600 text-white" : "bg-slate-700 text-gray-300 hover:bg-slate-600"
+            }`}
           aria-label="View inactive cities"
         >
           Inactive Cities
@@ -211,9 +210,10 @@ const CityManagement = ({
             >
               <span className="text-gray-200 flex items-center">
                 {city.name} (
-                {Array.isArray(city.state) && city.state.length > 0 ? (
-                  city.state[0].name
+                {city.name? (
+                  city.state.name
                 ) : (
+
                   <span className="text-red-400 flex items-center">
                     State Missing
                     <span className="ml-1 group relative">

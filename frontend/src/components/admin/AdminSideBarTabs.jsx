@@ -1,4 +1,4 @@
- 
+
 // import React, { useEffect, useState } from "react";
 // import axios from "axios";
 // import { useNavigate } from "react-router-dom";
@@ -427,9 +427,11 @@ const ADLocation = () => {
         try {
             const response = await api.get(`/api/states/${stateId}/cities`);
             const cityData = response.data;
+            console.log(cityData)
             const filteredCities = cityData.filter(
-                city => city?.state?.[0]?._id === stateId
+                city => city?.state?._id === stateId
             );
+            console.log(filteredCities)
             setCities(filteredCities.filter((city) => city.isActive !== false));
             setInactiveCities(filteredCities.filter((city) => city.isActive === false));
             setLoading(false);
@@ -674,8 +676,8 @@ const ADLocation = () => {
                             </div>
                         </div>
                     )} */}
-                
-                
+
+
                 </div>
             </div>
         </div>
