@@ -426,7 +426,7 @@ const OverviewScreen = ({ overviewStats, overviewLoading, overviewError, isDarkM
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1">Total Revenue</h3>
-                                    <p className="text-3xl font-extrabold text-gray-900 dark:text-white">${totalRevenue.toLocaleString()}</p>
+                                    <p className="text-3xl font-extrabold text-gray-900 dark:text-white">₹{totalRevenue.toLocaleString()}</p>
                                 </div>
                             </div>
                         </div>
