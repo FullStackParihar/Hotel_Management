@@ -111,7 +111,7 @@ exports.verifyOtp = async (req, res) => {
     const hostname = os.hostname();
 
     const Activity = new activitymodel({
-      userId: User._id,
+      userId: user._id,
       ipAddress: clientIp,
       device: hostname,
       action: 'signup'
