@@ -52,19 +52,7 @@ exports.signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const clientIp = requestIp.getClientIp(req)
-
-    const hostname = os.hostname();
-
-    const Activity = new activitymodel({
-      UserId: User._id,
-      ipAddress: clientIp,
-      device: hostname,
-      action: 'signup'
-
-    })
-
-    await Activity.save()
+    
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -117,6 +105,20 @@ exports.verifyOtp = async (req, res) => {
     });
 
     console.log('Verify OTP - Token generated:', token, 'Role:', user.role);
+
+    const clientIp = requestIp.getClientIp(req)
+
+    const hostname = os.hostname();
+
+    const Activity = new activitymodel({
+      userId: User._id,
+      ipAddress: clientIp,
+      device: hostname,
+      action: 'signup'
+
+    })
+
+    await Activity.save()
 
     res.json({
       token,
