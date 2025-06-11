@@ -28,10 +28,11 @@ const HotelList = ({
   const [currentImageIndex, setCurrentImageIndex] = useState({});
   const [roomLoading, setRoomLoading] = useState(false);
   const [previewImages, setPreviewImages] = useState({});
-  const baseURL = "http://localhost:6969";
+ 
   const scrollPositionRef = useRef(0);
-  const [isDarkMode] = useDarkMode(); // Use the useDarkMode hook
+  const [isDarkMode] = useDarkMode();  
   console.log("hotels", hotels);
+ 
 
   const fetchRooms = async (hotelId) => {
     if (!hotelId) {
@@ -648,7 +649,7 @@ const HotelList = ({
                                   </strong>
                                   <span className="flex items-center">
                                     {Array(room.capacity || 1)
-                                      .fill()
+                                      .fill(null)
                                       .map((_, i) => (
                                         <FaUser
                                           key={i}

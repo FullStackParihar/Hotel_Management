@@ -1,7 +1,9 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
- 
+const requestIp = require('request-ip')
+
+
 
 const dbConnection = require("../backend/db/dataBase");
  
@@ -19,6 +21,8 @@ app.use("/user", userRoutes);
 
 
 app.use('/locations', locationRoute);
+ 
+ 
  
 
 dbConnection();

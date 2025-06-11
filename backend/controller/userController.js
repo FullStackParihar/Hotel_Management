@@ -1,11 +1,15 @@
- 
+
 const User = require('../model/userModel');
+const Activity = require('../model/activitymodel')
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
-const cloudinary = require('../config/cloudinary'); // For deleting old images
-const { uploadToCloudinary } = require('../helpers/helper'); // Your existing Cloudinary upload utility
+const cloudinary = require('../config/cloudinary');
+const { uploadToCloudinary } = require('../helpers/helper');
+const activitymodel = require('../model/activitymodel');
+const requestIp = require('request-ip')
+const os = require('os');
 dotenv.config();
 
 const secretKey = process.env.secretKey || 'asdfghjkl';
@@ -18,11 +22,11 @@ exports.verifyToken = async (req, res, next) => {
     console.log('Signing token with secret:', process.env.secretKey);
 
     const secretKey = process.env.secretKey || 'asdfghjkl';
-    
+
     console.log('Verifying token with secret:', secretKey);
-    
+
     const decoded = jwt.verify(token, secretKey);
-    
+
     req.user = decoded;
     next();
   } catch (error) {
@@ -47,6 +51,20 @@ exports.signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const clientIp = requestIp.getClientIp(req)
+
+    const hostname = os.hostname();
+
+    const Activity = new activitymodel({
+      UserId: User._id,
+      ipAddress: clientIp,
+      device: hostname,
+      action: 'signup'
+
+    })
+
+    await Activity.save()
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -154,7 +172,7 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
- 
+
     if (user.isDisabled) {
       return res.status(403).json({ message: 'Account is disabled. Please contact Admin.' });
     }
@@ -167,6 +185,20 @@ exports.login = async (req, res) => {
     });
 
     console.log('Login - Token generated:', token, 'Role:', user.role);
+
+    const clientIp = requestIp.getClientIp(req)
+
+    const hostname = os.hostname();
+
+    const Activity = new activitymodel({
+      userId: user._id,
+      ipAddress: clientIp,
+      device: hostname,
+      action: 'login'
+
+    })
+
+    await Activity.save()
 
     res.json({
       token,
@@ -211,7 +243,7 @@ exports.getUsers = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-   
+
     const users = await User.find().select('firstname lastname email role isDisabled');
     res.json({ userData: users });
   } catch (error) {
@@ -390,7 +422,7 @@ exports.uploadProfileImage = async (req, res) => {
       return res.status(400).json({ message: 'Only .jpeg, .jpg, and .png files are allowed!' });
     }
 
-    const maxSize = 5 * 1024 * 1024;  
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       return res.status(400).json({ message: 'File size exceeds 5MB limit' });
     }
@@ -406,7 +438,7 @@ exports.uploadProfileImage = async (req, res) => {
     }
 
     const imageUrl = await uploadToCloudinary(file.data, file.name, {
-      folder: 'profile_images', 
+      folder: 'profile_images',
     });
 
     user.profileImage = imageUrl;
@@ -458,7 +490,7 @@ exports.updateBackgroundImage = async (req, res) => {
 
 exports.getUserProfile = async (req, res) => {
   try {
-    const userId = req.user._id; 
+    const userId = req.user._id;
     const user = await User.findById(userId).select("email firstname lastname backgroundImage isDisabled phone gender age role profileImage");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
