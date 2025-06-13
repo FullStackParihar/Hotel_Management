@@ -17,11 +17,14 @@ const ActivitySchema = new mongoose.Schema({
     enum: ['login', 'logout', 'signup'],
     required: true
   },
-
+  location:{
+  type: String,
+ 
+},
   device: {
-    type: String  
-  }
+  type: String
+}
 
-}, {versionKey:false, timestamps: true });
+}, { versionKey: false, timestamps: true });
 
 module.exports = mongoose.model('Activity', ActivitySchema);
