@@ -7,6 +7,7 @@ const userController = require('../controller/userController');
 router.post('/signup', userController.signup);
 router.post('/verifyOtp', userController.verifyOtp);
 router.post('/login', userController.login);
+router.post('/logout', userController.logout);
 router.get('/getUsers', userController.getUsers);
 router.get('/getAllUsers', userController.getAllUsers);
 router.patch('/update/:id', userController.patch);

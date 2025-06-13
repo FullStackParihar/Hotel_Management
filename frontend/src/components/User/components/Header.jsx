@@ -4,27 +4,48 @@ import React from "react";
 import { FaHotel, FaSignOutAlt, FaUser, FaListAlt, FaSun, FaMoon } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import useDarkMode from "../hooks/useDarkMode";
+import api from "../../../Utils/api";
 
 const Header = ({ userDetails, setShowBookingsModal, loading, setLoading, setError }) => {
   const navigate = useNavigate();
   const [isDarkMode, toggleMode] = useDarkMode();
 
-  const handleLogout = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const isLogout = confirm('Are you sure to logout?');
-      if (isLogout) {
-        localStorage.removeItem("token");
-        navigate("/");
-      }
-    } catch (err) {
-      console.error("handleLogout - Error:", err);
-      setError(err.response?.data?.message || "Failed to log out.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleLogout = async () => {
+  //   setLoading(true);
+  //   setError("");
+  //   try {
+  //     const isLogout = confirm('Are you sure to logout?');
+  //     if (isLogout) {
+  //       localStorage.removeItem("token");
+  //       navigate("/");
+  //     }
+  //   } catch (err) {
+  //     console.error("handleLogout - Error:", err);
+  //     setError(err.response?.data?.message || "Failed to log out.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+const handleLogout = async () => {
+  try {
+    confirm("are you sure want to logout")
+    const token = localStorage.getItem('token');
+
+    await api.post('/user/logout', {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+ 
+
+    localStorage.removeItem('token');
+    window.location.href = '/';
+  } catch (err) {
+    console.error('Logout error:', err);
+  }
+};
+
 
   return (
     <header className={`${isDarkMode ? 'bg-gray-800/90 text-gray-300' : 'bg-gray-200/90 text-gray-800'} backdrop-blur-md shadow-xl sticky top-0 z-50`}>

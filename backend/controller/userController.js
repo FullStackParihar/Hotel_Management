@@ -235,6 +235,41 @@ exports.verifyOtp = async (req, res) => {
 //   }
 // };
 
+exports.logout = async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Unauthorized: No token provided' });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    // Decode token to get user info
+    const decoded = jwt.verify(token, secretKey);
+
+    const clientIp = requestIp.getClientIp(req);
+    const hostname = os.hostname();
+
+    const activity = new activitymodel({
+      userId: decoded._id,
+      ipAddress: clientIp,
+      device: hostname,
+      action: 'logout',
+    });
+
+    await activity.save();
+
+    // Note: In JWT, logout is usually handled on the client side by deleting the token.
+    // Optionally, you can implement a token blacklist here if needed.
+
+    res.status(200).json({ message: 'Logout successful' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ message: 'Server error during logout' });
+  }
+};
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
