@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
 const requestIp = require('request-ip')
+ 
 
 
 
@@ -15,6 +16,9 @@ const port = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
+ 
+
+ 
  
 
 app.use("/user", userRoutes);

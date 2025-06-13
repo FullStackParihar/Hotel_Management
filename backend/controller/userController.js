@@ -9,7 +9,9 @@ const cloudinary = require('../config/cloudinary');
 const { uploadToCloudinary } = require('../helpers/helper');
 const activitymodel = require('../model/activitymodel');
 const requestIp = require('request-ip')
-const os = require('os');
+const os = require('os');                                                         
+const { default: mongoose } = require('mongoose');
+
 dotenv.config();
 
 const secretKey = process.env.secretKey || 'asdfghjkl';
@@ -83,42 +85,51 @@ exports.signup = async (req, res) => {
 };
 
 exports.verifyOtp = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { email, otp } = req.body;
     if (!email || !otp) {
+      await session.abortTransaction();
       return res.status(400).json({ message: 'Email and OTP are required' });
     }
 
     const stored = otpStore.get(email);
     if (!stored || stored.otp !== otp || Date.now() > stored.expires) {
+      await session.abortTransaction();
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 
     const { firstname, lastname, phone, password, gender, age, role } = stored.userData;
     const user = new User({ firstname, lastname, email, phone, password, age, role });
-    await user.save();
+
+    await user.save({ session });
 
     otpStore.delete(email);
 
-    const token = jwt.sign({ _id: user._id, email: user.email, role: user.role }, secretKey, {
-      expiresIn: '7d',
-    });
+    const token = jwt.sign(
+      { _id: user._id, email: user.email, role: user.role },
+      secretKey,
+      { expiresIn: '7d' }
+    );
 
     console.log('Verify OTP - Token generated:', token, 'Role:', user.role);
 
-    const clientIp = requestIp.getClientIp(req)
-
+    const clientIp = requestIp.getClientIp(req);
     const hostname = os.hostname();
 
-    const Activity = new activitymodel({
+    const activity = new activitymodel({
       userId: user._id,
       ipAddress: clientIp,
       device: hostname,
-      action: 'signup'
+      action: 'signup',
+    });
 
-    })
+    await activity.save({ session });
 
-    await Activity.save()
+    await session.commitTransaction();
+    session.endSession();
 
     res.json({
       token,
@@ -131,10 +142,66 @@ exports.verifyOtp = async (req, res) => {
       },
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error('Verify OTP error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// exports.verifyOtp = async (req, res) => {
+//   try {
+//     const { email, otp } = req.body;
+//     if (!email || !otp) {
+//       return res.status(400).json({ message: 'Email and OTP are required' });
+//     }
+
+//     const stored = otpStore.get(email);
+//     if (!stored || stored.otp !== otp || Date.now() > stored.expires) {
+//       return res.status(400).json({ message: 'Invalid or expired OTP' });
+//     }
+
+//     const { firstname, lastname, phone, password, gender, age, role } = stored.userData;
+//     const user = new User({ firstname, lastname, email, phone, password, age, role });
+//     await user.save();
+
+//     otpStore.delete(email);
+
+//     const token = jwt.sign({ _id: user._id, email: user.email, role: user.role }, secretKey, {
+//       expiresIn: '7d',
+//     });
+
+//     console.log('Verify OTP - Token generated:', token, 'Role:', user.role);
+
+//     const clientIp = requestIp.getClientIp(req)
+
+//     const hostname = os.hostname();
+
+//     const Activity = new activitymodel({
+//       userId: user._id,
+//       ipAddress: clientIp,
+//       device: hostname,
+//       action: 'signup'
+
+//     })
+
+//     await Activity.save()
+
+//     res.json({
+//       token,
+//       user: {
+//         _id: user._id,
+//         email: user.email,
+//         firstname: user.firstname,
+//         lastname: user.lastname,
+//         role: user.role,
+//       },
+//     });
+//   } catch (error) {
+//     console.error('Verify OTP error:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// };
 
 // exports.login = async (req, res) => {
 //   try {
